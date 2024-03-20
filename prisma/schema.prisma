@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                        Int           @id @default(autoincrement())
+  roleId                    Int
+  firstName                 String
+  lastName                  String
+  email                     String        @unique
+  studentCode               String        @unique
+  tel                       String
+  active                    Boolean       @default(true)
+  createdAt                 DateTime      @default(now())
+  //relation
+  role                      Role          @relation(fields: [roleId], references: [id])
+  ItemRequestsBorrower      ItemRequest[] @relation("borrower")
+  ItemRequestsApprover      ItemRequest[] @relation("approver")
+  ItemRequestsBorrowManager ItemRequest[] @relation("borrowmanager")
+  ItemRequestsReturnManager ItemRequest[] @relation("returnmanager")
+}
+
+model Role {
+  id        Int        @id @default(autoincrement())
+  name      String
+  //relation
+  Users     User[]
+  RoleItems RoleItem[]
+}
+
+model RoleItem {
+  id            Int         @id @default(autoincrement())
+  roleId        Int
+  generalItemId Int
+  // relation
+  role          Role        @relation(fields: [roleId], references: [id])
+  generalItem   GeneralItem @relation(fields: [generalItemId], references: [id])
+}
+
+model GeneralItem {
+  id        Int        @id @default(autoincrement())
+  name      String
+  model     String
+  brand     String
+  image     Bytes?
+  // relation
+  RoleItems RoleItem[]
+  Items     Item[]
+}
+
+model Item {
+  id            Int           @id @default(autoincrement())
+  locationId    Int
+  itemStatusId  Int
+  generalItemId Int
+  yearBought    DateTime
+  active        Boolean
+  // relation
+  location      Location      @relation(fields: [locationId], references: [id])
+  itemStatus    ItemStatus    @relation(fields: [itemStatusId], references: [id])
+  generalItem   GeneralItem   @relation(fields: [generalItemId], references: [id])
+  Reparations   Reparation[]
+  ItemRequests  ItemRequest[]
+}
+
+model ItemStatus {
+  id    Int    @id @default(autoincrement())
+  name  String
+  // relation
+  Items Item[]
+}
+
+model Location {
+  id    Int    @id @default(autoincrement())
+  name  String
+  // relation
+  Items Item[]
+}
+
+model Reparation {
+  id         Int      @id @default(autoincrement())
+  itemId     Int
+  repairDate DateTime
+  returnDate DateTime
+  notes      String
+  // relation
+  item       Item     @relation(fields: [itemId], references: [id])
+}
+
+model RequestStatus {
+  id           Int           @id @default(autoincrement())
+  name         String
+  // relation
+  ItemRequests ItemRequest[]
+}
+
+model ItemRequest {
+  id              Int           @id @default(autoincrement())
+  itemId          Int
+  requestStatusId Int
+  borrowerId      Int
+  approverId      Int
+  borrowManagerId Int
+  returnManagerId Int
+  requestDate     DateTime
+  starBorrowDate  DateTime
+  endBorrowDate   DateTime
+  decisionDate    DateTime?
+  borrowDate      DateTime?
+  returnDate      DateTime?
+  messae          String?
+  isUrgent        Boolean       @default(false)
+  // relation
+  item            Item          @relation(fields: [itemId], references: [id])
+  requestStatus   RequestStatus @relation(fields: [requestStatusId], references: [id])
+  borrower        User          @relation("borrower", fields: [borrowerId], references: [id])
+  approver        User          @relation("approver", fields: [approverId], references: [id])
+  borrowManager   User          @relation("borrowmanager", fields: [borrowManagerId], references: [id])
+  returnManager   User          @relation("returnmanager", fields: [returnManagerId], references: [id])
+}
