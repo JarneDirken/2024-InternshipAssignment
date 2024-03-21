@@ -10,12 +10,12 @@ datasource db {
 model User {
   id                        Int           @id @default(autoincrement())
   roleId                    Int
-  firebaseUid               String
+  firebaseUid               String        @unique
   firstName                 String
   lastName                  String
   email                     String        @unique
   studentCode               String        @unique
-  tel                       String
+  tel                       String        @unique
   active                    Boolean       @default(true)
   createdAt                 DateTime      @default(now())
   //relation
@@ -28,7 +28,7 @@ model User {
 
 model Role {
   id        Int        @id @default(autoincrement())
-  name      String
+  name      String     @unique
   //relation
   Users     User[]
   RoleItems RoleItem[]
@@ -45,7 +45,7 @@ model RoleItem {
 
 model GeneralItem {
   id        Int        @id @default(autoincrement())
-  name      String
+  name      String     @unique
   model     String
   brand     String
   image     Bytes?
@@ -60,7 +60,7 @@ model Item {
   itemStatusId  Int
   generalItemId Int
   yearBought    DateTime
-  active        Boolean
+  active        Boolean       @default(true)
   // relation
   location      Location      @relation(fields: [locationId], references: [id])
   itemStatus    ItemStatus    @relation(fields: [itemStatusId], references: [id])
@@ -71,14 +71,14 @@ model Item {
 
 model ItemStatus {
   id    Int    @id @default(autoincrement())
-  name  String
+  name  String @unique
   // relation
   Items Item[]
 }
 
 model Location {
   id    Int    @id @default(autoincrement())
-  name  String
+  name  String @unique
   // relation
   Items Item[]
 }
@@ -95,7 +95,7 @@ model Reparation {
 
 model RequestStatus {
   id           Int           @id @default(autoincrement())
-  name         String
+  name         String        @unique
   // relation
   ItemRequests ItemRequest[]
 }
