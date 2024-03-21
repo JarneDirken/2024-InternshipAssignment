@@ -1,6 +1,5 @@
 // code to fill the database with dummy data
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
+import prisma from "@/services/db";
 
 async function main() {
     await createLocations();
