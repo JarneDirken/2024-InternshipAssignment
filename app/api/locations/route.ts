@@ -13,8 +13,7 @@ export async function GET(req: NextApiRequest) {
 }
 
 export async function POST(req: NextApiRequest) {
-    const data = await req.body;
-
+    const data = await new Response(req.body).json();
     const created = await prisma.location.create({
         data: data
     });
