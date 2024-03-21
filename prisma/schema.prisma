@@ -120,7 +120,7 @@ model ItemRequest {
   item            Item          @relation(fields: [itemId], references: [id])
   requestStatus   RequestStatus @relation(fields: [requestStatusId], references: [id])
   borrower        User          @relation("borrower", fields: [borrowerId], references: [id])
-  approver        User          @relation("approver", fields: [approverId], references: [id])
-  borrowManager   User          @relation("borrowmanager", fields: [borrowManagerId], references: [id])
-  returnManager   User          @relation("returnmanager", fields: [returnManagerId], references: [id])
+  approver        User?         @relation("approver", fields: [approverId], references: [id])
+  borrowManager   User?         @relation("borrowmanager", fields: [borrowManagerId], references: [id])
+  returnManager   User?         @relation("returnmanager", fields: [returnManagerId], references: [id])
 }
