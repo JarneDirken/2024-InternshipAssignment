@@ -14,11 +14,13 @@ const config: Config = {
       },
       colors: {
         "title-gradient": "linear-gradient(to right, #FF8400, #F6CA45, #CF4307)",
+        "middle-gradient": "#F6CA45",
         "custom-accent": "#CF4307",
         "custom-primary": "#FF8400",
         "custom-secondary": "#FFF5D6",
         "custom-tertiary": "#FEE2BD",
         "custom-login": "#FFF5D6",
+        "custom-button-primary": "#130E01",
       }
     },
   },

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/header";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Source_Sans_3({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Internship Assignment",
@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Header />
-        <main>
+        <main style={{ height: 'calc(100vh - 72px)' }}>
           {children}
         </main>
       </body>
