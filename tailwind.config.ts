@@ -21,6 +21,7 @@ const config: Config = {
         "custom-tertiary": "#FEE2BD",
         "custom-login": "#FFF5D6",
         "custom-button-primary": "#130E01",
+        "custom-login2": "#ffb361",
       }
     },
   },
