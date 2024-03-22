@@ -2,8 +2,21 @@ import Image from 'next/image';
 
 export default function Login() {
     return (
-        <div className="bg-custom-login p-4 m-4 flex flex-col justify-center rounded-3xl" style={{ height: 'calc(100vh - 6.75rem)' }}>
-            <div className="flex mx-auto mt-6">
+        <div className="md:mx-12 m-4 flex flex-row justify-center" style={{ height: 'calc(100vh - 6.75rem)' }}>
+            {/* Left side - Illustration */}
+            <div className="bg-custom-login2 hidden md:flex w-1/2 rounded-tl-3xl rounded-bl-3xl justify-center items-center">
+                {/* Replace "illustration.png" with your actual illustration file */}
+                    <Image 
+                        src="/assets/svg/loginregister/loginRegister1.svg"
+                        width={500}
+                        height={500}
+                        alt="Illustration"
+                        priority
+                    />
+            </div>
+            {/* Right side - Form */}
+            <div className="w-full md:w-1/2 bg-custom-login flex flex-col justify-center mx-auto md:mx-0 rounded-tr-3xl	rounded-br-3xl">
+            <div className="flex justify-center mt-6">
                 <Image 
                     src="/assets/images/logo.png"
                     width={180}
@@ -25,13 +38,13 @@ export default function Login() {
                     <div className='mb-8 mt-1 flex justify-end'>
                         <a href="#" className='text-custom-primary underline'>Forgot password?</a>
                     </div>
-                    <button type="submit" className="text-white bg-black hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">Sign in</button>
+                    <button type="submit" className="text-white bg-black hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 text-center">Sign in</button>
                 </form>
             </div>
             <div className='mt-6 flex justify-center items-center'>
-                <div className="flex-grow border-t border-gray-400"></div>
-                <span className="flex-shrink mx-4 text-gray-400">or</span>
-                <div className="flex-grow border-t border-gray-400"></div>
+                <div className=" border-t border-gray-400 w-16"></div>
+                <span className=" mx-4 text-gray-400">or</span>
+                <div className=" border-t border-gray-400 w-16"></div>
             </div>
             <div className='mt-2 flex justify-center'>
                 <div className='flex items-center'>
@@ -44,6 +57,7 @@ export default function Login() {
             <div className='mt-2 flex justify-center'>
                 <span>Are you new?&nbsp;</span>
                 <span className='text-custom-primary underline'>Create an Account</span>
+            </div>
             </div>
         </div>
     );

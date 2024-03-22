@@ -19,6 +19,7 @@ const config: Config = {
         "custom-secondary": "#FFF5D6",
         "custom-tertiary": "#FEE2BD",
         "custom-login": "#FFF5D6",
+        "custom-login2": "#ffb361"
       }
     },
   },
