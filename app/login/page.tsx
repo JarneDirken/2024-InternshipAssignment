@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export default function Login() {
     return (
-        <div className="bg-custom-login p-4 m-4 h-full flex flex-col rounded-3xl">
+        <div className="bg-custom-login p-4 m-4 flex flex-col justify-center rounded-3xl" style={{ height: 'calc(100vh - 6.75rem)' }}>
             <div className="flex mx-auto mt-6">
                 <Image 
                     src="/assets/images/logo.png"
