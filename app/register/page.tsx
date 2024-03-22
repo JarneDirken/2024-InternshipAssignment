@@ -1,8 +1,91 @@
+'use client';
 import Image from 'next/image';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import React, { FormEvent, useState } from 'react';
+import '../../services/firebase-config';
+import Link from 'next/link';
 
 export default function Register() {
+    const [errorMessage, setErrorMessage] = useState('');
+    
+    async function handleRegister(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setErrorMessage('');
+
+        // get form data
+        const form = new FormData(event.currentTarget);
+        const firstName = form.get('firstname') as string;
+        const lastName = form.get('lastname') as string;
+        const studentCode = form.get('studentcode') as string;
+        const email = form.get('email') as string;
+        const password = form.get('password') as string;
+        const confpassword = form.get('confpassword') as string;
+        const tel = form.get('tel') as string;
+
+        // Check if passwords match
+        if (password.length <= 6 && confpassword.length <= 6) {
+            setErrorMessage('Passwords must have at least 6 characters');
+            return;
+        }
+        if (password !== confpassword) {
+            setErrorMessage('Passwords do not match.');
+            return;
+        }
+
+        if (firstName.length < 2 || lastName.length < 2) {
+            setErrorMessage('First name and last name must have at least 2 characters.');
+            return;
+        }
+
+        if (studentCode.length !== 8) {
+            setErrorMessage('Student code must have 8 characters');
+            return;
+        }
+
+        // get auth from firebase
+        const auth = getAuth();
+
+        try {
+            // create account with email and password 
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            // return the user with userID
+            const user = userCredential.user;
+            const firebaseUid = user.uid;
+
+            // Get all the data and add to database
+            const data = {
+                firebaseUid,
+                firstName,
+                lastName,
+                studentCode,
+                email,
+                tel,
+                roleId: 1,
+            }
+            
+            const response = await fetch('http://localhost:3000/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok){
+                const errorData = await response.json();
+                const message = errorData.error || 'An error occurred while creating your account.';
+                setErrorMessage(message);
+            }
+
+        } catch (error) {
+            if (error instanceof Error) {
+                setErrorMessage(error.message);
+            }
+        }
+    };
+
     return (
-        <div className="md:mx-12 flex flex-row justify-center overflow-hidden" style={{ height: 'calc(100vh - 5.75rem)' }}>
+        <div className="md:mx-12 flex flex-row justify-center overflow-hidden">
             {/* Left side - Illustration */}
             <div className="bg-custom-login2 hidden md:flex w-1/2 rounded-tl-3xl rounded-bl-3xl justify-center items-center">
                 {/* Replace "illustration.png" with your actual illustration file */}
@@ -26,35 +109,97 @@ export default function Register() {
                 />
             </div>
             <div className='mt-2'>
-                <form className="max-w-sm mx-auto">
-                    <div className='block md:flex gap-4'>
+                <form className="max-w-sm mx-auto p-2" onSubmit={handleRegister}>
+                    <div className='flex gap-4'>
                         <div className="mb-3">
                             <label htmlFor="firstname" className="block mb-1 text-sm font-medium text-gray-500">Firstname</label>
-                            <input type="firstname" id="firstname" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " required />
+                            <input 
+                                type="text" 
+                                id="firstname"
+                                name='firstname' 
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " 
+                                required
+                                minLength={2}
+                            />
                         </div>
                         <div className="mb-3">
                             <label htmlFor="lastname" className="block mb-1 text-sm font-medium text-gray-500">Lastname</label>
-                            <input type="lastname" id="lastname" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " required />
+                            <input 
+                                type="text" 
+                                id="lastname"
+                                name='lastname'
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " 
+                                required
+                                minLength={2} 
+                            />
                         </div>
                     </div>
-                    <div className="mb-3">
-                        <label htmlFor="studentcode" className="block mb-1 text-sm font-medium text-gray-500">Student code</label>
-                        <input type="studentcode" id="lastnamstudentcodee" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " required />
+                    <div className='flex gap-4'>
+                        <div className="mb-3">
+                            <label htmlFor="studentcode" className="block mb-1 text-sm font-medium text-gray-500">Student code</label>
+                            <input 
+                                type="number" 
+                                id="studentcode"
+                                name='studentcode' 
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " 
+                                required
+                                minLength={8}
+                                maxLength={8} 
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <label htmlFor="tel" className="block mb-1 text-sm font-medium text-gray-500">Telephone</label>
+                            <input 
+                                type="tel" 
+                                id="tel"
+                                name='tel' 
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " 
+                                required
+                            />
+                        </div>
                     </div>
                     <div className="mb-3">
                         <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-500">Email</label>
-                        <input type="email" id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " required />
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name='email' 
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " 
+                            required 
+                        />
                     </div>
-                    <div className='block md:flex gap-4'>
+                    <div className='flex gap-4'>
                         <div className='mb-3'>
                             <label htmlFor="password" className="block mb-1 text-sm font-medium text-gray-500">Password</label>
-                            <input type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primary block w-full p-2.5 " required />
+                            <input 
+                                type="password" 
+                                name="password" 
+                                id="password" 
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primary block w-full p-2.5" 
+                                required 
+                                minLength={6}
+                                onInput={(e) => e.currentTarget.setCustomValidity('')} 
+                                onInvalid={(e) => e.currentTarget.setCustomValidity('Password must be at least 6 characters long')}
+                            />
                         </div>
                         <div className='mb-5'>
                             <label htmlFor="confpassword" className="block mb-1 text-sm font-medium text-gray-500">Confirm password</label>
-                            <input type="confpassword" id="confpassword" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primary block w-full p-2.5 " required />
+                            <input 
+                                type="password" 
+                                name="confpassword" 
+                                id="confpassword" 
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primary block w-full p-2.5 " 
+                                required
+                                minLength={6}
+                            />
                         </div>
                     </div>
+                    {/* Form fields */}
+                    {errorMessage && (
+                        <div className="mb-3 text-red-500 text-sm">
+                            {errorMessage}
+                        </div>
+                    )}
                     <button type="submit" className="text-white bg-black hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 text-center">Sign in</button>
                 </form>
             </div>
@@ -73,7 +218,9 @@ export default function Register() {
             </div>
             <div className='mt-2 flex justify-center'>
                 <span className='text-sm text-gray-500'>Already have an account?&nbsp;</span>
-                <a className='text-custom-primary underline text-sm'>Log in</a>
+                <Link href="/login"className='text-custom-primary underline text-sm'>
+                    Log in
+                </Link>
             </div>
             </div>
         </div>

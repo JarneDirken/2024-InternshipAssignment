@@ -1,8 +1,9 @@
 import Image from 'next/image';
+import Link from "next/link";
 
 export default function Login() {
     return (
-        <div className="md:mx-12 flex flex-row justify-center" style={{ height: 'calc(100vh - 5.75rem)' }}>
+        <div className="md:mx-12 flex flex-row justify-center">
             {/* Left side - Illustration */}
             <div className="bg-custom-login2 hidden md:flex w-1/2 rounded-tl-3xl rounded-bl-3xl justify-center items-center">
                 {/* Replace "illustration.png" with your actual illustration file */}
@@ -26,7 +27,7 @@ export default function Login() {
                 />
             </div>
             <div className='mt-4'>
-                <form className="max-w-sm mx-auto">
+                <form className="max-w-sm mx-auto p-2">
                     <div className="mb-5">
                         <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-500">Your email</label>
                         <input type="email" id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " required />
@@ -56,7 +57,9 @@ export default function Login() {
             </div>
             <div className='mt-2 flex justify-center'>
                 <span className='text-sm text-gray-500'>Are you new?&nbsp;</span>
-                <span className='text-custom-primary underline text-sm'>Create an Account</span>
+                <Link href="/register"className='text-custom-primary underline text-sm'>
+                    Create an Account
+                </Link>
             </div>
             </div>
         </div>
