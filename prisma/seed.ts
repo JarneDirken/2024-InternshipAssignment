@@ -1,5 +1,5 @@
 // code to fill the database with dummy data
-import prisma from "@/services/db";
+import prisma from "../services/db";
 
 async function main() {
     await createLocations();
