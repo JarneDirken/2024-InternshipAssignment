@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export default function Login() {
     return (
-        <div className="md:mx-12 m-4 flex flex-row justify-center" style={{ height: 'calc(100vh - 6.75rem)' }}>
+        <div className="md:mx-12 flex flex-row justify-center" style={{ height: 'calc(100vh - 5.75rem)' }}>
             {/* Left side - Illustration */}
             <div className="bg-custom-login2 hidden md:flex w-1/2 rounded-tl-3xl rounded-bl-3xl justify-center items-center">
                 {/* Replace "illustration.png" with your actual illustration file */}
@@ -55,8 +55,8 @@ export default function Login() {
                 </div>
             </div>
             <div className='mt-2 flex justify-center'>
-                <span>Are you new?&nbsp;</span>
-                <span className='text-custom-primary underline'>Create an Account</span>
+                <span className='text-sm text-gray-500'>Are you new?&nbsp;</span>
+                <span className='text-custom-primary underline text-sm'>Create an Account</span>
             </div>
             </div>
         </div>
