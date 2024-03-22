@@ -17,7 +17,8 @@ const config: Config = {
         "custom-accent": "#CF4307",
         "custom-primary": "#FF8400",
         "custom-secondary": "#FFF5D6",
-        "custom-tertiary": "FEE2BD",
+        "custom-tertiary": "#FEE2BD",
+        "custom-login": "#FFF5D6",
       }
     },
   },
