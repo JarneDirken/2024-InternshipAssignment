@@ -1,20 +1,20 @@
 import prisma from '@/services/db';
 import { NextApiRequest } from 'next';
 
-export async function POST(req: NextApiRequest) {
-    const { uid } = await new Response(req.body).json();
+export async function GET(req: NextApiRequest, { params }: {params: {uid: string}}) {
+    const uid = params.uid
 
-    const userData = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
         where: {
             firebaseUid: uid,
         },
         include: {
             role: true,
-        },
+        }
     });
-
-    if (userData) {
-        return new Response(JSON.stringify({ role: userData.role.name }), {
+    
+    if (user) {
+        return new Response(JSON.stringify(user), {
             status: 200,
             headers: {
                 'Content-Type': 'application/json',
