@@ -1,8 +1,6 @@
-import "../globals.css";
 import Header from "@/components/layout/header";
 
-
-export default function RootLayout({
+export default function AuthLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
