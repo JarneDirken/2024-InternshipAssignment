@@ -1,7 +1,34 @@
+'use client';
 import Image from 'next/image';
 import Link from "next/link";
+import { FormEvent, useState } from 'react';
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import '../../services/firebase-config';
+import { useRouter } from 'next/navigation';
 
 export default function Login() {
+    const [errorMessage, setErrorMessage] = useState('');
+    const router = useRouter();
+
+    async function handleLogin(event: FormEvent<HTMLFormElement>){
+        event.preventDefault();
+        setErrorMessage('');
+        const auth = getAuth();
+
+        const form = new FormData(event.currentTarget);
+        const email = form.get('email') as string;
+        const password = form.get('password') as string;
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            router.push('/borrow');
+        } catch (error) {
+            if (error instanceof Error) {
+                setErrorMessage(error.message);
+            }
+        }
+    }
+
     return (
         <div className="md:mx-12 flex flex-row justify-center" style={{ height: 'calc(100% - 1rem)' }}>
             {/* Left side - Illustration */}
@@ -27,18 +54,24 @@ export default function Login() {
                 />
             </div>
             <div className='mt-4'>
-                <form className="max-w-sm mx-auto p-2">
+                <form className="max-w-sm mx-auto p-2" onSubmit={handleLogin}>
                     <div className="mb-5">
                         <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-500">Your email</label>
-                        <input type="email" id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " required />
+                        <input type="email" name='email' id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " required />
                     </div>
                     <div>
                         <label htmlFor="password" className="block mb-1 text-sm font-medium text-gray-500">Your password</label>
-                        <input type="password" id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primary block w-full p-2.5 " required />
+                        <input type="password" name='password' id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primary block w-full p-2.5 " required />
                     </div>
                     <div className='mb-8 mt-1 flex justify-end'>
                         <a href="#" className='text-custom-primary underline'>Forgot password?</a>
                     </div>
+                    {/* Form fields */}
+                    {errorMessage && (
+                        <div className="mb-3 text-red-500 text-sm">
+                            {errorMessage}
+                        </div>
+                    )}
                     <button type="submit" className="text-white bg-black hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 text-center">Sign in</button>
                 </form>
             </div>

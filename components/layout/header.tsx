@@ -4,9 +4,14 @@ import Link from "next/link";
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import Image from 'next/image';
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import { Avatar } from '@mui/material';
+import '../../services/firebase-config';
 
 export default function Header(){
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const auth = getAuth();
 
   // Effect to control body scroll based on overlay state
   useEffect(() => {
@@ -16,6 +21,18 @@ export default function Header(){
       document.body.classList.remove('overflow-hidden', 'h-screen');
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+    });
+}, [auth]);
+
+  const handleLogout = () => {
+    const auth = getAuth();
+    auth.signOut();
+    setUser(null);
+};
 
   return (
     <nav className="flex justify-between md:justify-start p-4 align-middle bg-opacity-0">
@@ -65,14 +82,23 @@ export default function Header(){
             Home
           </Link>
         </div>
-        <div className='flex items-center gap-4'>
-          <Link href="/login">
-            Sign in
-          </Link>
-          <Link href="/register">
-            <button className="px-12 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition duration-300">Create account</button>
-          </Link>
-          </div>
+        {/* Display user avatar and logout if logged in */}
+        {user ? (
+            <div>
+                <Avatar onClick={handleLogout} className='cursor-pointer'>{user && user.email ? user.email[0] : ''}</Avatar>
+            </div>
+        ) : (
+            <div className='flex items-center gap-4'>
+                <Link href="/login">
+                    Sign in
+                </Link>
+                <Link href="/register">
+                    <button className="px-12 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition duration-300">
+                        Create account
+                    </button>
+                </Link>
+            </div>
+        )}
       </div>
     </nav>
   );
