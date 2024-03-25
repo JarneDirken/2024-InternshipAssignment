@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Source_Sans_3 } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/header";
 
 const inter = Source_Sans_3({ subsets: ["latin"] });
 
@@ -18,8 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Header />
-        <main style={{ height: 'calc(100vh - 72px)' }}>
+        <main>
             {children}
         </main>
       </body>
