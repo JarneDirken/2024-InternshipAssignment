@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from "next/link";
 import { FormEvent, useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import '../../services/firebase-config';
+import '../../../services/firebase-config';
 import { useRouter } from 'next/navigation';
 
 export default function Login() {

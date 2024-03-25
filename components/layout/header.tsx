@@ -7,11 +7,17 @@ import Image from 'next/image';
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { Avatar } from '@mui/material';
 import '../../services/firebase-config';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { useRouter } from 'next/navigation';
 
 export default function Header(){
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const auth = getAuth();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const router = useRouter();
 
   // Effect to control body scroll based on overlay state
   useEffect(() => {
@@ -33,6 +39,14 @@ export default function Header(){
     auth.signOut();
     setUser(null);
 };
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <nav className="flex justify-between md:justify-start p-4 align-middle bg-opacity-0">
@@ -85,7 +99,15 @@ export default function Header(){
         {/* Display user avatar and logout if logged in */}
         {user ? (
             <div>
-                <Avatar onClick={handleLogout} className='cursor-pointer'>{user && user.email ? user.email[0] : ''}</Avatar>
+                <Avatar onClick={handleClick} className='cursor-pointer'>{user && user.email ? user.email[0] : ''}</Avatar>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleClose}
+                >
+                  <MenuItem onClick={() => router.push('/profile')}>Profile</MenuItem>
+                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                </Menu>
             </div>
         ) : (
             <div className='flex items-center gap-4'>

@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import React, { FormEvent, useState } from 'react';
-import '../../services/firebase-config';
+import '../../../services/firebase-config';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
