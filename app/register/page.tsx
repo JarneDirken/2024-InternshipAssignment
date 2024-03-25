@@ -24,7 +24,7 @@ export default function Register() {
         const confpassword = form.get('confpassword') as string;
         const tel = form.get('tel') as string;
 
-        if (password.length <= 6 || confpassword.length <= 6) {
+        if (password.length < 6 || confpassword.length < 6) {
             setErrorMessage('Passwords must have at least 6 characters');
             return;
         }
@@ -64,7 +64,7 @@ export default function Register() {
                 roleId: 1, // student role
             }
             
-            const response = await fetch('http://localhost:3000/api/register', {
+            const response = await fetch('/api/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
