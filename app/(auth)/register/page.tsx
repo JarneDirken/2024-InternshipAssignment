@@ -5,10 +5,31 @@ import React, { FormEvent, useState } from 'react';
 import '../../../services/firebase-config';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 export default function Register() {
     const [errorMessage, setErrorMessage] = useState('');
     const router = useRouter();
+    const [showPassword, setShowPassword] = useState(false);
+    const [showComfirm, setShowComfirm] = useState(false);
+
+    const handleClickShowComfirm = () => setShowComfirm((show) => !show);
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+
+    const handleMouseDownComfirm = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+    }
+    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+    };
     
     async function handleRegister(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -23,6 +44,7 @@ export default function Register() {
         const password = form.get('password') as string;
         const confpassword = form.get('confpassword') as string;
         const tel = form.get('tel') as string;
+        const thaiTelRegex = /^0[6-9]{1}\d{8}$/; // 0812345678
 
         if (password.length < 6 || confpassword.length < 6) {
             setErrorMessage('Passwords must have at least 6 characters');
@@ -40,6 +62,11 @@ export default function Register() {
 
         if (studentCode.length !== 8) {
             setErrorMessage('Student code must have 8 characters');
+            return;
+        }
+
+        if (!thaiTelRegex.test(tel)) {
+            setErrorMessage('Please enter a valid Thai telephone number.');
             return;
         }
 
@@ -87,6 +114,32 @@ export default function Register() {
         // redirect to /borrow page
     };
 
+    const theme = createTheme({
+        components: {
+          MuiOutlinedInput: {
+            styleOverrides: {
+              root: {
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'orange',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'orange',
+                },
+              },
+            },
+          },
+          MuiInputLabel: {
+            styleOverrides: {
+              root: {
+                '&.Mui-focused': {
+                  color: 'orange',
+                },
+              },
+            },
+          },
+        },
+      });
+
     return (
         <div className="md:mx-12 flex flex-row justify-center overflow-hidden" style={{ height: 'calc(100% - 1rem)' }}>
             {/* Left side - Illustration */}
@@ -112,89 +165,113 @@ export default function Register() {
                 />
             </div>
             <div className='mt-2'>
+            <ThemeProvider theme={theme}>
                 <form className="max-w-sm mx-auto p-2" onSubmit={handleRegister}>
                     <div className='flex gap-4'>
-                        <div className="mb-3">
-                            <label htmlFor="firstname" className="block mb-1 text-sm font-medium text-gray-500">Firstname</label>
-                            <input 
-                                type="text" 
-                                id="firstname"
-                                name='firstname' 
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " 
+                        <div className="mb-5">
+                            <TextField
                                 required
-                                minLength={2}
-                            />
+                                id="outlined-required"
+                                label="Firstname"
+                                size="small"
+                                fullWidth
+                                className='bg-white'
+                                name='firstname'
+                                />
                         </div>
-                        <div className="mb-3">
-                            <label htmlFor="lastname" className="block mb-1 text-sm font-medium text-gray-500">Lastname</label>
-                            <input 
-                                type="text" 
-                                id="lastname"
-                                name='lastname'
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " 
+                        <div className="mb-5">
+                            <TextField
                                 required
-                                minLength={2} 
-                            />
+                                id="outlined-required"
+                                label="Lastname"
+                                size="small"
+                                fullWidth
+                                className='bg-white'
+                                name='lastname'
+                                />
                         </div>
                     </div>
                     <div className='flex gap-4'>
-                        <div className="mb-3">
-                            <label htmlFor="studentcode" className="block mb-1 text-sm font-medium text-gray-500">Student code</label>
-                            <input 
-                                type="number" 
-                                id="studentcode"
-                                name='studentcode' 
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " 
+                        <div className="mb-5">
+                        <TextField
                                 required
-                                minLength={8}
-                                maxLength={8} 
-                            />
+                                id="outlined-required"
+                                label="Student code"
+                                size="small"
+                                fullWidth
+                                className='bg-white'
+                                name='studentcode'
+                                />
                         </div>
-                        <div className="mb-3">
-                            <label htmlFor="tel" className="block mb-1 text-sm font-medium text-gray-500">Telephone</label>
-                            <input 
-                                type="tel" 
-                                id="tel"
-                                name='tel' 
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " 
+                        <div className="mb-5">
+                        <TextField
                                 required
-                            />
+                                id="outlined-required"
+                                label="Telephone"
+                                size="small"
+                                fullWidth
+                                className='bg-white'
+                                name='tel'
+                                />
                         </div>
                     </div>
-                    <div className="mb-3">
-                        <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-500">Email</label>
-                        <input 
-                            type="email" 
-                            id="email" 
-                            name='email' 
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " 
-                            required 
+                    <div className="mb-5">
+                        <TextField
+                            required
+                            id="outlined-required"
+                            label="Email"
+                            size="small"
+                            fullWidth
+                            className='bg-white'
+                            name='email'
                         />
                     </div>
                     <div className='flex gap-4'>
-                        <div className='mb-3'>
-                            <label htmlFor="password" className="block mb-1 text-sm font-medium text-gray-500">Password</label>
-                            <input 
-                                type="password" 
-                                name="password" 
-                                id="password" 
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primary block w-full p-2.5" 
-                                required 
-                                minLength={6}
-                                onInput={(e) => e.currentTarget.setCustomValidity('')} 
-                                onInvalid={(e) => e.currentTarget.setCustomValidity('Password must be at least 6 characters long')}
+                        <div className='mb-5'>
+                        <FormControl variant="outlined" size='small' fullWidth className='bg-white' required>
+                            <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                            <OutlinedInput
+                                id="outlined-adornment-password"
+                                name='password'
+                                type={showPassword ? 'text' : 'password'}
+                                endAdornment={
+                                <InputAdornment position="end">
+                                    <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={handleClickShowPassword}
+                                    onMouseDown={handleMouseDownPassword}
+                                    edge="end"
+                                    >
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                                }
+                                label="Password"
                             />
+                        </FormControl>
                         </div>
                         <div className='mb-5'>
-                            <label htmlFor="confpassword" className="block mb-1 text-sm font-medium text-gray-500">Confirm password</label>
-                            <input 
-                                type="password" 
-                                name="confpassword" 
-                                id="confpassword" 
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primary block w-full p-2.5 " 
-                                required
-                                minLength={6}
+                        <FormControl variant="outlined" size='small' fullWidth className='bg-white' required>
+                            <InputLabel htmlFor="outlined-adornment-password">Comfirm</InputLabel>
+                            <OutlinedInput
+                                id="outlined-adornment-password"
+                                name='confpassword'
+                                type={showComfirm ? 'text' : 'password'}
+                                endAdornment={
+                                <InputAdornment position="end">
+                                    <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={handleClickShowComfirm}
+                                    onMouseDown={handleMouseDownComfirm}
+                                    edge="end"
+                                    >
+                                    {showComfirm ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                                }
+                                label="Password"
                             />
+                        </FormControl>
                         </div>
                     </div>
                     {/* Form fields */}
@@ -203,8 +280,9 @@ export default function Register() {
                             {errorMessage}
                         </div>
                     )}
-                    <button type="submit" className="text-white bg-black hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 text-center">Sign in</button>
+                    <button type="submit" className="text-white bg-black hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 text-center">Register</button>
                 </form>
+                </ThemeProvider>
             </div>
             <div className='mt-3 flex justify-center items-center'>
                 <div className=" border-t border-gray-400 w-16"></div>

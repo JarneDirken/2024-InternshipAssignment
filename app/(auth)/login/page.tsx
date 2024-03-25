@@ -5,10 +5,25 @@ import { FormEvent, useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import '../../../services/firebase-config';
 import { useRouter } from 'next/navigation';
+import TextField from '@mui/material/TextField';
+import InputLabel from '@mui/material/InputLabel';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import FormControl from '@mui/material/FormControl';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 export default function Login() {
     const [errorMessage, setErrorMessage] = useState('');
     const router = useRouter();
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+    };
 
     async function handleLogin(event: FormEvent<HTMLFormElement>){
         event.preventDefault();
@@ -28,6 +43,33 @@ export default function Login() {
             }
         }
     }
+
+    const theme = createTheme({
+        components: {
+          MuiOutlinedInput: {
+            styleOverrides: {
+              root: {
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'orange',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'orange',
+                },
+              },
+            },
+          },
+          MuiInputLabel: {
+            styleOverrides: {
+              root: {
+                '&.Mui-focused': {
+                  color: 'orange',
+                },
+              },
+            },
+          },
+        },
+      });
+      
 
     return (
         <div className="md:mx-12 flex flex-row justify-center" style={{ height: 'calc(100% - 1rem)' }}>
@@ -56,12 +98,42 @@ export default function Login() {
             <div className='mt-4'>
                 <form className="max-w-sm mx-auto p-2" onSubmit={handleLogin}>
                     <div className="mb-5">
-                        <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-500">Your email</label>
-                        <input type="email" name='email' id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primaryblock w-full p-2.5 " required />
+                    <ThemeProvider theme={theme}>
+                        <TextField
+                            required
+                            id="outlined-required"
+                            label="Email"
+                            size="small"
+                            fullWidth
+                            className='bg-white'
+                            name='email'
+                            />
+                    </ThemeProvider>
                     </div>
                     <div>
-                        <label htmlFor="password" className="block mb-1 text-sm font-medium text-gray-500">Your password</label>
-                        <input type="password" name='password' id="password" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-primary focus:border-custom-primary block w-full p-2.5 " required />
+                    <ThemeProvider theme={theme}>
+                        <FormControl variant="outlined" size='small' fullWidth className='bg-white' required>
+                            <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                            <OutlinedInput
+                                id="outlined-adornment-password"
+                                name='password'
+                                type={showPassword ? 'text' : 'password'}
+                                endAdornment={
+                                <InputAdornment position="end">
+                                    <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={handleClickShowPassword}
+                                    onMouseDown={handleMouseDownPassword}
+                                    edge="end"
+                                    >
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                                }
+                                label="Password"
+                            />
+                        </FormControl>
+                    </ThemeProvider>
                     </div>
                     <div className='mb-8 mt-1 flex justify-end'>
                         <a href="#" className='text-custom-primary underline'>Forgot password?</a>
