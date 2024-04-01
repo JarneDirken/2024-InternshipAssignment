@@ -8,22 +8,20 @@ datasource db {
 }
 
 model User {
-  id                        Int           @id @default(autoincrement())
-  roleId                    Int
-  firebaseUid               String        @unique
-  firstName                 String
-  lastName                  String
-  email                     String        @unique
-  studentCode               String        @unique @db.Char(8)
-  tel                       String        @unique
-  active                    Boolean       @default(true)
-  createdAt                 DateTime      @default(now())
+  id                   Int           @id @default(autoincrement())
+  roleId               Int
+  firebaseUid          String        @unique
+  firstName            String
+  lastName             String
+  email                String        @unique
+  studentCode          String        @unique @db.Char(8)
+  tel                  String        @unique
+  active               Boolean       @default(true)
+  createdAt            DateTime      @default(now())
   //relation
-  role                      Role          @relation(fields: [roleId], references: [id])
-  ItemRequestsBorrower      ItemRequest[] @relation("borrower")
-  ItemRequestsApprover      ItemRequest[] @relation("approver")
-  ItemRequestsBorrowManager ItemRequest[] @relation("borrowmanager")
-  ItemRequestsReturnManager ItemRequest[] @relation("returnmanager")
+  role                 Role          @relation(fields: [roleId], references: [id])
+  ItemRequestsBorrower ItemRequest[] @relation("borrower")
+  ItemRequestsApprover ItemRequest[] @relation("approver")
 }
 
 model Role {
@@ -35,38 +33,33 @@ model Role {
 }
 
 model RoleItem {
-  id            Int         @id @default(autoincrement())
-  roleId        Int
-  generalItemId Int
+  id     Int  @id @default(autoincrement())
+  roleId Int
+  itemId Int
   // relation
-  role          Role        @relation(fields: [roleId], references: [id])
-  generalItem   GeneralItem @relation(fields: [generalItemId], references: [id])
-}
-
-model GeneralItem {
-  id        Int        @id @default(autoincrement())
-  name      String     @unique
-  model     String
-  brand     String
-  image     Bytes?
-  // relation
-  RoleItems RoleItem[]
-  Items     Item[]
+  role   Role @relation(fields: [roleId], references: [id])
+  item   Item @relation(fields: [itemId], references: [id])
 }
 
 model Item {
-  id            Int           @id @default(autoincrement())
-  locationId    Int
-  itemStatusId  Int
-  generalItemId Int
-  yearBought    DateTime
-  active        Boolean       @default(true)
+  id           Int           @id @default(autoincrement())
+  locationId   Int
+  itemStatusId Int
+  name         String        @unique
+  model        String
+  brand        String
+  image        Bytes?
+  yearBought   DateTime
+  active       Boolean       @default(true)
+  number       String        @unique //Number that Dio uses in excel
+  notes        String?
+  schoolNumber String?       @unique //Number of specific item schoolnumber
   // relation
-  location      Location      @relation(fields: [locationId], references: [id])
-  itemStatus    ItemStatus    @relation(fields: [itemStatusId], references: [id])
-  generalItem   GeneralItem   @relation(fields: [generalItemId], references: [id])
-  Reparations   Reparation[]
-  ItemRequests  ItemRequest[]
+  location     Location      @relation(fields: [locationId], references: [id])
+  itemStatus   ItemStatus    @relation(fields: [itemStatusId], references: [id])
+  Reparations  Reparation[]
+  ItemRequests ItemRequest[]
+  RoleItem     RoleItem[]
 }
 
 model ItemStatus {
@@ -106,21 +99,19 @@ model ItemRequest {
   requestStatusId Int
   borrowerId      Int
   approverId      Int
-  borrowManagerId Int
-  returnManagerId Int
   requestDate     DateTime
   starBorrowDate  DateTime
   endBorrowDate   DateTime
   decisionDate    DateTime?
   borrowDate      DateTime?
   returnDate      DateTime?
-  messae          String?
+  file            Bytes?
+  receiveMessage  String?
+  approveMessage  String?
   isUrgent        Boolean       @default(false)
   // relation
   item            Item          @relation(fields: [itemId], references: [id])
   requestStatus   RequestStatus @relation(fields: [requestStatusId], references: [id])
   borrower        User          @relation("borrower", fields: [borrowerId], references: [id])
   approver        User?         @relation("approver", fields: [approverId], references: [id])
-  borrowManager   User?         @relation("borrowmanager", fields: [borrowManagerId], references: [id])
-  returnManager   User?         @relation("returnmanager", fields: [returnManagerId], references: [id])
 }
