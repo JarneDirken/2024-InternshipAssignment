@@ -1,12 +1,11 @@
 // code to fill the database with dummy data
-import prisma from "../services/db";
+import prisma from "../src/services/db";
 
 async function main() {
     await createLocations();
     await createItemStatus();
-    await createGeneralItem();
-    await createItem();
     await createRole();
+    await createItem();
     await createRoleItem();
 }
 
@@ -19,7 +18,6 @@ main()
     await prisma.$disconnect()
     process.exit(1)
   })
-
 
 async function createLocations() {
     const locationNames = [
@@ -71,68 +69,6 @@ async function createItemStatus() {
     }
 }
 
-async function createGeneralItem() {
-    const generalItems = [
-        {
-            name: "Laptop",
-            model: "XPS 15",
-            brand: "Dell",
-            image: null
-        },
-        {
-            name: "Projector",
-            model: "EB-X41",
-            brand: "Epson",
-            image: null
-        }
-    ];
-
-    for (const item of generalItems) {
-        await prisma.generalItem.upsert({
-            where: { name: item.name },
-            update: {},
-            create: {
-                name: item.name,
-                model: item.model,
-                brand: item.brand,
-                image: item.image
-            }
-        });
-    }
-}
-
-async function createItem() {
-    const items = [
-        {
-            id: 1,
-            locationId: 1,
-            itemStatusId: 2,
-            generalItemId: 1,
-            yearBought: "2018"
-        },
-        {
-            id: 2,
-            locationId: 1,
-            itemStatusId: 2,
-            generalItemId: 1,
-            yearBought: "2019"
-        }
-    ];
-
-    for (const item of items) {
-        await prisma.item.upsert({
-            where: { id: item.id },
-            update: {},
-            create: {
-                locationId: item.locationId,
-                itemStatusId: item.itemStatusId,
-                generalItemId: item.generalItemId,
-                yearBought: new Date(item.yearBought)
-            }
-        });
-    }
-}
-
 async function createRole() {
     const roles = [
         "Student",
@@ -155,13 +91,13 @@ async function createRoleItem(){
         {
             id: 1,
             roleId: 1,
-            generalItemId: 1,
+            itemId: 1,
             
         },
         {
             id: 2,
             roleId: 2,
-            generalItemId: 2,
+            itemId: 2,
         }
     ];
 
@@ -171,7 +107,48 @@ async function createRoleItem(){
             update: {},
             create: {
                 roleId: item.roleId,
-                generalItemId: item.generalItemId,
+                itemId: item.itemId,
+            }
+        });
+    }
+}
+
+async function createItem() {
+    const items = [
+        {
+            id: 1,
+            locationId: 1,
+            itemStatusId: 2,
+            name: "Digital Multimeter UT89XD (01)",
+            model: "MULTIMETER KITS	",
+            brand: "UNI-T",
+            yearBought: "2018",
+            number: "RAI-ELEC-MUL-201-01"
+        },
+        {
+            id: 2,
+            locationId: 1,
+            itemStatusId: 2,
+            name: "Digital Multimeter UT89XD (02)",
+            model: "MULTIMETER KITS	",
+            brand: "UNI-T",
+            yearBought: "2018",
+            number: "RAI-ELEC-MUL-201-02"
+        }
+    ];
+
+    for (const item of items) {
+        await prisma.item.upsert({
+            where: { id: item.id },
+            update: {},
+            create: {
+                locationId: item.locationId,
+                itemStatusId: item.itemStatusId,
+                name: item.name,
+                model: item.model,
+                brand: item.brand,
+                yearBought: new Date(item.yearBought),
+                number: item.number
             }
         });
     }
