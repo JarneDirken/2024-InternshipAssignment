@@ -84,3 +84,25 @@ export function SidebarItem({icon, text, active}: SidebarItemProps) {
         </li>
     )
 }
+
+export function MobileSidebarItem({icon, text, active}: SidebarItemProps) {
+
+    return (
+        <li className={`
+            relative flex items-center py-2 px-3 my-1 
+            font-medium rounded-md cursor-pointer
+            transition-colors group
+            ${
+                active
+                  ? "bg-orange-100 font-bold"
+                  : "hover:bg-orange-50 text-gray-600"
+            }
+        `}>
+            {icon}
+            <span className={`overflow-hidden transition-all w-48 ml-3`}
+            >
+                {text}
+            </span>
+        </li>
+    )
+}
