@@ -95,6 +95,11 @@ export default function Header(){
           <Link href="/">
             Home
           </Link>
+          {user && (
+            <Link href="/borrow">
+              Borrow
+            </Link>
+          )}
         </div>
         {/* Display user avatar and logout if logged in */}
         {user ? (
