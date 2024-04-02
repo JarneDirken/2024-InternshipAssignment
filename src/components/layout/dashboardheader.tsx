@@ -22,7 +22,6 @@ import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import { usePathname } from 'next/navigation';
-import Link from 'next/link';
 import { MobileSidebarItem } from './sidebar';
 import MobileSidebarHeading from './sidebarheading';
 
