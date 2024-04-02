@@ -9,8 +9,8 @@ import Image from "next/image";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import "@/services/firebase-config";
 import { User } from '@/models/User';
-import CircularProgress from '@mui/material/CircularProgress';
 import Link from 'next/link';
+import Loading from '../states/Loading';
 
 export default function DashboardHeader() {
     const [isOpen, setIsOpen] = useState(false);
@@ -60,22 +60,26 @@ export default function DashboardHeader() {
     }    
 
     return(
-        <nav className="bg-gray-50 shadow-sm w-full h-20 flex items-center sm:justify-end justify-between fixed top-0 left-0 right-0 z-1">
+        <nav className="bg-gray-50 z-10 shadow-sm w-full h-20 flex items-center sm:justify-end justify-between fixed top-0 left-0 right-0 z-1">
             <div className="hamburger sm:hidden z-20 cursor-pointer ml-8" onClick={() => setIsOpen(!isOpen)}>
                 {isOpen ? <CloseIcon fontSize="large" /> : <MenuIcon fontSize="large" />}
             </div>
             <div className='flex items-center mr-10 sm:mr-16'>
                 <NotificationsOutlinedIcon className="text-4xl" />
                 {!profile ? (
-                    <div className='flex justify-center items-center'>
-                        <CircularProgress />
-                    </div>
+                    <Loading />
                 ) : (
                     <div className='flex items-center ml-6'>
                         <Link href="/profile">
-                            <Avatar sx={{ width: 40, height: 40 }}>
-                                {capitalizeFirstLetter(profile?.firstName[0])}{capitalizeFirstLetter(profile?.lastName[0])}
-                            </Avatar>
+                        <Avatar sx={{ width: 40, height: 40 }}>
+                            {profile.profilePic ? (
+                                <img src={profile.profilePic} alt={`${profile.firstName} ${profile.lastName}`} />
+                            ) : (
+                                <span>
+                                    {capitalizeFirstLetter(profile.firstName[0])}{capitalizeFirstLetter(profile.lastName[0])}
+                                </span>
+                            )}
+                        </Avatar>
                         </Link>
                         <div className="hidden sm:block ml-2">
                             <p className="font-semibold">
