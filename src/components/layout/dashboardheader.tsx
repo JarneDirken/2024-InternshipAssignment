@@ -6,9 +6,24 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import Image from "next/image";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import "@/services/firebase-config";
+import { User } from '@/models/User';
+import CircularProgress from '@mui/material/CircularProgress';
+import Link from 'next/link';
 
 export default function DashboardHeader() {
     const [isOpen, setIsOpen] = useState(false);
+    const [profile, setProfile] = useState<User | null>(null);
+    const auth = getAuth();
+
+    useEffect(() => {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                fetchUserProfile(user.uid);
+            }
+        });
+    }, []);
 
     useEffect(() => {
         // Define the function that handles screen resizing
@@ -26,6 +41,24 @@ export default function DashboardHeader() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    async function fetchUserProfile(uid: string) {
+        const endpoint = `/api/user/${uid}`;
+        try {
+            const response = await fetch(endpoint);
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
+            const userData = await response.json();
+            setProfile(userData);
+        } catch (error) {
+            console.error("Fetching user profile failed:", error);
+        }
+    }
+
+    function capitalizeFirstLetter(string: string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }    
+
     return(
         <nav className="bg-gray-50 shadow-sm w-full h-20 flex items-center sm:justify-end justify-between fixed top-0 left-0 right-0 z-1">
             <div className="hamburger sm:hidden z-20 cursor-pointer ml-8" onClick={() => setIsOpen(!isOpen)}>
@@ -33,13 +66,25 @@ export default function DashboardHeader() {
             </div>
             <div className='flex items-center mr-10 sm:mr-16'>
                 <NotificationsOutlinedIcon className="text-4xl" />
-                <div className='flex items-center ml-6'>
-                    <Avatar sx={{ width: 40, height: 40 }}>JD</Avatar>
-                    <div className="hidden sm:block ml-2">
-                        <p className="font-semibold">John Doe</p>
-                        <p className="text-gray-500">johndoe@kmitl.com</p>
+                {!profile ? (
+                    <div className='flex justify-center items-center'>
+                        <CircularProgress />
                     </div>
-                </div>
+                ) : (
+                    <div className='flex items-center ml-6'>
+                        <Link href="/profile">
+                            <Avatar sx={{ width: 40, height: 40 }}>
+                                {capitalizeFirstLetter(profile?.firstName[0])}{capitalizeFirstLetter(profile?.lastName[0])}
+                            </Avatar>
+                        </Link>
+                        <div className="hidden sm:block ml-2">
+                            <p className="font-semibold">
+                                {capitalizeFirstLetter(profile?.firstName)} {capitalizeFirstLetter(profile?.lastName)}
+                            </p>
+                            <p className="text-gray-500">{profile?.email}</p>
+                        </div>
+                    </div>
+                )}
             </div>
             <div 
                 id="menu-overlay"

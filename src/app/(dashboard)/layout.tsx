@@ -1,3 +1,4 @@
+'use client';
 import Sidebar from "@/components/layout/sidebar";
 import { SidebarItem } from "@/components/layout/sidebar";
 import SidebarHeading from "@/components/layout/sidebarheading";
@@ -13,6 +14,8 @@ import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import DashboardHeader from "@/components/layout/dashboardheader";
 import DashboardFrame from "@/components/layout/dashboardframe";
 import DashboardContext from "@/components/layout/sidebarcontext";
+import Link from "next/link";
+import { usePathname } from 'next/navigation';
 
 export default function DashboardLayout({
   children,
@@ -20,18 +23,34 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
 
+  const pathname = usePathname();
+
   return (
     <DashboardContext>
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-screen bg-gray-100">
         <DashboardHeader/>
         <div className="hidden sm:block">
           <Sidebar>
-            <SidebarItem icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Borrow" active  />
-            <SidebarItem icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Return"  />
-            <SidebarItem icon={<HistoryOutlinedIcon fontSize="inherit" className="text-3xl" />} text="History"  />
+            <Link href="/borrow">
+              <SidebarItem 
+                icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-3xl" />} 
+                text="Borrow" 
+                active={pathname === "/borrow"}  />
+            </Link>
+            <Link href="/return">
+              <SidebarItem 
+                icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-3xl" />} 
+                text="Return" 
+                active={pathname === "/return"}  />
+            </Link>
+            <Link href="/history">
+              <SidebarItem 
+              icon={<HistoryOutlinedIcon fontSize="inherit" className="text-3xl" />} 
+              text="History"  
+              active={pathname === "/history"}/>
+            </Link>
 
             <SidebarHeading>Supervisor</SidebarHeading>
-
             <SidebarItem icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Requests"  />
             <SidebarItem icon={<HandymanOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Repairs"  />
             <SidebarItem icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Lendings"  />

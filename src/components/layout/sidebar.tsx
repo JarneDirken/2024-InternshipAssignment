@@ -16,7 +16,8 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                         className={`overflow-hidden transition-all mx-auto`}
                         height={expanded ? 128 : 0}
                         width={expanded ? 128 : 0}
-                        alt="Logo" 
+                        alt="Logo"
+                        priority
                     />
                     <button 
                         onClick={() => setExpanded(!expanded)} 
