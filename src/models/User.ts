@@ -7,5 +7,6 @@ export interface User {
     studentCode: string;
     tel: string;
     createdAt: Date;
-    role: {id: number, name: string}
+    role: {id: number, name: string};
+    profilePic?: string;
 }
