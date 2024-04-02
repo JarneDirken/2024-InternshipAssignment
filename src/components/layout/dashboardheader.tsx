@@ -11,10 +11,25 @@ import "@/services/firebase-config";
 import { User } from '@/models/User';
 import Link from 'next/link';
 import Loading from '../states/Loading';
+import CircularProgress from '@mui/material/CircularProgress';
+import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
+import KeyboardReturnOutlinedIcon from '@mui/icons-material/KeyboardReturnOutlined';
+import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
+import ContentPasteOutlinedIcon from '@mui/icons-material/ContentPasteOutlined';
+import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
+import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { MobileSidebarItem } from './sidebar';
+import MobileSidebarHeading from './sidebarheading';
 
 export default function DashboardHeader() {
     const [isOpen, setIsOpen] = useState(false);
     const [profile, setProfile] = useState<User | null>(null);
+    const pathname = usePathname();
     const auth = getAuth();
 
     useEffect(() => {
@@ -93,29 +108,50 @@ export default function DashboardHeader() {
             <div 
                 id="menu-overlay"
                 className={`fixed top-0 left-0 h-screen w-full md:w-auto bg-white z-10 transition-transform duration-500 ease-in-out 
-                            flex flex-col justify-between ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                            flex flex-col justify-between overflow-y-auto ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                                 
                 <Image src={'/assets/images/logo.png'} 
-                        className={`overflow-hidden transition-all ml-auto`}
+                        className={`overflow-hidden absolute transition-all right-9 top-6`}
                         height={90}
                         width={90}
                         alt="Logo" 
                 />
                 <div className='flex flex-col w-11/12 mx-auto'>
-                    <div className='px-8'>
-                        <h1 className='font-bold text-lg'>Links</h1>
-                        <div>Borrow</div>
-                        <div>Return</div>
-                        <div>History</div>
-                        <div className='border-b my-6'></div>
-                        <h1 className='font-bold text-lg'>Supervisor</h1>
-                        <div>Requests</div>
-                        <div>Repairs</div>
-                        <div className='border-b my-6'></div>
-                        <h1 className='font-bold text-lg'>Admin</h1>
-                        <div>Products</div>
-                        <div>Locations</div>
-                        <div>Users</div>
+                    <div className='px-4 mt-24'>
+                        <ul className={`flex-1 px-3 mx-auto"}`}>
+                            <MobileSidebarHeading>Links</MobileSidebarHeading>
+                            <Link href="/borrow">
+                                <MobileSidebarItem 
+                                    icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    text="Borrow" 
+                                    active={pathname === "/borrow"}  />
+                            </Link>
+                            <Link href="/return">
+                                <MobileSidebarItem 
+                                    icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    text="Return" 
+                                    active={pathname === "/return"}  />
+                            </Link>
+                            <Link href="/history">
+                                <MobileSidebarItem 
+                                icon={<HistoryOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                text="History"  
+                                active={pathname === "/history"}/>
+                            </Link>
+
+                            <div className='border-b my-5'></div>
+                            <MobileSidebarHeading>Supervisor</MobileSidebarHeading>
+                            <MobileSidebarItem icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Requests"  />
+                            <MobileSidebarItem icon={<HandymanOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Repairs"  />
+                            <MobileSidebarItem icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Lendings"  />
+                        
+                            <div className='border-b my-5'></div>
+                            <MobileSidebarHeading>Admin</MobileSidebarHeading>
+
+                            <MobileSidebarItem icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-2xl" />} text="Products"  />
+                            <MobileSidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Locations"  />
+                            <MobileSidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Users"  />
+                        </ul>
                     </div>
                 </div>
                 
