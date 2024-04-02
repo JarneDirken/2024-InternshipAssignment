@@ -1,14 +1,52 @@
 import Sidebar from "@/components/layout/sidebar";
+import { SidebarItem } from "@/components/layout/sidebar";
+import SidebarHeading from "@/components/layout/sidebarheading";
+import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
+import KeyboardReturnOutlinedIcon from '@mui/icons-material/KeyboardReturnOutlined';
+import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
+import ContentPasteOutlinedIcon from '@mui/icons-material/ContentPasteOutlined';
+import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
+import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import DashboardHeader from "@/components/layout/dashboardheader";
+import DashboardFrame from "@/components/layout/dashboardframe";
+import DashboardContext from "@/components/layout/sidebarcontext";
 
 export default function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
-    <div style={{ height: 'calc(100vh - 72px)' }}>
-      <Sidebar />
-      {children}
-    </div>
+    <DashboardContext>
+      <div className="flex flex-col h-screen">
+        <DashboardHeader/>
+        <div className="hidden sm:block">
+          <Sidebar>
+            <SidebarItem icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Borrow" active  />
+            <SidebarItem icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Return"  />
+            <SidebarItem icon={<HistoryOutlinedIcon fontSize="inherit" className="text-3xl" />} text="History"  />
+
+            <SidebarHeading>Supervisor</SidebarHeading>
+
+            <SidebarItem icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Requests"  />
+            <SidebarItem icon={<HandymanOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Repairs"  />
+            <SidebarItem icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Lendings"  />
+          
+            <SidebarHeading>Admin</SidebarHeading>
+
+            <SidebarItem icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-3xl" />} text="Products"  />
+            <SidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Locations"  />
+            <SidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Users"  />
+          </Sidebar>
+        </div>
+        <DashboardFrame>
+          {children}
+        </DashboardFrame>
+      </div>
+    </DashboardContext>
   );
 }
