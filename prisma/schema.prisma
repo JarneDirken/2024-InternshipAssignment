@@ -106,7 +106,7 @@ model ItemRequest {
   decisionDate    DateTime?
   borrowDate      DateTime?
   returnDate      DateTime?
-  file            Bytes?
+  file            String?
   receiveMessage  String?
   approveMessage  String?
   isUrgent        Boolean       @default(false)
