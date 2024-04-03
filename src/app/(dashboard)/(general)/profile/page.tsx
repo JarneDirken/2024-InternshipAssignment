@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import "@/services/firebase-config";
-import { User } from '@/models/User';
 import PersonIcon from '@mui/icons-material/Person';
 import Avatar from '@mui/material/Avatar';
 import Loading from '@/components/states/Loading';
@@ -10,9 +9,11 @@ import Button from '@/components/states/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { useRecoilState } from 'recoil';
+import { userProfileState } from '@/services/store';
 
 export default function Profile() {
-    const [profile, setProfile] = useState<User | null>(null);
+    const [profile, setProfile] = useRecoilState(userProfileState);
     const [loading, setLoading] = useState(true);
     const auth = getAuth();
 

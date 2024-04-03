@@ -8,10 +8,8 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import Image from "next/image";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import "@/services/firebase-config";
-import { User } from '@/models/User';
 import Link from 'next/link';
 import Loading from '../states/Loading';
-import CircularProgress from '@mui/material/CircularProgress';
 import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 import KeyboardReturnOutlinedIcon from '@mui/icons-material/KeyboardReturnOutlined';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
@@ -24,10 +22,12 @@ import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import { usePathname } from 'next/navigation';
 import { MobileSidebarItem } from './sidebar';
 import MobileSidebarHeading from './sidebarheading';
+import { useRecoilState } from 'recoil';
+import { userProfileState } from '@/services/store';
 
 export default function DashboardHeader() {
     const [isOpen, setIsOpen] = useState(false);
-    const [profile, setProfile] = useState<User | null>(null);
+    const [profile, setProfile] = useRecoilState(userProfileState);
     const pathname = usePathname();
     const auth = getAuth();
 
