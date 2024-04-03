@@ -3,20 +3,19 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyC65KlTaBR0cT-RNSv4OvTRw0hovd1AITc",
-    authDomain: "internshipassignment-c6d15.firebaseapp.com",
-    projectId: "internshipassignment-c6d15",
-    storageBucket: "internshipassignment-c6d15.appspot.com",
-    messagingSenderId: "924731255763",
-    appId: "1:924731255763:web:4c2251eaba8369478f9d26"
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-// Initialize Firebase only if there are no initialized apps
 let app: FirebaseApp;
 if (!getApps().length) {
     app = initializeApp(firebaseConfig);
 } else {
-    app = getApp(); // if already initialized, use that one
+    app = getApp();
 }
 
 export default app;
