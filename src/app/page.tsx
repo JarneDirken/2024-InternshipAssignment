@@ -1,8 +1,21 @@
+'use client';
 import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/layout/header";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import { useEffect, useState } from "react";
+
 
 export default function Home() {
+  const [user, setUser] = useState<User | null>(null);
+  const auth = getAuth();
+
+  useEffect(() => {
+      onAuthStateChanged(auth, (currentUser) => {
+          setUser(currentUser);
+      });
+  }, [auth]);
+
   return (
     <div style={{ height: 'calc(100vh - 72px)' }}>
       <Header />
@@ -19,13 +32,23 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="pt-20 md:hidden">
-            <Link href="/login">
-              <button className="bg-custom-button-primary w-full py-3.5 rounded-xl text-white font-medium text-lg">
-                Get Started
-              </button>
-            </Link>
-          </div>
+          {user ? (
+            <div className="pt-20 md:hidden">
+              <Link href="/borrow">
+                <button className="bg-custom-button-primary w-full py-3.5 rounded-xl text-white font-medium text-lg">
+                  Dashboard
+                </button>
+              </Link>
+            </div>
+          ) : (
+            <div className="pt-20 md:hidden">
+              <Link href="/login">
+                <button className="bg-custom-button-primary w-full py-3.5 rounded-xl text-white font-medium text-lg">
+                  Get Started
+                </button>
+              </Link>
+            </div>
+          )}
         </div>
         <div className="hidden md:block mx-auto my-auto">
           <Image

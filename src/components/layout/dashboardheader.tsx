@@ -21,7 +21,7 @@ import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import { usePathname } from 'next/navigation';
 import { MobileSidebarItem } from './sidebar';
-import MobileSidebarHeading from './sidebarheading';
+import { MobileSidebarHeading } from './sidebarheading';
 import { useRecoilState } from 'recoil';
 import { userProfileState } from '@/services/store';
 
@@ -106,7 +106,7 @@ export default function DashboardHeader() {
             </div>
             <div 
                 id="menu-overlay"
-                className={`fixed top-0 left-0 h-screen w-full md:w-auto bg-white z-10 transition-transform duration-500 ease-in-out 
+                className={`fixed top-0 left-0 h-screen w-full sm:hidden bg-white z-10 transition-transform duration-500 ease-in-out 
                             flex flex-col justify-between overflow-y-auto ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                                 
                 <Image src={'/assets/images/logo.png'} 
@@ -116,45 +116,45 @@ export default function DashboardHeader() {
                         alt="Logo" 
                 />
                 <div className='flex flex-col w-11/12 mx-auto'>
-                    <div className='px-4 mt-24'>
+                    <div className='px-4 mt-20'>
                         <ul className={`flex-1 px-3 mx-auto"}`}>
                             <MobileSidebarHeading>Links</MobileSidebarHeading>
                             <Link href="/borrow">
                                 <MobileSidebarItem 
-                                    icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-sm" />} 
                                     text="Borrow" 
                                     active={pathname === "/borrow"}  />
                             </Link>
                             <Link href="/return">
                                 <MobileSidebarItem 
-                                    icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-sm" />} 
                                     text="Return" 
                                     active={pathname === "/return"}  />
                             </Link>
                             <Link href="/history">
                                 <MobileSidebarItem 
-                                icon={<HistoryOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                icon={<HistoryOutlinedIcon fontSize="inherit" className="text-sm" />} 
                                 text="History"  
                                 active={pathname === "/history"}/>
                             </Link>
 
-                            <div className='border-b my-5'></div>
+                            <div className='border-b my-3'></div>
                             <MobileSidebarHeading>Supervisor</MobileSidebarHeading>
-                            <MobileSidebarItem icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Requests"  />
-                            <MobileSidebarItem icon={<HandymanOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Repairs"  />
-                            <MobileSidebarItem icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Lendings"  />
+                            <MobileSidebarItem icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-sm" />} text="Requests"  />
+                            <MobileSidebarItem icon={<HandymanOutlinedIcon fontSize="inherit" className="text-sm" />} text="Repairs"  />
+                            <MobileSidebarItem icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-sm" />} text="Lendings"  />
                         
-                            <div className='border-b my-5'></div>
+                            <div className='border-b my-3'></div>
                             <MobileSidebarHeading>Admin</MobileSidebarHeading>
 
-                            <MobileSidebarItem icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-2xl" />} text="Products"  />
-                            <MobileSidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Locations"  />
-                            <MobileSidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Users"  />
+                            <MobileSidebarItem icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-sm" />} text="Products"  />
+                            <MobileSidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-sm" />} text="Locations"  />
+                            <MobileSidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-sm" />} text="Users"  />
                         </ul>
                     </div>
                 </div>
                 
-                <div className='p-8 w-11/12 mx-auto'>
+                <div className='px-8 mb-6 w-11/12 mx-auto'>
                     <div className='border-b my-6'></div>
                     <button className={`bg-gray-100 flex py-1.5 hover:bg-gray-200 overflow-hidden transition-all w-full justify-center`}>
                         <LogoutRoundedIcon className={`text-2xl mr-1.5`} />

@@ -3,11 +3,28 @@ import Image from "next/image";
 import FirstPageRoundedIcon from '@mui/icons-material/FirstPageRounded';
 import LastPageRoundedIcon from '@mui/icons-material/LastPageRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { SidebarContext } from "./sidebarcontext";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import '../../services/firebase-config';
 
 export default function Sidebar({ children }: { children: React.ReactNode }) {
     const {expanded, setExpanded} = useContext(SidebarContext);
+    const [user, setUser] = useState<User | null>(null);
+    const auth = getAuth();
+
+    useEffect(() => {
+        onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+        });
+    }, [auth]);
+
+    const handleLogout = () => {
+        const auth = getAuth();
+        auth.signOut();
+        setUser(null);
+    };
+
     return (
         <aside className="h-screen max-w-fit fixed left-0 z-10">
             <nav className="h-full flex flex-col bg-white border-r shadow-sm">
@@ -30,7 +47,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                 <ul className={`flex-1 px3 ${expanded ? "ml-[10.92px]" : "mx-auto"}`}>{children}</ul>
 
                 <div className="border-t flex p-4">
-                    <button className={`bg-gray-100 flex py-1.5 hover:bg-gray-200 overflow-hidden transition-all w-full ${expanded ? "justify-center" : "rounded-lg"}`}>
+                    <button onClick={handleLogout} className={`bg-gray-100 flex py-1.5 hover:bg-gray-200 overflow-hidden transition-all w-full ${expanded ? "justify-center" : "rounded-lg"}`}>
                         <LogoutRoundedIcon className={`text-2xl ${expanded ? "mr-2" : "mx-auto"}`} />
                         <p className={`font-semibold ${expanded ? "block" : "hidden"}`}>Log Out</p>
                     </button>

@@ -27,39 +27,39 @@ export default function DashboardLayout({
 
   return (
     <DashboardContext>
-      <div className="flex flex-col h-screen bg-gray-100">
+      <div className="flex flex-col h-screen">
         <DashboardHeader/>
         <div className="hidden sm:block">
           <Sidebar>
             <Link href="/borrow">
               <SidebarItem 
-                icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-3xl" />} 
+                icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-lg" />} 
                 text="Borrow" 
                 active={pathname === "/borrow"}  />
             </Link>
             <Link href="/return">
               <SidebarItem 
-                icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-3xl" />} 
+                icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-lg" />} 
                 text="Return" 
                 active={pathname === "/return"}  />
             </Link>
             <Link href="/history">
               <SidebarItem 
-              icon={<HistoryOutlinedIcon fontSize="inherit" className="text-3xl" />} 
+              icon={<HistoryOutlinedIcon fontSize="inherit" className="text-lg" />} 
               text="History"  
               active={pathname === "/history"}/>
             </Link>
 
             <SidebarHeading>Supervisor</SidebarHeading>
-            <SidebarItem icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Requests"  />
-            <SidebarItem icon={<HandymanOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Repairs"  />
-            <SidebarItem icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Lendings"  />
+            <SidebarItem icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-lg" />} text="Requests"  />
+            <SidebarItem icon={<HandymanOutlinedIcon fontSize="inherit" className="text-lg" />} text="Repairs"  />
+            <SidebarItem icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-lg" />} text="Lendings"  />
           
             <SidebarHeading>Admin</SidebarHeading>
 
-            <SidebarItem icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-3xl" />} text="Products"  />
-            <SidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Locations"  />
-            <SidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Users"  />
+            <SidebarItem icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-lg" />} text="Products"  />
+            <SidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-lg" />} text="Locations"  />
+            <SidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-lg" />} text="Users"  />
           </Sidebar>
         </div>
         <DashboardFrame>
