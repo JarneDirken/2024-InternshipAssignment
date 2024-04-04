@@ -197,45 +197,9 @@ export default function Borrow() {
                     <PendingBorrows />
                 )}
             </div>
-            {/* <div>
-                <TestLocations />
-            </div> */}
         </div>
     );
 }
-
-// function TestLocations() {
-//     const fetchLocations = async () => {
-//     const auth = getAuth(app);
-//     const user = auth.currentUser;
-
-//     if (user) {
-//         const token = await getIdToken(user);
-//         console.log(token);
-//         const response = await fetch('/api/locations', {
-//             method: 'GET',
-//             headers: {
-//                 'Authorization': `Bearer ${token}`
-//             }
-//         });
-//         if (response.ok) {
-//             const locations = await response.json();
-//             return locations;
-//         }
-//     }
-//         throw new Error('User not authenticated');
-//     };
-
-//     useEffect(()=> {
-//         fetchLocations();
-//     }, [])
-
-//     return (
-//         <div>
-//             locations:
-//         </div>
-//     );
-// }
 
 function Filters({ active, setActive, onFilterChange }: FiltersProps) {
     const [locations, setLocations] = useState<Location[]>([]);
@@ -301,15 +265,25 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
     }, [setActive]);
 
     async function getLocations() {
-        try {
-            const response = await fetch('/api/locations');
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+        const auth = getAuth(app);
+        const user = auth.currentUser;
+        if (user) {
+            try {
+                const token = await getIdToken(user);
+                const response = await fetch('/api/locations', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `${token}`
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                setLocations(data);
+            } catch (error) {
+                console.error("Failed to fetch locations:", error);
             }
-            const data = await response.json();
-            setLocations(data);
-        } catch (error) {
-            console.error("Failed to fetch locations:", error);
         }
     }
 
