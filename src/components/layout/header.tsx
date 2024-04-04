@@ -97,7 +97,7 @@ export default function Header(){
           </Link>
           {user && (
             <Link href="/borrow">
-              Borrow
+              Dashboard
             </Link>
           )}
         </div>
