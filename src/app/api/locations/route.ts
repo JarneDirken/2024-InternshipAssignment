@@ -17,7 +17,6 @@ import { headers } from 'next/headers'
 export async function GET(req: NextApiRequest, res: NextApiResponse) {
     try {
         const token = (headers().get('authorization'));
-        console.log(token);
         if (!token) {
             return new Response(JSON.stringify({error: 'Unauthorized - No token provided'}), {
                 status: 401,
