@@ -111,7 +111,7 @@ export default function Borrow() {
     // After the state is updated, restore the scroll position from the ref
     useEffect(() => {
         window.scrollTo(0, scrollPositionRef.current);
-    }, [items]);
+    }, [loadMoreItems]);
     
     useEffect(() => {
         getItems(currentPage, nameFilter, modelFilter, brandFilter, locationFilter);
@@ -144,6 +144,30 @@ export default function Borrow() {
 function Filters({ active, setActive, onFilterChange }: FiltersProps) {
     const [locations, setLocations] = useState<Location[]>([]);
     const prevWidthRef = useRef(window.innerWidth);
+    const [name, setName] = useState('');
+    const [model, setModel] = useState('');
+    const [brand, setBrand] = useState('');
+    const [location, setLocation] = useState('');
+
+    const resetName = () => {
+        setName('');
+        onFilterChange('name', '');
+    };
+
+    const resetBrand = () => {
+        setBrand('');
+        onFilterChange('brand', '');
+    };
+
+    const resetModel = () => {
+        setModel('');
+        onFilterChange('model', '');
+    };
+
+    const resetLocation = () => {
+        setLocation('');
+        onFilterChange('location', '');
+    };
 
     useEffect(() => {
         getLocations();
@@ -186,18 +210,22 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
 
     const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         onFilterChange('name', event.target.value);
+        setName(event.target.value);
     };
 
     const handleModelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         onFilterChange('model', event.target.value);
+        setModel(event.target.value);
     };
 
     const handleBrandChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         onFilterChange('brand', event.target.value);
+        setBrand(event.target.value);
     };
 
     const handleLocationChange = (value: string | null) => {
         onFilterChange('location', value || '');
+        setLocation(value || '');
     };
 
     const theme = createTheme({
@@ -263,6 +291,7 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
                                 size="small"
                                 className="bg-white w-full"
                                 name="name"
+                                value={name}
                                 onChange={handleNameChange}
                                 placeholder="Search"
                                 InputLabelProps={{
@@ -284,6 +313,7 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
                                 size="small"
                                 className="bg-white w-full"
                                 name="model"
+                                value={model}
                                 onChange={handleModelChange}
                                 placeholder="Search"
                                 InputLabelProps={{
@@ -305,6 +335,7 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
                                 size="small"
                                 className="bg-white w-full"
                                 name="brand"
+                                value={brand}
                                 onChange={handleBrandChange}
                                 placeholder="Search"
                                 InputLabelProps={{
@@ -324,8 +355,10 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
                                 disablePortal
                                 size="small"
                                 id="combo-box-demo"
+                                value={location || null}
                                 onChange={(event, value) => handleLocationChange(value)}
                                 options={locations.map(location => location.name)}
+                                isOptionEqualToValue={(option, value) => option === value}
                                 sx={{ width: '100%' }}
                                 renderInput={(params) => (
                                     <TextField
@@ -341,13 +374,36 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
                         </div>
                     </div>
                 </ThemeProvider>
-                <div className="bg-gray-100 rounded-lg p-2 flex items-center">
+                <div className="bg-gray-100 rounded-lg p-2 flex items-center gap-2 flex-wrap">
                     <span className="text-gray-500">Filters applied:&nbsp;</span>
-                    <div className="bg-gray-300 px-2 rounded-md flex items-center">
-                        <ClearIcon fontSize="small" />
-                        <span className="text-sm text-gray-600">Name:&nbsp;</span>
-                        <span className="text-sm">Building E12</span>
-                    </div>
+                    {name && (
+                        <div className="bg-gray-300 px-2 rounded-md flex items-center truncate">
+                            <ClearIcon fontSize="small" className="cursor-pointer" onClick={resetName} />
+                            <span className="text-sm text-gray-600">Name:&nbsp;</span>
+                            <span className="text-sm">{name}</span>
+                        </div>
+                    )}
+                    {model && (
+                        <div className="bg-gray-300 px-2 rounded-md flex items-center truncate">
+                            <ClearIcon fontSize="small" className="cursor-pointer" onClick={resetModel} />
+                            <span className="text-sm text-gray-600">Model:&nbsp;</span>
+                            <span className="text-sm">{model}</span>
+                        </div>
+                    )}
+                    {brand && (
+                        <div className="bg-gray-300 px-2 rounded-md flex items-center truncate">
+                            <ClearIcon fontSize="small" className="cursor-pointer" onClick={resetBrand} />
+                            <span className="text-sm text-gray-600">Brand:&nbsp;</span>
+                            <span className="text-sm">{brand}</span>
+                        </div>
+                    )}
+                    {location && (
+                        <div className="bg-gray-300 px-2 rounded-md flex items-center truncate">
+                            <ClearIcon fontSize="small" className="cursor-pointer" onClick={resetLocation} />
+                            <span className="text-sm text-gray-600">Location:&nbsp;</span>
+                            <span className="text-sm">{location}</span>
+                        </div>
+                    )}
                 </div>
             </div>
         </>
