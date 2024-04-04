@@ -24,6 +24,7 @@ import { MobileSidebarItem } from './sidebar';
 import MobileSidebarHeading from './sidebarheading';
 import { useRecoilState } from 'recoil';
 import { userProfileState } from '@/services/store';
+import Tooltip from '@mui/material/Tooltip';
 
 export default function DashboardHeader() {
     const [isOpen, setIsOpen] = useState(false);
@@ -79,22 +80,27 @@ export default function DashboardHeader() {
                 {isOpen ? <CloseIcon fontSize="large" /> : <MenuIcon fontSize="large" />}
             </div>
             <div className='flex items-center mr-10 sm:mr-16'>
-                <NotificationsOutlinedIcon className="text-4xl" />
+                <Tooltip title="Notifciations" arrow>
+                    <NotificationsOutlinedIcon className="text-4xl cursor-pointer" />
+                </Tooltip>
                 {!profile ? (
                     <Loading />
                 ) : (
+
                     <div className='flex items-center ml-6'>
-                        <Link href="/profile">
-                        <Avatar sx={{ width: 40, height: 40 }}>
-                            {profile.profilePic ? (
-                                <img src={profile.profilePic} alt={`${profile.firstName} ${profile.lastName}`} />
-                            ) : (
-                                <span>
-                                    {capitalizeFirstLetter(profile.firstName[0])}{capitalizeFirstLetter(profile.lastName[0])}
-                                </span>
-                            )}
-                        </Avatar>
-                        </Link>
+                        <Tooltip title="Account info" arrow>
+                            <Link href="/profile">
+                                <Avatar sx={{ width: 40, height: 40 }}>
+                                    {profile.profilePic ? (
+                                        <img src={profile.profilePic} alt={`${profile.firstName} ${profile.lastName}`} />
+                                    ) : (
+                                        <span>
+                                            {capitalizeFirstLetter(profile.firstName[0])}{capitalizeFirstLetter(profile.lastName[0])}
+                                        </span>
+                                    )}
+                                </Avatar>
+                            </Link>
+                        </Tooltip>
                         <div className="hidden sm:block ml-2">
                             <p className="font-semibold">
                                 {capitalizeFirstLetter(profile?.firstName)} {capitalizeFirstLetter(profile?.lastName)}

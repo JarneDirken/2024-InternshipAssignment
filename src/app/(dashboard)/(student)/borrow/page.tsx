@@ -15,6 +15,11 @@ import ClearIcon from '@mui/icons-material/Clear';
 import Loading from "@/components/states/Loading";
 import AppsOutlinedIcon from '@mui/icons-material/AppsOutlined';
 import ReorderOutlinedIcon from '@mui/icons-material/ReorderOutlined';
+import Tooltip from "@mui/material/Tooltip";
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { getAuth, getIdToken } from 'firebase/auth';
+import app from "@/services/firebase-config";
 
 interface FiltersProps { // typescript moment, everthing should have a type
     active: boolean;
@@ -43,6 +48,7 @@ export default function Borrow() {
     const [brandFilter, setBrandFilter] = useState(''); // brand filter
     const [locationFilter, setLocationFilter] = useState(''); // location filter
     const scrollPositionRef = useRef<number>(0);
+    const [selectedTab, setSelectedTab] = useState('products');
 
     // get items with pagination and filter on SERVER SIDE
     async function getItems(page = 1, nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
@@ -57,7 +63,7 @@ export default function Borrow() {
                 location: locationFilter
             }).toString();
             const response = await fetch(`/api/items?${queryString}`);
-    
+
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -100,19 +106,19 @@ export default function Borrow() {
 
     const loadMoreItems = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
-    
+
         // Remember the current scroll position
         scrollPositionRef.current = window.scrollY;
-    
+
         const nextPage = currentPage + 1;
         setCurrentPage(nextPage);
     };
-    
+
     // After the state is updated, restore the scroll position from the ref
     useEffect(() => {
         window.scrollTo(0, scrollPositionRef.current);
     }, [loadMoreItems]);
-    
+
     useEffect(() => {
         getItems(currentPage, nameFilter, modelFilter, brandFilter, locationFilter);
     }, [currentPage, nameFilter, modelFilter, brandFilter, locationFilter]);
@@ -122,24 +128,78 @@ export default function Borrow() {
     return (
         <div>
             <div className="bg-white mb-4 rounded-xl">
-                <Filters 
-                    active={active} 
-                    setActive={setActive} 
-                    onFilterChange={handleFilterChange} 
+                <Filters
+                    active={active}
+                    setActive={setActive}
+                    onFilterChange={handleFilterChange}
                 />
             </div>
             <div className="rounded-xl">
-                <BorrowCard
+                <div className="flex border-b border-b-gray-300 gap-12 bg-white rounded-tl-xl rounded-tr-xl z-0">
+                    <div
+                        className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'products' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
+                        onClick={() => setSelectedTab('products')}
+                    >
+                        Products
+                    </div>
+                    <div
+                        className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'pending' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
+                        onClick={() => setSelectedTab('pending')}
+                    >
+                        Pending borrows
+                    </div>
+                </div>
+                {selectedTab === "products" ? (
+                    <BorrowCard
                     active={active}
                     items={items}
                     loading={loading}
                     loadMoreItems={loadMoreItems}
                     totalItemCount={totalItemCount}
-                />            
+                />
+                ) : (
+                    <PendingBorrows />
+                )}
             </div>
+            {/* <div>
+                <TestLocations />
+            </div> */}
         </div>
     );
 }
+
+// function TestLocations() {
+//     const fetchLocations = async () => {
+//     const auth = getAuth(app);
+//     const user = auth.currentUser;
+
+//     if (user) {
+//         const token = await getIdToken(user);
+//         console.log(token);
+//         const response = await fetch('/api/locations', {
+//             method: 'GET',
+//             headers: {
+//                 'Authorization': `Bearer ${token}`
+//             }
+//         });
+//         if (response.ok) {
+//             const locations = await response.json();
+//             return locations;
+//         }
+//     }
+//         throw new Error('User not authenticated');
+//     };
+
+//     useEffect(()=> {
+//         fetchLocations();
+//     }, [])
+
+//     return (
+//         <div>
+//             locations:
+//         </div>
+//     );
+// }
 
 function Filters({ active, setActive, onFilterChange }: FiltersProps) {
     const [locations, setLocations] = useState<Location[]>([]);
@@ -148,6 +208,15 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
     const [model, setModel] = useState('');
     const [brand, setBrand] = useState('');
     const [location, setLocation] = useState('');
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
 
     const resetName = () => {
         setName('');
@@ -263,21 +332,39 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
                 </div>
                 <div className="flex items-center gap-6">
                     <div className="lg:flex items-center gap-1 hidden">
-                        <div className={`cursor-pointer rounded-full p-1 ${active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
-                            onClick={() => setActive(true)}>
-                            <ReorderOutlinedIcon />
-                        </div>
-                        <div className={`cursor-pointer rounded-full p-1 ${!active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
-                            onClick={() => setActive(false)}>
-                            <AppsOutlinedIcon />
-                        </div>
+                        <Tooltip title="List view" arrow>
+                            <div className={`cursor-pointer rounded-full p-1 ${active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
+                                onClick={() => setActive(true)}>
+                                <ReorderOutlinedIcon />
+                            </div>
+                        </Tooltip>
+                        <Tooltip title="Card view" arrow>
+                            <div className={`cursor-pointer rounded-full p-1 ${!active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
+                                onClick={() => setActive(false)}>
+                                <AppsOutlinedIcon />
+                            </div>
+                        </Tooltip>
                     </div>
-                    <div className="relative">
-                        <ShoppingCartOutlinedIcon fontSize="large" />
-                        <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2">
-                            0
+                    <Tooltip title="Shopping cart" arrow placement="top">
+                        <div className="relative">
+                            <div onClick={handleMenuOpen}>
+                                <ShoppingCartOutlinedIcon fontSize="large" className="cursor-pointer" />
+                            </div>
+                            <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2">
+                                0
+                            </div>
+                            <Menu
+                                anchorEl={anchorEl}
+                                open={Boolean(anchorEl)}
+                                onClose={handleMenuClose}
+                                className="cursor-pointer"
+                            >
+                                <MenuItem onClick={handleMenuClose}>Menu Item 1 fddf dsfds fsdf sd</MenuItem>
+                                <MenuItem onClick={handleMenuClose}>Menu Item 2</MenuItem>
+                                <MenuItem onClick={handleMenuClose}>Menu Item 3</MenuItem>
+                            </Menu>
                         </div>
-                    </div>
+                    </Tooltip>
                 </div>
             </div>
             <hr className="hidden md:block" />
@@ -411,21 +498,13 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
 }
 
 function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems }: BorrowCardProps) {
-    const gridViewClass = "grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4";
-    const listViewClass = "flex flex-col bg-white rounded-xl overflow-hidden";
+    const gridViewClass = "grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4";
+    const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-hidden";
 
     if (loading) { return (<Loading />); }
 
     return (
         <div className={active ? listViewClass : gridViewClass}>
-            {active && (
-                <div className="relative py-5 pt-8 px-12 font-semibold uppercase flex items-center border-b border-gray-300">
-                    <div className="text-custom-primary border-custom-primary border-b-4 w-48 absolute left-0 px-12 py-2">
-                        Products
-                    </div>
-                </div>
-
-            )}
             {items.length > 0 ? (
                 items.map((item) => (
                     <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-4"}`}>
@@ -505,6 +584,14 @@ function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems }: B
                     Load More
                 </button>
             )}
+        </div>
+    );
+}
+
+function PendingBorrows(){
+    return (
+        <div>
+            Pending borrows
         </div>
     );
 }

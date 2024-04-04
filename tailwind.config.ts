@@ -22,6 +22,7 @@ const config: Config = {
         "custom-login": "#FFF5D6",
         "custom-button-primary": "#130E01",
         "custom-login2": "#ffb361",
+        "custom-gray": "#949494",
       }
     },
   },

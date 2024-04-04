@@ -50,11 +50,13 @@ model Item {
   model        String
   brand        String
   image        String?
-  yearBought   DateTime
+  yearBought   DateTime?
   active       Boolean       @default(true)
   number       String        @unique //Number that Dio uses in excel
   notes        String?
   schoolNumber String?       @unique //Number of specific item schoolnumber
+  consumable   Boolean       @default(false)
+  amount       Int?
   // relation
   location     Location      @relation(fields: [locationId], references: [id])
   itemStatus   ItemStatus    @relation(fields: [itemStatusId], references: [id])
@@ -110,6 +112,7 @@ model ItemRequest {
   receiveMessage  String?
   approveMessage  String?
   isUrgent        Boolean       @default(false)
+  amountRequest   Int?
   // relation
   item            Item          @relation(fields: [itemId], references: [id])
   requestStatus   RequestStatus @relation(fields: [requestStatusId], references: [id])
