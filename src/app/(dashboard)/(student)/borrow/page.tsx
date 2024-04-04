@@ -137,25 +137,29 @@ export default function Borrow() {
             <div className="rounded-xl">
                 <div className="flex border-b border-b-gray-300 gap-12 bg-white rounded-tl-xl rounded-tr-xl z-0">
                     <div
-                        className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'products' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-medium'}`}
+                        className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'products' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
                         onClick={() => setSelectedTab('products')}
                     >
                         Products
                     </div>
                     <div
-                        className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'pending' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-medium'}`}
+                        className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'pending' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
                         onClick={() => setSelectedTab('pending')}
                     >
                         Pending borrows
                     </div>
                 </div>
-                <BorrowCard
+                {selectedTab === "products" ? (
+                    <BorrowCard
                     active={active}
                     items={items}
                     loading={loading}
                     loadMoreItems={loadMoreItems}
                     totalItemCount={totalItemCount}
                 />
+                ) : (
+                    <PendingBorrows />
+                )}
             </div>
             {/* <div>
                 <TestLocations />
@@ -580,6 +584,14 @@ function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems }: B
                     Load More
                 </button>
             )}
+        </div>
+    );
+}
+
+function PendingBorrows(){
+    return (
+        <div>
+            Pending borrows
         </div>
     );
 }
