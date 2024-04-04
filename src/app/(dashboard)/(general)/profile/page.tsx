@@ -278,7 +278,7 @@ export default function Profile() {
                                             name='lastname'
                                         />
                                 )}
-                                <div className='flex flex-col'>
+                                <div className='flex flex-col truncate'>
                                     <span className='text-gray-500 font-medium'>Email</span>
                                     {profile.email}
                                 </div>
