@@ -57,7 +57,7 @@ export default function DashboardHeader() {
     }, []);
 
     async function fetchUserProfile(uid: string) {
-        const endpoint = `/api/user/${uid}`;
+        const endpoint = `/api/userprofile/${uid}`;
         try {
             const response = await fetch(endpoint);
             if (!response.ok) {

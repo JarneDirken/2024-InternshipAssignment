@@ -38,7 +38,7 @@ export default function Profile() {
     }, []);
 
     async function fetchUserProfile(uid: string) {
-        const endpoint = `/api/user/${uid}`;
+        const endpoint = `/api/userprofile/${uid}`;
         try {
             const response = await fetch(endpoint);
             if (!response.ok) {
@@ -174,7 +174,7 @@ export default function Profile() {
             studentCode,
         };
         
-        const response = await fetch(`/api/user/`, {
+        const response = await fetch(`/api/userprofile/`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
