@@ -1,12 +1,41 @@
 import prisma from '@/services/db';
 import { NextApiRequest } from 'next';
+import { NextRequest } from 'next/server';
 
-export async function GET(req: NextApiRequest) {
+export async function GET(request: NextRequest) {
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '6', 10);
+    const nameFilter = searchParams.get('name') || '';
+    const modelFilter = searchParams.get('model') || '';
+    const brandFilter = searchParams.get('brand') || '';
+    const locationFilter = searchParams.get('location') || '';
+    const skip = (page - 1) * limit;
+
     const items = await prisma.item.findMany({
+        where: {
+            itemStatusId: 2,
+            name: { contains: nameFilter, mode: 'insensitive' },
+            model: { contains: modelFilter, mode: 'insensitive' },
+            brand: { contains: brandFilter, mode: 'insensitive' },
+            location: { name: { contains: locationFilter, mode: 'insensitive' } }
+        },
+        skip,
+        take: limit,
         include: { location: true },
     });
 
-    return new Response(JSON.stringify(items), {
+    const totalCount = await prisma.item.count({
+        where: {
+            itemStatusId: 2,
+            name: { contains: nameFilter, mode: 'insensitive' },
+            model: { contains: modelFilter, mode: 'insensitive' },
+            brand: { contains: brandFilter, mode: 'insensitive' },
+            location: { name: { contains: locationFilter, mode: 'insensitive' } }
+        }
+    });
+
+    return new Response(JSON.stringify({ items, totalCount }), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',
