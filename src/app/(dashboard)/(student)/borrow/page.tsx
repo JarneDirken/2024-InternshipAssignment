@@ -21,6 +21,8 @@ import MenuItem from '@mui/material/MenuItem';
 import { getAuth, getIdToken } from 'firebase/auth';
 import app from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
+import MaterialUIModal  from '@mui/material/Modal';
+import Box from '@mui/material/Box';
 
 interface FiltersProps { // typescript moment, everthing should have a type
     active: boolean;
@@ -34,6 +36,12 @@ interface BorrowCardProps { // typescript moment, everthing should have a type
     loading: boolean;
     totalItemCount: number;
     loadMoreItems: (event: React.MouseEvent<HTMLButtonElement>) => void;
+    openModal: () => void;
+}
+
+interface ModalCardProps {
+    open: boolean;
+    onClose: () => void; // assuming onClose doesn't need to receive any argument
 }
 
 export default function Borrow() {
@@ -51,6 +59,7 @@ export default function Borrow() {
     const [locationFilter, setLocationFilter] = useState(''); // location filter
     const scrollPositionRef = useRef<number>(0);
     const [selectedTab, setSelectedTab] = useState('products');
+    const [isModalOpen, setModalOpen] = useState(false);
 
     // get items with pagination and filter on SERVER SIDE
     async function getItems(page = 1, nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
@@ -150,6 +159,10 @@ export default function Borrow() {
         setCurrentPage(nextPage);
     };
 
+    const openModal = () => {
+        setModalOpen(true);
+    }
+
     // After the state is updated, restore the scroll position from the ref
     // useEffect(() => {
     //     window.scrollTo(0, scrollPositionRef.current);
@@ -163,6 +176,10 @@ export default function Borrow() {
 
     return (
         <div>
+            <Modal
+                open={isModalOpen}
+                onClose={() => setModalOpen(false)}
+            />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
                     active={active}
@@ -192,6 +209,7 @@ export default function Borrow() {
                     loading={loading}
                     loadMoreItems={loadMoreItems}
                     totalItemCount={totalItemCount}
+                    openModal={openModal}
                 />
                 ) : (
                     <PendingBorrows />
@@ -507,7 +525,7 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
     );
 }
 
-function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems }: BorrowCardProps) {
+function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems, openModal }: BorrowCardProps) {
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-hidden";
 
@@ -554,7 +572,12 @@ function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems }: B
                                     </div>
                                 </div>
                                 <div>
-                                    <button className="px-4 border-custom-primary bg-custom-primary rounded-lg text-white font-semibold text-lg" style={{ paddingTop: 2, paddingBottom: 2 }}>Borrow</button>
+                                    <button 
+                                        className="px-4 border-custom-primary bg-custom-primary rounded-lg text-white font-semibold text-lg" 
+                                        style={{ paddingTop: 2, paddingBottom: 2 }}
+                                        onClick={openModal}>
+                                            Borrow
+                                        </button>
                                 </div>
                             </div>
                         ) : (
@@ -586,7 +609,12 @@ function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems }: B
                                 </div>
                                 <hr />
                                 <div className="flex justify-center items-center p-2">
-                                    <button className="px-4 border-custom-primary bg-custom-primary rounded-lg text-white font-semibold text-lg" style={{ paddingTop: 2, paddingBottom: 2 }}>Borrow</button>
+                                    <button 
+                                        className="px-4 border-custom-primary bg-custom-primary rounded-lg text-white font-semibold text-lg" 
+                                        style={{ paddingTop: 2, paddingBottom: 2 }}
+                                        onClick={openModal}>
+                                            Borrow
+                                        </button>
                                 </div>
                             </div>
                         )}
@@ -604,10 +632,42 @@ function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems }: B
     );
 }
 
-function PendingBorrows(){
+function PendingBorrows() {
     return (
         <div>
             Pending borrows
         </div>
+    );
+}
+
+function Modal({ open, onClose }: ModalCardProps) {
+    return (
+        <MaterialUIModal
+            open={open}
+            onClose={onClose}
+            aria-labelledby="borrow-modal-title"
+            aria-describedby="borrow-modal-description"
+        >
+            <Box 
+                className="modal-box"
+                sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 400, // Adjust the size as needed
+                    bgcolor: 'background.paper',
+                    border: '2px solid #000',
+                    boxShadow: 24,
+                    p: 4,
+                }}
+            >
+                <h2 id="borrow-modal-title">Borrow Item</h2>
+                <p id="borrow-modal-description">
+                    Details about the item to borrow...
+                </p>
+                <button onClick={onClose}>Close</button>
+            </Box>
+        </MaterialUIModal>
     );
 }
