@@ -508,16 +508,24 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
 }
 
 function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems }: BorrowCardProps) {
-    const gridViewClass = "grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4";
+    const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-hidden";
 
     if (loading) { return (<Loading />); }
 
+    if (items.length === 0) {
+        return (
+            <div className="text-center p-4">
+                No items found.
+            </div>
+        );
+    }
+
     return (
+        <>
         <div className={active ? listViewClass : gridViewClass}>
-            {items.length > 0 ? (
-                items.map((item) => (
-                    <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-4"}`}>
+                {items.map((item) => (
+                    <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between">
                                 <div className="flex flex-row gap-10 items-center">
@@ -583,18 +591,16 @@ function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems }: B
                             </div>
                         )}
                     </div>
-                ))
-            ) : (
-                <div className="text-center p-4">
-                    No items found.
-                </div>
-            )}
-            {items.length > 0 && items.length < totalItemCount && (
-                <button onClick={loadMoreItems} className="items-center justify-center mx-auto my-4 px-6 py-2 border rounded-lg text-white bg-custom-primary font-semibold">
+                ))}
+        </div>
+        {items.length > 0 && items.length < totalItemCount && (
+            <div className="text-center mt-4">
+                <button onClick={loadMoreItems} className="items-center justify-center mx-auto px-6 py-2 border rounded-lg text-white bg-custom-primary font-semibold">
                     Load More
                 </button>
-            )}
-        </div>
+            </div>
+        )}
+        </>
     );
 }
 
