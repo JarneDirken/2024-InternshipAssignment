@@ -20,6 +20,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { getAuth, getIdToken } from 'firebase/auth';
 import app from "@/services/firebase-config";
+import { ItemRequest } from "@/models/ItemRequest";
 
 interface FiltersProps { // typescript moment, everthing should have a type
     active: boolean;
@@ -39,6 +40,7 @@ export default function Borrow() {
     const isAuthorized = useAuth(['Student']); // you need at least role student to view this page
     const [active, setActive] = useState(true); // this is to toggle from list view to card view
     const [items, setItems] = useState<Item[]>([]); // to store all items
+    const [requests, setRequests] = useState<ItemRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1); // pagination
     const [totalItemCount, setTotalItemCount] = useState(0); // pagination
@@ -79,6 +81,40 @@ export default function Borrow() {
             setCurrentPage(page); // Update currentPage state here
         } catch (error) {
             console.error("Failed to fetch items:", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // get item requests with pagination and filter on SERVER SIDE
+    async function getPendingBorrows(page = 1, nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = ''){
+        setLoading(true);
+        try {
+            const queryString = new URLSearchParams({
+                page: page.toString(),
+                limit: itemsPerPage.toString(),
+                name: nameFilter,
+                model: modelFilter,
+                brand: brandFilter,
+                location: locationFilter
+            }).toString();
+            const response = await fetch(`/api/itemrequests?${queryString}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (page === 1) {
+                setRequests(data.items);
+            } else {
+                setRequests(prevItems => [...prevItems, ...data.items]);
+            }
+            setTotalItemCount(data.totalCount);
+            setCurrentPage(page); // Update currentPage state here
+        } catch (error) {
+            console.error("Failed to fetch item requests:", error);
         } finally {
             setLoading(false);
         }

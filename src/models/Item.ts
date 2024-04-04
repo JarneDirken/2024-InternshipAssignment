@@ -1,3 +1,5 @@
+import { Location } from "./Location";
+
 export interface Item {
     id: number,
     locationId:   number,
@@ -11,5 +13,7 @@ export interface Item {
     number: string,
     notes?: string,
     schoolNumber?: string,
-    location: {id: number, name: string},
+    location: Location,
+    consumable: boolean,
+    amount: number,
 }

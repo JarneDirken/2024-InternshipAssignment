@@ -1,4 +1,4 @@
-export interface Location {
+export interface RequestStatus {
     id: number,
     name: string,
 }
