@@ -15,6 +15,11 @@ import ClearIcon from '@mui/icons-material/Clear';
 import Loading from "@/components/states/Loading";
 import AppsOutlinedIcon from '@mui/icons-material/AppsOutlined';
 import ReorderOutlinedIcon from '@mui/icons-material/ReorderOutlined';
+import Tooltip from "@mui/material/Tooltip";
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { getAuth, getIdToken } from 'firebase/auth';
+import app from "@/services/firebase-config";
 
 interface FiltersProps { // typescript moment, everthing should have a type
     active: boolean;
@@ -137,9 +142,45 @@ export default function Borrow() {
                     totalItemCount={totalItemCount}
                 />            
             </div>
+            {/* <div>
+                <TestLocations />
+            </div> */}
         </div>
     );
 }
+
+// function TestLocations() {
+//     const fetchLocations = async () => {
+//     const auth = getAuth(app);
+//     const user = auth.currentUser;
+    
+//     if (user) {
+//         const token = await getIdToken(user);
+//         console.log(token);
+//         const response = await fetch('/api/locations', {
+//             method: 'GET',
+//             headers: {
+//                 'Authorization': `Bearer ${token}`
+//             }
+//         });
+//         if (response.ok) {
+//             const locations = await response.json();
+//             return locations;
+//         }
+//     }
+//         throw new Error('User not authenticated');
+//     };
+
+//     useEffect(()=> {
+//         fetchLocations();
+//     }, [])
+
+//     return (
+//         <div>
+//             locations:
+//         </div>
+//     );
+// }
 
 function Filters({ active, setActive, onFilterChange }: FiltersProps) {
     const [locations, setLocations] = useState<Location[]>([]);
@@ -148,6 +189,15 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
     const [model, setModel] = useState('');
     const [brand, setBrand] = useState('');
     const [location, setLocation] = useState('');
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
 
     const resetName = () => {
         setName('');
@@ -263,21 +313,39 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
                 </div>
                 <div className="flex items-center gap-6">
                     <div className="lg:flex items-center gap-1 hidden">
-                        <div className={`cursor-pointer rounded-full p-1 ${active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
-                            onClick={() => setActive(true)}>
-                            <ReorderOutlinedIcon />
-                        </div>
-                        <div className={`cursor-pointer rounded-full p-1 ${!active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
-                            onClick={() => setActive(false)}>
-                            <AppsOutlinedIcon />
-                        </div>
+                        <Tooltip title="List view" arrow>
+                            <div className={`cursor-pointer rounded-full p-1 ${active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
+                                onClick={() => setActive(true)}>
+                                <ReorderOutlinedIcon />
+                            </div>
+                        </Tooltip>
+                        <Tooltip title="Card view" arrow>
+                            <div className={`cursor-pointer rounded-full p-1 ${!active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
+                                onClick={() => setActive(false)}>
+                                <AppsOutlinedIcon />
+                            </div>
+                        </Tooltip>
                     </div>
-                    <div className="relative">
-                        <ShoppingCartOutlinedIcon fontSize="large" />
-                        <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2">
-                            0
+                    <Tooltip title="Shopping cart" arrow  placement="top">
+                        <div className="relative">
+                            <div onClick={handleMenuOpen}>
+                                <ShoppingCartOutlinedIcon fontSize="large" className="cursor-pointer" />
+                            </div>
+                            <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2">
+                                0
+                            </div>
+                            <Menu
+                                anchorEl={anchorEl}
+                                open={Boolean(anchorEl)}
+                                onClose={handleMenuClose}
+                                className="cursor-pointer"
+                            >
+                                <MenuItem onClick={handleMenuClose}>Menu Item 1 fddf dsfds fsdf sd</MenuItem>
+                                <MenuItem onClick={handleMenuClose}>Menu Item 2</MenuItem>
+                                <MenuItem onClick={handleMenuClose}>Menu Item 3</MenuItem>
+                            </Menu>
                         </div>
-                    </div>
+                    </Tooltip>
                 </div>
             </div>
             <hr className="hidden md:block" />
