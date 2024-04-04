@@ -54,8 +54,10 @@ async function createLocations() {
 
 async function createItemStatus() {
     const itemStatusNames = [
-        "Borrowed",
         "Available",
+        "Pending approval",
+        "Borrowed",
+        "Pending return",
         "Repairing",
         "Broken",
     ];
@@ -118,7 +120,7 @@ async function createItem() {
         {
             id: 1,
             locationId: 1,
-            itemStatusId: 2,
+            itemStatusId: 1,
             name: "Digital Multimeter UT89XD (01)",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
@@ -129,7 +131,7 @@ async function createItem() {
         {
             id: 2,
             locationId: 1,
-            itemStatusId: 2,
+            itemStatusId: 1,
             name: "Digital Multimeter UT89XD (02)",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
@@ -140,7 +142,7 @@ async function createItem() {
         {
             id: 3,
             locationId: 3,
-            itemStatusId: 2,
+            itemStatusId: 1,
             name: "Digital Multimeter UT89XD (03)",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
@@ -151,7 +153,7 @@ async function createItem() {
         {
             id: 4,
             locationId: 3,
-            itemStatusId: 2,
+            itemStatusId: 1,
             name: "Digital Multimeter UT89XD (04)",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
@@ -162,7 +164,7 @@ async function createItem() {
         {
             id: 5,
             locationId: 3,
-            itemStatusId: 2,
+            itemStatusId: 1,
             name: "Digital Multimeter UT89XD (05)",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
@@ -173,7 +175,7 @@ async function createItem() {
         {
             id: 6,
             locationId: 3,
-            itemStatusId: 2,
+            itemStatusId: 1,
             name: "Digital Multimeter UT89XD (06)",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
@@ -184,7 +186,7 @@ async function createItem() {
         {
             id: 7,
             locationId: 3,
-            itemStatusId: 2,
+            itemStatusId: 1,
             name: "Basic Arduino Learning Kit (01)",
             model: "COMPUTER ACCESORIES",
             brand: "ThaiEasyElec",
@@ -195,7 +197,7 @@ async function createItem() {
         {
             id: 8,
             locationId: 3,
-            itemStatusId: 2,
+            itemStatusId: 1,
             name: "Basic Arduino Learning Kit (02)",
             model: "COMPUTER ACCESORIES",
             brand: "ThaiEasyElec",
@@ -206,7 +208,7 @@ async function createItem() {
         {
             id: 9,
             locationId: 3,
-            itemStatusId: 2,
+            itemStatusId: 1,
             name: "Basic Arduino Learning Kit (03)",
             model: "COMPUTER ACCESORIES",
             brand: "ThaiEasyElec",
@@ -217,7 +219,7 @@ async function createItem() {
         {
             id: 10,
             locationId: 3,
-            itemStatusId: 2,
+            itemStatusId: 1,
             name: "Basic Arduino Learning Kit (04)",
             model: "COMPUTER ACCESORIES",
             brand: "ThaiEasyElec",

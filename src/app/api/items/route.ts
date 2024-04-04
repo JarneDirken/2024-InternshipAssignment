@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
 
     const items = await prisma.item.findMany({
         where: {
-            itemStatusId: 2,
+            itemStatusId: 1,
+            active: true,
             name: { contains: nameFilter, mode: 'insensitive' },
             model: { contains: modelFilter, mode: 'insensitive' },
             brand: { contains: brandFilter, mode: 'insensitive' },

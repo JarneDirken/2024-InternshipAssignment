@@ -45,7 +45,7 @@ model RoleItem {
 model Item {
   id           Int           @id @default(autoincrement())
   locationId   Int
-  itemStatusId Int
+  itemStatusId Int           @default(1)
   name         String        @unique
   model        String
   brand        String

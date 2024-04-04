@@ -36,18 +36,20 @@ interface BorrowCardProps { // typescript moment, everthing should have a type
     loading: boolean;
     totalItemCount: number;
     loadMoreItems: (event: React.MouseEvent<HTMLButtonElement>) => void;
-    openModal: () => void;
+    openModal: (id: number) => void;
 }
 
 interface ModalCardProps {
     open: boolean;
-    onClose: () => void; // assuming onClose doesn't need to receive any argument
+    onClose: () => void;
+    item?: Item;
 }
 
 export default function Borrow() {
     const isAuthorized = useAuth(['Student']); // you need at least role student to view this page
     const [active, setActive] = useState(true); // this is to toggle from list view to card view
     const [items, setItems] = useState<Item[]>([]); // to store all items
+    const [item, setItem] = useState<Item>(); // to store one item
     const [requests, setRequests] = useState<ItemRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1); // pagination
@@ -96,7 +98,7 @@ export default function Borrow() {
     }
 
     // get item requests with pagination and filter on SERVER SIDE
-    async function getPendingBorrows(page = 1, nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = ''){
+    async function getPendingBorrows(page = 1, nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
         setLoading(true);
         try {
             const queryString = new URLSearchParams({
@@ -126,6 +128,29 @@ export default function Borrow() {
             console.error("Failed to fetch item requests:", error);
         } finally {
             setLoading(false);
+        }
+    }
+
+    async function getItemData(id: number) {
+        const auth = getAuth(app);
+        const user = auth.currentUser;
+        if (user) {
+            try {
+                const token = await getIdToken(user);
+                const response = await fetch(`/api/items/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `${token}`
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                setItem(data);
+            } catch (error) {
+                console.error("Failed to fetch item:", error);
+            }
         }
     }
 
@@ -159,7 +184,8 @@ export default function Borrow() {
         setCurrentPage(nextPage);
     };
 
-    const openModal = () => {
+    const openModal = (id: number) => {
+        getItemData(id);
         setModalOpen(true);
     }
 
@@ -179,6 +205,7 @@ export default function Borrow() {
             <Modal
                 open={isModalOpen}
                 onClose={() => setModalOpen(false)}
+                item={item}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
@@ -575,7 +602,7 @@ function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems, ope
                                     <button 
                                         className="px-4 border-custom-primary bg-custom-primary rounded-lg text-white font-semibold text-lg" 
                                         style={{ paddingTop: 2, paddingBottom: 2 }}
-                                        onClick={openModal}>
+                                        onClick={() => openModal(item.id)}>
                                             Borrow
                                         </button>
                                 </div>
@@ -612,7 +639,7 @@ function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems, ope
                                     <button 
                                         className="px-4 border-custom-primary bg-custom-primary rounded-lg text-white font-semibold text-lg" 
                                         style={{ paddingTop: 2, paddingBottom: 2 }}
-                                        onClick={openModal}>
+                                        onClick={() => openModal(item.id)}>
                                             Borrow
                                         </button>
                                 </div>
@@ -640,7 +667,12 @@ function PendingBorrows() {
     );
 }
 
-function Modal({ open, onClose }: ModalCardProps) {
+function Modal({ open, onClose, item }: ModalCardProps) {
+    
+    useEffect(() => {
+        console.log(item);
+    }, [item])
+
     return (
         <MaterialUIModal
             open={open}
