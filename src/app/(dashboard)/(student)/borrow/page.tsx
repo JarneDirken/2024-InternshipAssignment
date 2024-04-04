@@ -115,9 +115,9 @@ export default function Borrow() {
     };
 
     // After the state is updated, restore the scroll position from the ref
-    useEffect(() => {
-        window.scrollTo(0, scrollPositionRef.current);
-    }, [loadMoreItems]);
+    // useEffect(() => {
+    //     window.scrollTo(0, scrollPositionRef.current);
+    // }, [loadMoreItems]);
 
     useEffect(() => {
         getItems(currentPage, nameFilter, modelFilter, brandFilter, locationFilter);
