@@ -28,6 +28,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 
 interface FiltersProps { // typescript moment, everthing should have a type
     active: boolean;
@@ -675,10 +676,40 @@ function PendingBorrows() {
 function Modal({ open, onClose, item }: ModalCardProps) {
     const [value, setValue] = useState(dayjs());
     const [amount, setAmount] = useState('');
+    const [isOnTime, setIsOnTime] = useState(false);
+    const [file, setFile] = useState<File | null>(null);
 
     const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setAmount(event.target.value);
     };
+
+    const handleDragOver = (event: React.DragEvent<HTMLLabelElement>) => {
+        event.preventDefault();
+    };
+    
+    const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+        event.preventDefault();
+        const files = event.dataTransfer.files;
+        if (files.length > 0) {
+            setFile(files[0]);
+        }
+    };
+    
+      const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+          setFile(event.target.files[0]);
+        }
+      };
+
+      const handleClearFile = () => {
+        setFile(null);
+        // Reset the file input value
+        const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+        if (fileInput) {
+            fileInput.value = '';
+        }
+    };
+    
 
     const theme = createTheme({
         palette: {
@@ -717,7 +748,7 @@ function Modal({ open, onClose, item }: ModalCardProps) {
                     <ClearIcon className="cursor-pointer" onClick={onClose} />
                 </div>
                 <div id="borrow-modal-description" className="px-4 py-2 overflow-y-auto h-[87%]">
-                    <div className=" flex flex-col xl:flex-row xl:gap-8">
+                    <div className=" flex flex-col xl:flex-row xl:gap-8 px-8">
                         <div className="flex flex-col xl:w-1/2 xl:px-12">
                             <div className="flex justify-center mb-2 xl:justify-start">
                                 <img src={item.image} height={200} width={200} alt={item.name} />
@@ -762,10 +793,10 @@ function Modal({ open, onClose, item }: ModalCardProps) {
                                 )}
                             </div>
                         </div>
-                        <div className="xl:w-1/2 xl:block xl:items-end xl:justify-end flex justify-center shadow-lg scale-90 transform hide-picker-actions z-0">
+                        <div className="xl:w-1/2 xl:block xl:items-end xl:justify-end flex justify-center shadow-lg scale-90 transform hide-picker-actions z-0 mr-8">
                             <ThemeProvider theme={theme}>
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <div className=""> 
+                                <div> 
                                     <StaticDateTimePicker
                                     displayStaticWrapperAs="mobile"
                                     openTo="day"
@@ -781,17 +812,57 @@ function Modal({ open, onClose, item }: ModalCardProps) {
                             </ThemeProvider>
                         </div>
                     </div>
-                    <div className="flex flex-row justify-between py-2 px-4">
+                    {!isOnTime && (
+                        <div className="flex flex-col px-4">
+                            <div className="flex flex-row justify-between items-center px-8">
+                                <span className="">Download the file and re-upload it with a signature of your teacher.</span>
+                                <span className="text-custom-blue underline cursor-pointer">Download</span>
+                            </div>
+                            <div className="flex flex-col justify-center items-center mt-2 px-8">
+                            <label
+                                htmlFor="file-upload"
+                                className="cursor-pointer border-dashed border border-gray-400 bg-gray-100 w-full rounded py-8 px-8 text-center"
+                                onDragOver={handleDragOver}
+                                onDrop={handleDrop}
+                            >
+                                <CloudUploadOutlinedIcon fontSize="large" className="text-custom-gray" />
+                                <div className="flex flex-col">
+                                    <span className="font-semibold"><span className="text-custom-blue">Click to upload</span> or drag and drop</span>
+                                    <span className="text-custom-gray">JPG, JPEG, PNG, PDF less than 5MB.</span>
+                                </div>
+                                <input
+                                    id="file-upload"
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    className="opacity-0 w-0 h-0"
+                                    accept="image/jpeg,image/png,application/pdf"
+                                />
+                            </label>
+                                {file && (
+                                <div className="flex flex-row gap-2">
+                                    <span>File selected: {file.name}</span>
+                                    <ClearIcon className="cursor-pointer" onClick={handleClearFile} />
+                                </div>
+                                )}
+                            </div>
+                            <div className="mt-6 flex justify-center items-center">
+                                <span className="capitalize font-bold">You are making an <span className="text-custom-red">urgent borrow request!</span> are you sure you want to continue?</span>
+                            </div>
+                        </div>
+                    )}
+                    <div className="flex flex-row justify-between py-2 px-2 md:px-16 mt-2">
                         <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
                             <button className="text-custom-gray">Cancel</button>
                         </div>
-                        <div className="border-custom-green border flex items-center gap-2 py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
-                            <CheckCircleOutlineOutlinedIcon fontSize="small" className="text-custom-green"/>
-                            <button className="text-custom-green">Borrow</button>
+                        <div className={`border py-1 px-3 rounded-lg ${isOnTime || file ? 'border-custom-green text-custom-green cursor-pointer' : 'border-gray-300 text-gray-300 cursor-not-allowed'}`} 
+                            onClick={!isOnTime && !file ? undefined : onClose}>
+                            <CheckCircleOutlineOutlinedIcon fontSize="small" className={`${isOnTime || file ? 'text-custom-green':'text-custom-gray cursor-not-allowed'}`}/>
+                            <button className={`${isOnTime || file ? 'text-custom-green':'text-custom-gray cursor-not-allowed disabled'}`}>Borrow</button>
                         </div>
-                        <div className="border-custom-primary border flex items-center gap-2 py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
-                            <ShoppingCartOutlinedIcon fontSize="small" className="text-custom-primary" />
-                            <button className="text-custom-primary">Add cart</button>
+                        <div className={`border py-1 px-3 rounded-lg ${isOnTime || file ? 'border-custom-primary text-custom-primary cursor-pointer' : 'border-gray-300 text-gray-300 cursor-not-allowed'}`} 
+                            onClick={!isOnTime && !file ? undefined : onClose}>
+                            <ShoppingCartOutlinedIcon fontSize="small" className={`${isOnTime || file ? 'text-custom-primary':'text-custom-gray cursor-not-allowed'}`} />
+                            <button className={`${isOnTime || file ? 'text-custom-primary':'text-custom-gray cursor-not-allowed disabled'}`}>Add cart</button>
                         </div>
                     </div>
                 </div>
