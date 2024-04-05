@@ -3,7 +3,6 @@ import Unauthorized from "@/app/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
 import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
-import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import SearchIcon from '@mui/icons-material/Search';
 import Autocomplete from "@mui/material/Autocomplete";
@@ -34,6 +33,7 @@ interface FiltersProps { // typescript moment, everthing should have a type
     active: boolean;
     setActive: Dispatch<SetStateAction<boolean>>;
     onFilterChange: (filterType: string, filterValue: string) => void;
+    items: Item[];
 }
 
 interface BorrowCardProps {
@@ -187,6 +187,7 @@ export default function Borrow() {
                     active={active}
                     setActive={setActive}
                     onFilterChange={handleFilterChange}
+                    items={items}
                 />
             </div>
             <div className="rounded-xl">
@@ -198,7 +199,7 @@ export default function Borrow() {
                         >
                             Products
                         </div>
-                        <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-11 transform translate-x-1/2 -translate-y-1/2">
+                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-11 transform translate-x-1/2 -translate-y-1/2 text-sm ${selectedTab === 'products' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
                             {totalItemCount}
                         </div>
                     </div>
@@ -224,7 +225,7 @@ export default function Borrow() {
     );
 }
 
-function Filters({ active, setActive, onFilterChange }: FiltersProps) {
+function Filters({ active, setActive, onFilterChange, items }: FiltersProps) {
     const [locations, setLocations] = useState<Location[]>([]);
     const prevWidthRef = useRef(window.innerWidth);
     const [name, setName] = useState('');
@@ -310,19 +311,19 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
         }
     }
 
-    const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        onFilterChange('name', event.target.value);
-        setName(event.target.value);
+    const handleNameChange = (value: string | null) => {
+        onFilterChange('name', value || '');
+        setName(value || '');
     };
 
-    const handleModelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        onFilterChange('model', event.target.value);
-        setModel(event.target.value);
+    const handleModelChange = (value: string | null) => {
+        onFilterChange('model', value || '');
+        setModel(value || '');
     };
 
-    const handleBrandChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        onFilterChange('brand', event.target.value);
-        setBrand(event.target.value);
+    const handleBrandChange = (value: string | null) => {
+        onFilterChange('brand', value || '');
+        setBrand(value || '');
     };
 
     const handleLocationChange = (value: string | null) => {
@@ -405,69 +406,69 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
                 <ThemeProvider theme={theme}>
                     <div className="grid grid-cols-2 gap-4 mb-4 lg:grid-cols-4">
                         <div>
-                            <TextField
-                                id="outlined"
-                                label="Name"
+                            <Autocomplete
+                                disablePortal
                                 size="small"
-                                className="bg-white w-full"
-                                name="name"
-                                value={name}
-                                onChange={handleNameChange}
-                                placeholder="Search"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <SearchIcon />
-                                        </InputAdornment>
-                                    ),
-                                }}
+                                id="combo-box-demo"
+                                value={name || null}
+                                onChange={(event, value) => handleNameChange(value)}
+                                options={[...new Set(items.map(item => item.name))]} // Ensure unique names
+                                isOptionEqualToValue={(option, value) => option === value}
+                                sx={{ width: '100%' }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Name"
+                                        placeholder="Search"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                    />
+                                )}
                             />
                         </div>
                         <div>
-                            <TextField
-                                id="outlined"
-                                label="Model"
+                        <Autocomplete
+                                disablePortal
                                 size="small"
-                                className="bg-white w-full"
-                                name="model"
-                                value={model}
-                                onChange={handleModelChange}
-                                placeholder="Search"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <SearchIcon />
-                                        </InputAdornment>
-                                    ),
-                                }}
+                                id="combo-box-demo"
+                                value={model || null}
+                                onChange={(event, value) => handleModelChange(value)}
+                                options={[...new Set(items.map(item => item.model))]} // Ensure unique models
+                                isOptionEqualToValue={(option, value) => option === value}
+                                sx={{ width: '100%' }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Model"
+                                        placeholder="Search"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                    />
+                                )}
                             />
                         </div>
                         <div>
-                            <TextField
-                                id="outlined"
-                                label="Brand"
+                        <Autocomplete
+                                disablePortal
                                 size="small"
-                                className="bg-white w-full"
-                                name="brand"
-                                value={brand}
-                                onChange={handleBrandChange}
-                                placeholder="Search"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <SearchIcon />
-                                        </InputAdornment>
-                                    ),
-                                }}
+                                id="combo-box-demo"
+                                value={brand || null}
+                                onChange={(event, value) => handleBrandChange(value)}
+                                options={[...new Set(items.map(item => item.brand))]} // Ensure unique brands
+                                isOptionEqualToValue={(option, value) => option === value}
+                                sx={{ width: '100%' }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Brand"
+                                        placeholder="Search"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                    />
+                                )}
                             />
                         </div>
                         <div>
