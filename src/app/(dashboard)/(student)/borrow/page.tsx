@@ -7,7 +7,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import SearchIcon from '@mui/icons-material/Search';
 import Autocomplete from "@mui/material/Autocomplete";
-import { useEffect, useState, Dispatch, SetStateAction, useRef } from "react";
+import { useEffect, useState, Dispatch, SetStateAction, useRef, useCallback } from "react";
 import { Location } from "@/models/Location";
 import { Item } from "@/models/Item";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -36,12 +36,10 @@ interface FiltersProps { // typescript moment, everthing should have a type
     onFilterChange: (filterType: string, filterValue: string) => void;
 }
 
-interface BorrowCardProps { // typescript moment, everthing should have a type
+interface BorrowCardProps {
     active: boolean;
     items: Item[];
     loading: boolean;
-    totalItemCount: number;
-    loadMoreItems: (event: React.MouseEvent<HTMLButtonElement>) => void;
     openModal: (id: number) => void;
 }
 
@@ -58,24 +56,21 @@ export default function Borrow() {
     const [item, setItem] = useState<Item>(); // to store one item
     const [requests, setRequests] = useState<ItemRequest[]>([]);
     const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1); // pagination
+    const [totalrequestCount, setTotalRequestCount] = useState([]);
+    const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalItemCount, setTotalItemCount] = useState(0); // pagination
-    const itemsPerPage = 6; // pagination
     const [nameFilter, setNameFilter] = useState(''); // name filter
     const [modelFilter, setModelFilter] = useState(''); // model filter
     const [brandFilter, setBrandFilter] = useState(''); // brand filter
     const [locationFilter, setLocationFilter] = useState(''); // location filter
-    const scrollPositionRef = useRef<number>(0);
     const [selectedTab, setSelectedTab] = useState('products');
     const [isModalOpen, setModalOpen] = useState(false);
 
     // get items with pagination and filter on SERVER SIDE
-    async function getItems(page = 1, nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
+    async function getItems(nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
         setLoading(true);
         try {
             const queryString = new URLSearchParams({
-                page: page.toString(),
-                limit: itemsPerPage.toString(),
                 name: nameFilter,
                 model: modelFilter,
                 brand: brandFilter,
@@ -88,14 +83,8 @@ export default function Borrow() {
             }
 
             const data = await response.json();
-
-            if (page === 1) {
-                setItems(data.items);
-            } else {
-                setItems(prevItems => [...prevItems, ...data.items]);
-            }
-            setTotalItemCount(data.totalCount);
-            setCurrentPage(page); // Update currentPage state here
+            setItems(data.items);
+            
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -104,12 +93,10 @@ export default function Borrow() {
     }
 
     // get item requests with pagination and filter on SERVER SIDE
-    async function getPendingBorrows(page = 1, nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
+    async function getPendingBorrows(nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
         setLoading(true);
         try {
             const queryString = new URLSearchParams({
-                page: page.toString(),
-                limit: itemsPerPage.toString(),
                 name: nameFilter,
                 model: modelFilter,
                 brand: brandFilter,
@@ -122,14 +109,8 @@ export default function Borrow() {
             }
 
             const data = await response.json();
-
-            if (page === 1) {
-                setRequests(data.items);
-            } else {
-                setRequests(prevItems => [...prevItems, ...data.items]);
-            }
-            setTotalItemCount(data.totalCount);
-            setCurrentPage(page); // Update currentPage state here
+            setRequests(data.items);
+            setTotalRequestCount(data.totalCount);
         } catch (error) {
             console.error("Failed to fetch item requests:", error);
         } finally {
@@ -177,17 +158,6 @@ export default function Borrow() {
             default:
                 break;
         }
-        setCurrentPage(1); // Reset to first page on filter change
-    };
-
-    const loadMoreItems = (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-
-        // Remember the current scroll position
-        scrollPositionRef.current = window.scrollY;
-
-        const nextPage = currentPage + 1;
-        setCurrentPage(nextPage);
     };
 
     const openModal = (id: number) => {
@@ -195,14 +165,13 @@ export default function Borrow() {
         setModalOpen(true);
     }
 
-    // After the state is updated, restore the scroll position from the ref
-    // useEffect(() => {
-    //     window.scrollTo(0, scrollPositionRef.current);
-    // }, [loadMoreItems]);
+    useEffect(() => {
+        getItems(nameFilter, modelFilter, brandFilter, locationFilter);
+    }, [nameFilter, modelFilter, brandFilter, locationFilter]);
 
     useEffect(() => {
-        getItems(currentPage, nameFilter, modelFilter, brandFilter, locationFilter);
-    }, [currentPage, nameFilter, modelFilter, brandFilter, locationFilter]);
+        setTotalItemCount(items.length);
+    },[items])
 
     if (!isAuthorized) { return <Unauthorized />; }
 
@@ -222,11 +191,16 @@ export default function Borrow() {
             </div>
             <div className="rounded-xl">
                 <div className="flex border-b border-b-gray-300 bg-white rounded-tl-xl rounded-tr-xl z-0">
-                    <div
-                        className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'products' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
-                        onClick={() => setSelectedTab('products')}
-                    >
-                        Products
+                    <div className="relative">
+                        <div
+                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'products' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
+                            onClick={() => setSelectedTab('products')}
+                        >
+                            Products
+                        </div>
+                        <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-11 transform translate-x-1/2 -translate-y-1/2">
+                            {totalItemCount}
+                        </div>
                     </div>
                     <div
                         className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'pending' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
@@ -237,13 +211,11 @@ export default function Borrow() {
                 </div>
                 {selectedTab === "products" ? (
                     <BorrowCard
-                    active={active}
-                    items={items}
-                    loading={loading}
-                    loadMoreItems={loadMoreItems}
-                    totalItemCount={totalItemCount}
-                    openModal={openModal}
-                />
+                        active={active}
+                        items={items}
+                        loading={loading}
+                        openModal={openModal}
+                    />
                 ) : (
                     <PendingBorrows />
                 )}
@@ -558,9 +530,11 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
     );
 }
 
-function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems, openModal }: BorrowCardProps) {
-    const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4";
-    const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-hidden";
+function BorrowCard({ active, items, loading, openModal }: BorrowCardProps) {
+    const cardContainerHeight = "calc(100vh - 25.6rem)";
+
+    const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll";
+    const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
 
     if (loading) { return (<Loading />); }
 
@@ -574,7 +548,7 @@ function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems, ope
 
     return (
         <>
-        <div className={active ? listViewClass : gridViewClass}>
+        <div className={active ? listViewClass : gridViewClass} style={{ maxHeight: cardContainerHeight }}>
                 {items.map((item) => (
                     <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
@@ -654,13 +628,6 @@ function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems, ope
                     </div>
                 ))}
         </div>
-        {items.length > 0 && items.length < totalItemCount && (
-            <div className="text-center mt-4">
-                <button onClick={loadMoreItems} className="items-center justify-center mx-auto px-6 py-2 border rounded-lg text-white bg-custom-primary font-semibold">
-                    Load More
-                </button>
-            </div>
-        )}
         </>
     );
 }
