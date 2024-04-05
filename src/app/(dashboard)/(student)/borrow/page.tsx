@@ -3,7 +3,6 @@ import Unauthorized from "@/app/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
 import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
-import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import SearchIcon from '@mui/icons-material/Search';
 import Autocomplete from "@mui/material/Autocomplete";
@@ -420,7 +419,7 @@ function Filters({ active, setActive, onFilterChange, items }: FiltersProps) {
                                     <TextField
                                         {...params}
                                         label="Name"
-                                        placeholder="Select"
+                                        placeholder="Search"
                                         InputLabelProps={{
                                             shrink: true,
                                         }}
@@ -442,7 +441,7 @@ function Filters({ active, setActive, onFilterChange, items }: FiltersProps) {
                                     <TextField
                                         {...params}
                                         label="Model"
-                                        placeholder="Select"
+                                        placeholder="Search"
                                         InputLabelProps={{
                                             shrink: true,
                                         }}
@@ -464,7 +463,7 @@ function Filters({ active, setActive, onFilterChange, items }: FiltersProps) {
                                     <TextField
                                         {...params}
                                         label="Brand"
-                                        placeholder="Select"
+                                        placeholder="Search"
                                         InputLabelProps={{
                                             shrink: true,
                                         }}
