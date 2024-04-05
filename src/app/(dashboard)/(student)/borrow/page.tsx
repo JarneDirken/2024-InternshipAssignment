@@ -23,6 +23,11 @@ import app from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
 import MaterialUIModal  from '@mui/material/Modal';
 import Box from '@mui/material/Box';
+import dayjs from 'dayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 
 interface FiltersProps { // typescript moment, everthing should have a type
     active: boolean;
@@ -668,10 +673,31 @@ function PendingBorrows() {
 }
 
 function Modal({ open, onClose, item }: ModalCardProps) {
-    
-    useEffect(() => {
-        console.log(item);
-    }, [item])
+    const [value, setValue] = useState(dayjs());
+    const [amount, setAmount] = useState('');
+
+    const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setAmount(event.target.value);
+    };
+
+    const theme = createTheme({
+        palette: {
+          primary: {
+            main: '#ff9800', // your primary color
+          },
+        },
+        components: {
+          MuiButton: {
+            styleOverrides: {
+              textPrimary: {
+                color: '#ff9800',
+              },
+            },
+          },
+        },
+      });
+
+    if(!item) { return;}
 
     return (
         <MaterialUIModal
@@ -681,24 +707,94 @@ function Modal({ open, onClose, item }: ModalCardProps) {
             aria-describedby="borrow-modal-description"
         >
             <Box 
-                className="modal-box"
-                sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 400, // Adjust the size as needed
-                    bgcolor: 'background.paper',
-                    border: '2px solid #000',
-                    boxShadow: 24,
-                    p: 4,
-                }}
+                className="modal-box bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80%] md:w-[50%] rounded-lg shadow-lg h-[70%]"
             >
-                <h2 id="borrow-modal-title">Borrow Item</h2>
-                <p id="borrow-modal-description">
-                    Details about the item to borrow...
-                </p>
-                <button onClick={onClose}>Close</button>
+                <div className="flex px-4 py-4 justify-between items-center border-b border-b-gray-300">
+                    <div className="flex items-center gap-2">
+                        <PersonAddAltOutlinedIcon />
+                        <h1 id="borrow-modal-title" className="text-xl">Borrow details</h1>
+                    </div>
+                    <ClearIcon className="cursor-pointer" onClick={onClose} />
+                </div>
+                <div id="borrow-modal-description" className="px-4 py-2 overflow-y-auto h-[87%]">
+                    <div className=" flex flex-col xl:flex-row xl:gap-8">
+                        <div className="flex flex-col xl:w-1/2 xl:px-12">
+                            <div className="flex justify-center mb-2 xl:justify-start">
+                                <img src={item.image} height={200} width={200} alt={item.name} />
+                            </div>
+                            <div className="flex flex-col gap-3 lg:mt-4">
+                                <div className="flex flex-col">
+                                    <span className="font-semibold text-gray-400">Name</span>
+                                    <span>{item.name}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <div className="flex flex-col">
+                                        <span className="font-semibold text-gray-400">Model</span>
+                                        <span>{item.model}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="font-semibold text-gray-400">Brand</span>
+                                        <span>{item.brand}</span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="font-semibold text-gray-400">Location</span>
+                                    <span>{item.location.name}</span>
+                                </div>
+                                {!item.consumable && (
+                                    <div className="mt-2">
+                                        <ThemeProvider theme={theme}>
+                                            <TextField
+                                                id="outlined"
+                                                label="Amount"
+                                                size="small"
+                                                className="bg-white w-full"
+                                                name="amount"
+                                                value={amount}
+                                                onChange={handleAmountChange}
+                                                placeholder="Search"
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                            />
+                                        </ThemeProvider>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="xl:w-1/2 xl:block xl:items-end xl:justify-end flex justify-center shadow-lg scale-90 transform hide-picker-actions z-0">
+                            <ThemeProvider theme={theme}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <div className=""> 
+                                    <StaticDateTimePicker
+                                    displayStaticWrapperAs="mobile"
+                                    openTo="day"
+                                    value={value}
+                                    onChange={(newValue) => {
+                                        if (newValue !== null) {
+                                        setValue(newValue);
+                                        }
+                                    }}
+                                    />
+                                </div>
+                                </LocalizationProvider>
+                            </ThemeProvider>
+                        </div>
+                    </div>
+                    <div className="flex flex-row justify-between py-2 px-4">
+                        <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
+                            <button className="text-custom-gray">Cancel</button>
+                        </div>
+                        <div className="border-custom-green border flex items-center gap-2 py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
+                            <CheckCircleOutlineOutlinedIcon fontSize="small" className="text-custom-green"/>
+                            <button className="text-custom-green">Borrow</button>
+                        </div>
+                        <div className="border-custom-primary border flex items-center gap-2 py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
+                            <ShoppingCartOutlinedIcon fontSize="small" className="text-custom-primary" />
+                            <button className="text-custom-primary">Add cart</button>
+                        </div>
+                    </div>
+                </div>
             </Box>
         </MaterialUIModal>
     );
