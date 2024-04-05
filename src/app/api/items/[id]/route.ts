@@ -22,7 +22,8 @@ export async function GET(res: NextApiResponse, { params }: {params: {id: string
         const item = await prisma.item.findFirst({
             where: {
                 id: parseInt(id, 10)
-            }
+            },
+            include: { location: true },
         });
 
         if (item === null) {

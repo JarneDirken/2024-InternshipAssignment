@@ -7,7 +7,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import SearchIcon from '@mui/icons-material/Search';
 import Autocomplete from "@mui/material/Autocomplete";
-import { useEffect, useState, Dispatch, SetStateAction, useRef } from "react";
+import { useEffect, useState, Dispatch, SetStateAction, useRef, useCallback } from "react";
 import { Location } from "@/models/Location";
 import { Item } from "@/models/Item";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -23,6 +23,12 @@ import app from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
 import MaterialUIModal  from '@mui/material/Modal';
 import Box from '@mui/material/Box';
+import dayjs from 'dayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 
 interface FiltersProps { // typescript moment, everthing should have a type
     active: boolean;
@@ -30,12 +36,10 @@ interface FiltersProps { // typescript moment, everthing should have a type
     onFilterChange: (filterType: string, filterValue: string) => void;
 }
 
-interface BorrowCardProps { // typescript moment, everthing should have a type
+interface BorrowCardProps {
     active: boolean;
     items: Item[];
     loading: boolean;
-    totalItemCount: number;
-    loadMoreItems: (event: React.MouseEvent<HTMLButtonElement>) => void;
     openModal: (id: number) => void;
 }
 
@@ -52,24 +56,21 @@ export default function Borrow() {
     const [item, setItem] = useState<Item>(); // to store one item
     const [requests, setRequests] = useState<ItemRequest[]>([]);
     const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1); // pagination
+    const [totalrequestCount, setTotalRequestCount] = useState([]);
+    const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalItemCount, setTotalItemCount] = useState(0); // pagination
-    const itemsPerPage = 6; // pagination
     const [nameFilter, setNameFilter] = useState(''); // name filter
     const [modelFilter, setModelFilter] = useState(''); // model filter
     const [brandFilter, setBrandFilter] = useState(''); // brand filter
     const [locationFilter, setLocationFilter] = useState(''); // location filter
-    const scrollPositionRef = useRef<number>(0);
     const [selectedTab, setSelectedTab] = useState('products');
     const [isModalOpen, setModalOpen] = useState(false);
 
     // get items with pagination and filter on SERVER SIDE
-    async function getItems(page = 1, nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
+    async function getItems(nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
         setLoading(true);
         try {
             const queryString = new URLSearchParams({
-                page: page.toString(),
-                limit: itemsPerPage.toString(),
                 name: nameFilter,
                 model: modelFilter,
                 brand: brandFilter,
@@ -82,14 +83,8 @@ export default function Borrow() {
             }
 
             const data = await response.json();
-
-            if (page === 1) {
-                setItems(data.items);
-            } else {
-                setItems(prevItems => [...prevItems, ...data.items]);
-            }
-            setTotalItemCount(data.totalCount);
-            setCurrentPage(page); // Update currentPage state here
+            setItems(data.items);
+            
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -98,12 +93,10 @@ export default function Borrow() {
     }
 
     // get item requests with pagination and filter on SERVER SIDE
-    async function getPendingBorrows(page = 1, nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
+    async function getPendingBorrows(nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
         setLoading(true);
         try {
             const queryString = new URLSearchParams({
-                page: page.toString(),
-                limit: itemsPerPage.toString(),
                 name: nameFilter,
                 model: modelFilter,
                 brand: brandFilter,
@@ -116,14 +109,8 @@ export default function Borrow() {
             }
 
             const data = await response.json();
-
-            if (page === 1) {
-                setRequests(data.items);
-            } else {
-                setRequests(prevItems => [...prevItems, ...data.items]);
-            }
-            setTotalItemCount(data.totalCount);
-            setCurrentPage(page); // Update currentPage state here
+            setRequests(data.items);
+            setTotalRequestCount(data.totalCount);
         } catch (error) {
             console.error("Failed to fetch item requests:", error);
         } finally {
@@ -171,17 +158,6 @@ export default function Borrow() {
             default:
                 break;
         }
-        setCurrentPage(1); // Reset to first page on filter change
-    };
-
-    const loadMoreItems = (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-
-        // Remember the current scroll position
-        scrollPositionRef.current = window.scrollY;
-
-        const nextPage = currentPage + 1;
-        setCurrentPage(nextPage);
     };
 
     const openModal = (id: number) => {
@@ -189,14 +165,13 @@ export default function Borrow() {
         setModalOpen(true);
     }
 
-    // After the state is updated, restore the scroll position from the ref
-    // useEffect(() => {
-    //     window.scrollTo(0, scrollPositionRef.current);
-    // }, [loadMoreItems]);
+    useEffect(() => {
+        getItems(nameFilter, modelFilter, brandFilter, locationFilter);
+    }, [nameFilter, modelFilter, brandFilter, locationFilter]);
 
     useEffect(() => {
-        getItems(currentPage, nameFilter, modelFilter, brandFilter, locationFilter);
-    }, [currentPage, nameFilter, modelFilter, brandFilter, locationFilter]);
+        setTotalItemCount(items.length);
+    },[items])
 
     if (!isAuthorized) { return <Unauthorized />; }
 
@@ -216,11 +191,16 @@ export default function Borrow() {
             </div>
             <div className="rounded-xl">
                 <div className="flex border-b border-b-gray-300 bg-white rounded-tl-xl rounded-tr-xl z-0">
-                    <div
-                        className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'products' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
-                        onClick={() => setSelectedTab('products')}
-                    >
-                        Products
+                    <div className="relative">
+                        <div
+                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'products' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
+                            onClick={() => setSelectedTab('products')}
+                        >
+                            Products
+                        </div>
+                        <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-11 transform translate-x-1/2 -translate-y-1/2">
+                            {totalItemCount}
+                        </div>
                     </div>
                     <div
                         className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'pending' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
@@ -231,13 +211,11 @@ export default function Borrow() {
                 </div>
                 {selectedTab === "products" ? (
                     <BorrowCard
-                    active={active}
-                    items={items}
-                    loading={loading}
-                    loadMoreItems={loadMoreItems}
-                    totalItemCount={totalItemCount}
-                    openModal={openModal}
-                />
+                        active={active}
+                        items={items}
+                        loading={loading}
+                        openModal={openModal}
+                    />
                 ) : (
                     <PendingBorrows />
                 )}
@@ -552,9 +530,11 @@ function Filters({ active, setActive, onFilterChange }: FiltersProps) {
     );
 }
 
-function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems, openModal }: BorrowCardProps) {
-    const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4";
-    const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-hidden";
+function BorrowCard({ active, items, loading, openModal }: BorrowCardProps) {
+    const cardContainerHeight = "calc(100vh - 25.6rem)";
+
+    const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll";
+    const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
 
     if (loading) { return (<Loading />); }
 
@@ -568,7 +548,7 @@ function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems, ope
 
     return (
         <>
-        <div className={active ? listViewClass : gridViewClass}>
+        <div className={active ? listViewClass : gridViewClass} style={{ maxHeight: cardContainerHeight }}>
                 {items.map((item) => (
                     <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
@@ -648,13 +628,6 @@ function BorrowCard({ active, items, loading, totalItemCount, loadMoreItems, ope
                     </div>
                 ))}
         </div>
-        {items.length > 0 && items.length < totalItemCount && (
-            <div className="text-center mt-4">
-                <button onClick={loadMoreItems} className="items-center justify-center mx-auto px-6 py-2 border rounded-lg text-white bg-custom-primary font-semibold">
-                    Load More
-                </button>
-            </div>
-        )}
         </>
     );
 }
@@ -668,10 +641,61 @@ function PendingBorrows() {
 }
 
 function Modal({ open, onClose, item }: ModalCardProps) {
+    const [value, setValue] = useState(dayjs());
+    const [amount, setAmount] = useState('');
+    const [isOnTime, setIsOnTime] = useState(false);
+    const [file, setFile] = useState<File | null>(null);
+
+    const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setAmount(event.target.value);
+    };
+
+    const handleDragOver = (event: React.DragEvent<HTMLLabelElement>) => {
+        event.preventDefault();
+    };
     
-    useEffect(() => {
-        console.log(item);
-    }, [item])
+    const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+        event.preventDefault();
+        const files = event.dataTransfer.files;
+        if (files.length > 0) {
+            setFile(files[0]);
+        }
+    };
+    
+      const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+          setFile(event.target.files[0]);
+        }
+      };
+
+      const handleClearFile = () => {
+        setFile(null);
+        // Reset the file input value
+        const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+        if (fileInput) {
+            fileInput.value = '';
+        }
+    };
+    
+
+    const theme = createTheme({
+        palette: {
+          primary: {
+            main: '#ff9800', // your primary color
+          },
+        },
+        components: {
+          MuiButton: {
+            styleOverrides: {
+              textPrimary: {
+                color: '#ff9800',
+              },
+            },
+          },
+        },
+      });
+
+    if(!item) { return;}
 
     return (
         <MaterialUIModal
@@ -681,24 +705,134 @@ function Modal({ open, onClose, item }: ModalCardProps) {
             aria-describedby="borrow-modal-description"
         >
             <Box 
-                className="modal-box"
-                sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 400, // Adjust the size as needed
-                    bgcolor: 'background.paper',
-                    border: '2px solid #000',
-                    boxShadow: 24,
-                    p: 4,
-                }}
+                className="modal-box bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80%] md:w-[50%] rounded-lg shadow-lg h-[70%]"
             >
-                <h2 id="borrow-modal-title">Borrow Item</h2>
-                <p id="borrow-modal-description">
-                    Details about the item to borrow...
-                </p>
-                <button onClick={onClose}>Close</button>
+                <div className="flex px-4 py-4 justify-between items-center border-b border-b-gray-300">
+                    <div className="flex items-center gap-2">
+                        <PersonAddAltOutlinedIcon />
+                        <h1 id="borrow-modal-title" className="text-xl">Borrow details</h1>
+                    </div>
+                    <ClearIcon className="cursor-pointer" onClick={onClose} />
+                </div>
+                <div id="borrow-modal-description" className="px-4 py-2 overflow-y-auto h-[87%]">
+                    <div className=" flex flex-col xl:flex-row xl:gap-8 px-8">
+                        <div className="flex flex-col xl:w-1/2 xl:px-12">
+                            <div className="flex justify-center mb-2 xl:justify-start">
+                                <img src={item.image} height={200} width={200} alt={item.name} />
+                            </div>
+                            <div className="flex flex-col gap-3 lg:mt-4">
+                                <div className="flex flex-col">
+                                    <span className="font-semibold text-gray-400">Name</span>
+                                    <span>{item.name}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <div className="flex flex-col">
+                                        <span className="font-semibold text-gray-400">Model</span>
+                                        <span>{item.model}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="font-semibold text-gray-400">Brand</span>
+                                        <span>{item.brand}</span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="font-semibold text-gray-400">Location</span>
+                                    <span>{item.location.name}</span>
+                                </div>
+                                {!item.consumable && (
+                                    <div className="mt-2">
+                                        <ThemeProvider theme={theme}>
+                                            <TextField
+                                                id="outlined"
+                                                label="Amount"
+                                                size="small"
+                                                className="bg-white w-full"
+                                                name="amount"
+                                                value={amount}
+                                                onChange={handleAmountChange}
+                                                placeholder="Search"
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                            />
+                                        </ThemeProvider>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="xl:w-1/2 xl:block xl:items-end xl:justify-end flex justify-center shadow-lg scale-90 transform hide-picker-actions z-0 mr-8">
+                            <ThemeProvider theme={theme}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <div> 
+                                    <StaticDateTimePicker
+                                    displayStaticWrapperAs="mobile"
+                                    openTo="day"
+                                    value={value}
+                                    onChange={(newValue) => {
+                                        if (newValue !== null) {
+                                        setValue(newValue);
+                                        }
+                                    }}
+                                    />
+                                </div>
+                                </LocalizationProvider>
+                            </ThemeProvider>
+                        </div>
+                    </div>
+                    {!isOnTime && (
+                        <div className="flex flex-col px-4">
+                            <div className="flex flex-row justify-between items-center px-8">
+                                <span className="">Download the file and re-upload it with a signature of your teacher.</span>
+                                <span className="text-custom-blue underline cursor-pointer">Download</span>
+                            </div>
+                            <div className="flex flex-col justify-center items-center mt-2 px-8">
+                            <label
+                                htmlFor="file-upload"
+                                className="cursor-pointer border-dashed border border-gray-400 bg-gray-100 w-full rounded py-8 px-8 text-center"
+                                onDragOver={handleDragOver}
+                                onDrop={handleDrop}
+                            >
+                                <CloudUploadOutlinedIcon fontSize="large" className="text-custom-gray" />
+                                <div className="flex flex-col">
+                                    <span className="font-semibold"><span className="text-custom-blue">Click to upload</span> or drag and drop</span>
+                                    <span className="text-custom-gray">JPG, JPEG, PNG, PDF less than 5MB.</span>
+                                </div>
+                                <input
+                                    id="file-upload"
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    className="opacity-0 w-0 h-0"
+                                    accept="image/jpeg,image/png,application/pdf"
+                                />
+                            </label>
+                                {file && (
+                                <div className="flex flex-row gap-2">
+                                    <span>File selected: {file.name}</span>
+                                    <ClearIcon className="cursor-pointer" onClick={handleClearFile} />
+                                </div>
+                                )}
+                            </div>
+                            <div className="mt-6 flex justify-center items-center">
+                                <span className="capitalize font-bold">You are making an <span className="text-custom-red">urgent borrow request!</span> are you sure you want to continue?</span>
+                            </div>
+                        </div>
+                    )}
+                    <div className="flex flex-row justify-between py-2 px-2 md:px-16 mt-2">
+                        <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
+                            <button className="text-custom-gray">Cancel</button>
+                        </div>
+                        <div className={`border py-1 px-3 rounded-lg ${isOnTime || file ? 'border-custom-green text-custom-green cursor-pointer' : 'border-gray-300 text-gray-300 cursor-not-allowed'}`} 
+                            onClick={!isOnTime && !file ? undefined : onClose}>
+                            <CheckCircleOutlineOutlinedIcon fontSize="small" className={`${isOnTime || file ? 'text-custom-green':'text-custom-gray cursor-not-allowed'}`}/>
+                            <button className={`${isOnTime || file ? 'text-custom-green':'text-custom-gray cursor-not-allowed disabled'}`}>Borrow</button>
+                        </div>
+                        <div className={`border py-1 px-3 rounded-lg ${isOnTime || file ? 'border-custom-primary text-custom-primary cursor-pointer' : 'border-gray-300 text-gray-300 cursor-not-allowed'}`} 
+                            onClick={!isOnTime && !file ? undefined : onClose}>
+                            <ShoppingCartOutlinedIcon fontSize="small" className={`${isOnTime || file ? 'text-custom-primary':'text-custom-gray cursor-not-allowed'}`} />
+                            <button className={`${isOnTime || file ? 'text-custom-primary':'text-custom-gray cursor-not-allowed disabled'}`}>Add cart</button>
+                        </div>
+                    </div>
+                </div>
             </Box>
         </MaterialUIModal>
     );
