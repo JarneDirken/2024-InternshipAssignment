@@ -11,7 +11,6 @@ export async function GET(request: NextRequest) {
 
     const items = await prisma.item.findMany({
         where: {
-            // Ensure the itemStatusId and other conditions are correctly set
             itemStatusId: 1,
             active: true,
             name: { contains: nameFilter, mode: 'insensitive' },
