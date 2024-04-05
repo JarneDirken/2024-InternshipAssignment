@@ -200,7 +200,7 @@ export default function Borrow() {
                         >
                             Products
                         </div>
-                        <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-11 transform translate-x-1/2 -translate-y-1/2 text-sm">
+                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-11 transform translate-x-1/2 -translate-y-1/2 text-sm ${selectedTab === 'products' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
                             {totalItemCount}
                         </div>
                     </div>
@@ -433,7 +433,7 @@ function Filters({ active, setActive, onFilterChange, items }: FiltersProps) {
                                 disablePortal
                                 size="small"
                                 id="combo-box-demo"
-                                value={name || null}
+                                value={model || null}
                                 onChange={(event, value) => handleModelChange(value)}
                                 options={[...new Set(items.map(item => item.model))]} // Ensure unique models
                                 isOptionEqualToValue={(option, value) => option === value}
@@ -455,7 +455,7 @@ function Filters({ active, setActive, onFilterChange, items }: FiltersProps) {
                                 disablePortal
                                 size="small"
                                 id="combo-box-demo"
-                                value={name || null}
+                                value={brand || null}
                                 onChange={(event, value) => handleBrandChange(value)}
                                 options={[...new Set(items.map(item => item.brand))]} // Ensure unique brands
                                 isOptionEqualToValue={(option, value) => option === value}
