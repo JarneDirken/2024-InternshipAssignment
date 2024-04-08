@@ -131,7 +131,7 @@ async function createItem() {
         {
             id: 2,
             locationId: 1,
-            itemStatusId: 1,
+            itemStatusId: 2,
             name: "Digital Multimeter UT89XD (02)",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
@@ -142,7 +142,7 @@ async function createItem() {
         {
             id: 3,
             locationId: 3,
-            itemStatusId: 1,
+            itemStatusId: 3,
             name: "Digital Multimeter UT89XD (03)",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
@@ -153,7 +153,7 @@ async function createItem() {
         {
             id: 4,
             locationId: 3,
-            itemStatusId: 1,
+            itemStatusId: 4,
             name: "Digital Multimeter UT89XD (04)",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
@@ -164,7 +164,7 @@ async function createItem() {
         {
             id: 5,
             locationId: 3,
-            itemStatusId: 1,
+            itemStatusId: 5,
             name: "Digital Multimeter UT89XD (05)",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
@@ -175,7 +175,7 @@ async function createItem() {
         {
             id: 6,
             locationId: 3,
-            itemStatusId: 1,
+            itemStatusId: 6,
             name: "Digital Multimeter UT89XD (06)",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
