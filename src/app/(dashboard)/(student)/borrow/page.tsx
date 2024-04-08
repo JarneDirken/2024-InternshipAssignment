@@ -547,6 +547,32 @@ function BorrowCard({ active, items, loading, openModal }: BorrowCardProps) {
         );
     }
 
+    function renderItemStatus(item: Item) {
+        switch (item.itemStatusId) {
+            case 1:
+                return (
+                    <button 
+                        className="px-4 border-custom-primary bg-custom-primary rounded-lg text-white font-semibold text-lg"
+                        style={{ paddingTop: 2, paddingBottom: 2 }}
+                        onClick={() => openModal(item.id)}>
+                        Borrow
+                    </button>
+                );
+            case 2:
+                return <span>Pending borrow</span>;
+            case 3:
+                return <span>Being Borrowed</span>;
+            case 4:
+                return <span>Pending return</span>;
+            case 5:
+                return <span>Reparation</span>;
+            case 6:
+                return <span>Broken</span>;
+            default:
+                return null;
+        }
+    }
+
     return (
         <>
         <div className={active ? listViewClass : gridViewClass} style={{ maxHeight: cardContainerHeight }}>
@@ -580,12 +606,7 @@ function BorrowCard({ active, items, loading, openModal }: BorrowCardProps) {
                                     </div>
                                 </div>
                                 <div>
-                                    <button 
-                                        className="px-4 border-custom-primary bg-custom-primary rounded-lg text-white font-semibold text-lg" 
-                                        style={{ paddingTop: 2, paddingBottom: 2 }}
-                                        onClick={() => openModal(item.id)}>
-                                            Borrow
-                                        </button>
+                                    {renderItemStatus(item)}
                                 </div>
                             </div>
                         ) : (
@@ -617,12 +638,7 @@ function BorrowCard({ active, items, loading, openModal }: BorrowCardProps) {
                                 </div>
                                 <hr />
                                 <div className="flex justify-center items-center p-2">
-                                    <button 
-                                        className="px-4 border-custom-primary bg-custom-primary rounded-lg text-white font-semibold text-lg" 
-                                        style={{ paddingTop: 2, paddingBottom: 2 }}
-                                        onClick={() => openModal(item.id)}>
-                                            Borrow
-                                        </button>
+                                    {renderItemStatus(item)}
                                 </div>
                             </div>
                         )}
@@ -642,10 +658,10 @@ function PendingBorrows() {
 }
 
 function Modal({ open, onClose, item }: ModalCardProps) {
-    const [value, setValue] = useState(dayjs());
-    const [amount, setAmount] = useState('');
-    const [isOnTime, setIsOnTime] = useState(false);
-    const [file, setFile] = useState<File | null>(null);
+    const [value, setValue] = useState(dayjs()); // date picker
+    const [amount, setAmount] = useState(''); // amount for if item == consumable
+    const [isOnTime, setIsOnTime] = useState(false); // change this to view / not view the urgent borrow request
+    const [file, setFile] = useState<File | null>(null); // file uploader
 
     const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setAmount(event.target.value);
@@ -740,7 +756,7 @@ function Modal({ open, onClose, item }: ModalCardProps) {
                                     <span className="font-semibold text-gray-400">Location</span>
                                     <span>{item.location.name}</span>
                                 </div>
-                                {!item.consumable && (
+                                {item.consumable && (
                                     <div className="mt-2">
                                         <ThemeProvider theme={theme}>
                                             <TextField
