@@ -126,7 +126,8 @@ async function createItem() {
             brand: "UNI-T",
             yearBought: "2018",
             number: "RAI-ELEC-MUL-201-01",
-            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2Fmultimeter.png?alt=media&token=25081b29-2a6e-4718-aef6-c9a61fe395ce"
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2Fmultimeter.png?alt=media&token=25081b29-2a6e-4718-aef6-c9a61fe395ce",
+            consumable: true
         },
         {
             id: 2,

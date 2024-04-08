@@ -11,7 +11,6 @@ export async function GET(request: NextRequest) {
 
     const items = await prisma.item.findMany({
         where: {
-            itemStatusId: 1,
             active: true,
             name: { contains: nameFilter, mode: 'insensitive' },
             model: { contains: modelFilter, mode: 'insensitive' },
@@ -23,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     const totalCount = await prisma.item.count({
         where: {
-            itemStatusId: 1,
+            active: true,
             name: { contains: nameFilter, mode: 'insensitive' },
             model: { contains: modelFilter, mode: 'insensitive' },
             brand: { contains: brandFilter, mode: 'insensitive' },
