@@ -119,3 +119,9 @@ model ItemRequest {
   borrower        User          @relation("borrower", fields: [borrowerId], references: [id])
   approver        User?         @relation("approver", fields: [approverId], references: [id])
 }
+
+model Parameter {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  value String
+}
