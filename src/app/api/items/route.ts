@@ -18,6 +18,9 @@ export async function GET(request: NextRequest) {
             location: { name: { contains: locationFilter, mode: 'insensitive' } }
         },
         include: { location: true },
+        orderBy: {
+            name: 'asc', // Change 'name' to whichever field you want to sort by
+        },
     });
 
     const totalCount = await prisma.item.count({
