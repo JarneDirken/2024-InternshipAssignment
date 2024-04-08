@@ -9,3 +9,27 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+/* Add this CSS to your global stylesheet or in a <style> tag */
+.hide-picker-actions .MuiDialogActions-root {
+  display: none;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 5px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: darkgray;
+  border-radius: 14px;
+  border: 3px solid darkgray;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: darkgray;
+}

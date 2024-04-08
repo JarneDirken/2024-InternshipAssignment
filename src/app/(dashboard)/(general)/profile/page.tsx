@@ -38,7 +38,7 @@ export default function Profile() {
     }, []);
 
     async function fetchUserProfile(uid: string) {
-        const endpoint = `/api/user/${uid}`;
+        const endpoint = `/api/userprofile/${uid}`;
         try {
             const response = await fetch(endpoint);
             if (!response.ok) {
@@ -174,7 +174,7 @@ export default function Profile() {
             studentCode,
         };
         
-        const response = await fetch(`/api/user/`, {
+        const response = await fetch(`/api/userprofile/`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -278,7 +278,7 @@ export default function Profile() {
                                             name='lastname'
                                         />
                                 )}
-                                <div className='flex flex-col'>
+                                <div className='flex flex-col truncate'>
                                     <span className='text-gray-500 font-medium'>Email</span>
                                     {profile.email}
                                 </div>

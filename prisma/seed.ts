@@ -54,8 +54,10 @@ async function createLocations() {
 
 async function createItemStatus() {
     const itemStatusNames = [
-        "Borrowed",
         "Available",
+        "Pending approval",
+        "Borrowed",
+        "Pending return",
         "Repairing",
         "Broken",
     ];
@@ -118,23 +120,114 @@ async function createItem() {
         {
             id: 1,
             locationId: 1,
-            itemStatusId: 2,
+            itemStatusId: 1,
             name: "Digital Multimeter UT89XD (01)",
-            model: "MULTIMETER KITS	",
+            model: "MULTIMETER KITS",
             brand: "UNI-T",
             yearBought: "2018",
-            number: "RAI-ELEC-MUL-201-01"
+            number: "RAI-ELEC-MUL-201-01",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2Fmultimeter.png?alt=media&token=25081b29-2a6e-4718-aef6-c9a61fe395ce",
+            consumable: true
         },
         {
             id: 2,
             locationId: 1,
             itemStatusId: 2,
             name: "Digital Multimeter UT89XD (02)",
-            model: "MULTIMETER KITS	",
+            model: "MULTIMETER KITS",
             brand: "UNI-T",
             yearBought: "2018",
-            number: "RAI-ELEC-MUL-201-02"
-        }
+            number: "RAI-ELEC-MUL-201-02",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2Fmultimeter.png?alt=media&token=25081b29-2a6e-4718-aef6-c9a61fe395ce"
+        },
+        {
+            id: 3,
+            locationId: 3,
+            itemStatusId: 3,
+            name: "Digital Multimeter UT89XD (03)",
+            model: "MULTIMETER KITS",
+            brand: "UNI-T",
+            yearBought: "2018",
+            number: "RAI-ELEC-MUL-201-03",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2Fmultimeter.png?alt=media&token=25081b29-2a6e-4718-aef6-c9a61fe395ce"
+        },
+        {
+            id: 4,
+            locationId: 3,
+            itemStatusId: 4,
+            name: "Digital Multimeter UT89XD (04)",
+            model: "MULTIMETER KITS",
+            brand: "UNI-T",
+            yearBought: "2018",
+            number: "RAI-ELEC-MUL-201-04",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2Fmultimeter.png?alt=media&token=25081b29-2a6e-4718-aef6-c9a61fe395ce"
+        },
+        {
+            id: 5,
+            locationId: 3,
+            itemStatusId: 5,
+            name: "Digital Multimeter UT89XD (05)",
+            model: "MULTIMETER KITS",
+            brand: "UNI-T",
+            yearBought: "2018",
+            number: "RAI-ELEC-MUL-201-05",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2Fmultimeter.png?alt=media&token=25081b29-2a6e-4718-aef6-c9a61fe395ce"
+        },
+        {
+            id: 6,
+            locationId: 3,
+            itemStatusId: 6,
+            name: "Digital Multimeter UT89XD (06)",
+            model: "MULTIMETER KITS",
+            brand: "UNI-T",
+            yearBought: "2018",
+            number: "RAI-ELEC-MUL-201-06",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2Fmultimeter.png?alt=media&token=25081b29-2a6e-4718-aef6-c9a61fe395ce"
+        },
+        {
+            id: 7,
+            locationId: 3,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit (01)",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-01",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            id: 8,
+            locationId: 3,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit (02)",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-02",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            id: 9,
+            locationId: 3,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit (03)",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-03",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            id: 10,
+            locationId: 3,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit (04)",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-04",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
     ];
 
     for (const item of items) {
@@ -148,7 +241,8 @@ async function createItem() {
                 model: item.model,
                 brand: item.brand,
                 yearBought: new Date(item.yearBought),
-                number: item.number
+                number: item.number,
+                image: item.image
             }
         });
     }

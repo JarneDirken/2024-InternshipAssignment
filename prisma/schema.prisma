@@ -45,16 +45,18 @@ model RoleItem {
 model Item {
   id           Int           @id @default(autoincrement())
   locationId   Int
-  itemStatusId Int
-  name         String        @unique
+  itemStatusId Int           @default(1)
+  name         String
   model        String
   brand        String
   image        String?
-  yearBought   DateTime
+  yearBought   DateTime?
   active       Boolean       @default(true)
   number       String        @unique //Number that Dio uses in excel
   notes        String?
   schoolNumber String?       @unique //Number of specific item schoolnumber
+  consumable   Boolean       @default(false)
+  amount       Int?
   // relation
   location     Location      @relation(fields: [locationId], references: [id])
   itemStatus   ItemStatus    @relation(fields: [itemStatusId], references: [id])
@@ -106,13 +108,20 @@ model ItemRequest {
   decisionDate    DateTime?
   borrowDate      DateTime?
   returnDate      DateTime?
-  file            Bytes?
+  file            String?
   receiveMessage  String?
   approveMessage  String?
   isUrgent        Boolean       @default(false)
+  amountRequest   Int?
   // relation
   item            Item          @relation(fields: [itemId], references: [id])
   requestStatus   RequestStatus @relation(fields: [requestStatusId], references: [id])
   borrower        User          @relation("borrower", fields: [borrowerId], references: [id])
   approver        User?         @relation("approver", fields: [approverId], references: [id])
+}
+
+model Parameter {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  value String
 }
