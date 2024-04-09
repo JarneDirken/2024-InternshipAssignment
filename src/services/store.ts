@@ -14,6 +14,11 @@ export const itemsState = atom<Item[]>({
     default: [],
 });
 
+export const createRequest = atom({
+    key: 'createRequest',
+    default: false,
+});
+
 export const requestsState = atom<ItemRequest[]>({
     key: 'requestsState',
     default: [],

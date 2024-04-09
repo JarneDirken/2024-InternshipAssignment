@@ -16,6 +16,7 @@ import DashboardFrame from "@/components/layout/dashboardframe";
 import DashboardContext from "@/components/layout/sidebarcontext";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
+import { SnackbarProvider } from 'notistack';
 
 export default function DashboardLayout({
   children,
@@ -26,6 +27,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   return (
+    <SnackbarProvider maxSnack={3}>
     <DashboardContext>
       <div className="flex flex-col h-screen bg-gray-100">
         <DashboardHeader/>
@@ -67,5 +69,6 @@ export default function DashboardLayout({
         </DashboardFrame>
       </div>
     </DashboardContext>
+    </SnackbarProvider>
   );
 }
