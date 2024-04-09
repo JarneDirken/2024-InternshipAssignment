@@ -730,6 +730,25 @@ function PendingBorrows({ active, nameFilter, modelFilter, brandFilter, location
         }
     }
 
+    async function cancelPendingBorrow(requestId: number, itemId: number){
+        try {
+            const queryString = new URLSearchParams({
+                itemId: itemId.toString()
+            }).toString();
+            const response = await fetch(`/api/user/itemrequest/${requestId}?${queryString}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error("Failed to cancel pending borrow request: ", error)
+        }
+    }
+
     useEffect(() => {
         getPendingBorrows(nameFilter, modelFilter, brandFilter, locationFilter);
     }, [nameFilter, modelFilter, brandFilter, locationFilter]);
@@ -798,6 +817,7 @@ function PendingBorrows({ active, nameFilter, modelFilter, brandFilter, location
                                         textColor="custom-red"
                                         borderColor="custom-red" 
                                         paddingY="py-0"
+                                        onClick={() => cancelPendingBorrow(request.id, request.itemId)}
                                     />
                                     <Button 
                                         text="View" 
@@ -854,6 +874,7 @@ function PendingBorrows({ active, nameFilter, modelFilter, brandFilter, location
                                         textColor="custom-red"
                                         borderColor="custom-red" 
                                         paddingY="py-0"
+                                        onClick={() => cancelPendingBorrow(request.id, request.itemId)}
                                     />
                                 </div>
                             </div>
