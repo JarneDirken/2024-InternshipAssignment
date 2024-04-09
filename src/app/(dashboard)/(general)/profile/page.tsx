@@ -72,11 +72,9 @@ export default function Profile() {
             const storageRef = ref(storage, `gs://internshipassignment-c6d15.appspot.com/profilePictures/${profile.firebaseUid}`);
     
             uploadBytes(storageRef, file).then((snapshot) => {
-                console.log('Uploaded a blob or file!');
     
                 // Get the download URL
                 getDownloadURL(snapshot.ref).then(async (downloadURL) => {
-                    console.log('File available at', downloadURL);
                     
                     const response = await fetch(`/api/userprofilepic/`, {
                         method: 'PATCH',

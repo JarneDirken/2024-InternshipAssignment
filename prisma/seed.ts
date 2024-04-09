@@ -7,6 +7,7 @@ async function main() {
     await createRole();
     await createItem();
     await createRoleItem();
+    await createRequestStatus();
 }
 
 main()
@@ -244,6 +245,26 @@ async function createItem() {
                 number: item.number,
                 image: item.image
             }
+        });
+    }
+}
+
+async function createRequestStatus() {
+    const requestStatus = [
+        "Pending borrow",
+        "Accepted",
+        "Rejected",
+        "Handed over",
+        "Pending return",
+        "Returned",
+        "Checked",
+    ];
+
+    for (const name of requestStatus) {
+        await prisma.requestStatus.upsert({
+            where: { name },  // This checks if the location already exists
+            update: {},  // If it does, nothing is updated
+            create: { name }  // If it doesn't, a new location is created
         });
     }
 }
