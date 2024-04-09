@@ -15,7 +15,7 @@ import Modal from "@/components/(user)/borrow/Modal";
 export default function Borrow() {
     const isAuthorized = useAuth(['Student']); // you need at least role student to view this page
     const [active, setActive] = useState(true); // this is to toggle from list view to card view
-    const items = useRecoilValue(itemsState); // to store all items
+    const [items, setItems] = useState<Item[]>([]);
     const [item, setItem] = useState<Item>(); // to store one item
     const requests = useRecoilValue(requestsState);
     const [loading, setLoading] = useState(true);
@@ -83,6 +83,23 @@ export default function Borrow() {
         }
     }
 
+    async function getAllItems(){
+        setLoading(true);
+        try {
+            const response = await fetch(`/api/user/allitems`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            setItems(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Failed to fetch items:", error);
+            setItems([]); // Ensure items is always an array
+        } finally {
+            setLoading(false);
+        }
+    }
+
     const handleFilterChange = (filterType: string, value: string) => {
         switch (filterType) {
             case 'name':
@@ -106,6 +123,10 @@ export default function Borrow() {
         getItemData(id);
         setModalOpen(true);
     }
+
+    useEffect(() => {
+        getAllItems();
+    }, []);
 
     useEffect(() => {
         setTotalItemCount(items.length);

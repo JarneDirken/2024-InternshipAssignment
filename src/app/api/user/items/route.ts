@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const brandFilter = searchParams.get('brand') || '';
     const locationFilter = searchParams.get('location') || '';
     const offset = parseInt(searchParams.get('offset') || '0');
-    const limit = parseInt(searchParams.get('limit') || '7');
+    const limit = parseInt(searchParams.get('limit') || '9');
 
     const items = await prisma.item.findMany({
         where: {

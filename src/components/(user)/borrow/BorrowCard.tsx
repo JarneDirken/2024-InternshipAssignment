@@ -18,12 +18,12 @@ interface BorrowCardProps {
 
 export default function BorrowCard({ active, openModal, nameFilter, modelFilter, brandFilter, locationFilter }: BorrowCardProps) {
     const [loading, setLoading] = useState(true);
-    const [items, setItems] = useRecoilState(itemsState);
+    const [items, setItems] = useState<Item[]>([]);
     const successfullCreated = useRecoilValue(createRequest);
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const { ref, inView } = useInView();
-    const NUMBER_OF_ITEMS_TO_FETCH = 7;
+    const NUMBER_OF_ITEMS_TO_FETCH = 9;
     const listRef = useRef<HTMLDivElement>(null);
 
     const cardContainerHeight = "calc(100vh - 25.6rem)";
@@ -73,19 +73,21 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
 
     useEffect(() => {
         if (inView && hasMore && !loading) {
-            // Save the current scroll position
-            // Ensure currentScrollPosition is a number by using the nullish coalescing operator (??)
-            // to fall back to 0 if listRef.current is null
-            const currentScrollPosition = listRef.current?.scrollTop ?? 0;
-    
+            // Ensure we have a current scroll position as a number, even if listRef.current is null
+            const currentScrollPosition = listRef.current ? listRef.current.scrollTop : 0;
+        
             getItems().then(() => {
-                // Restore the scroll position after new items have been loaded
-                if (listRef.current) {
-                    listRef.current.scrollTop = currentScrollPosition;
-                }
+                // Use requestAnimationFrame to ensure the DOM has updated
+                requestAnimationFrame(() => {
+                    if (listRef.current) {
+                        listRef.current.scrollTop = currentScrollPosition;
+                    }
+                });
             });
         }
     }, [inView, loading, hasMore]);
+    
+    
 
     if (loading) { return (<Loading />); }
 
