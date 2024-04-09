@@ -21,8 +21,8 @@ model User {
   profilePic           String?
   //relation
   role                 Role          @relation(fields: [roleId], references: [id])
-  ItemRequestsBorrower ItemRequest[] @relation("borrower")
-  ItemRequestsApprover ItemRequest[] @relation("approver")
+  ItemRequestsBorrower ItemRequest[] @relation(name: "Borrower")
+  ItemRequestsApprover ItemRequest[] @relation(name: "Approver")
 }
 
 model Role {
@@ -100,10 +100,10 @@ model ItemRequest {
   id              Int           @id @default(autoincrement())
   itemId          Int
   requestStatusId Int
-  borrowerId      Int
-  approverId      Int
+  borrowerId      String
+  approverId      String?
   requestDate     DateTime
-  starBorrowDate  DateTime
+  startBorrowDate DateTime
   endBorrowDate   DateTime
   decisionDate    DateTime?
   borrowDate      DateTime?
@@ -116,8 +116,8 @@ model ItemRequest {
   // relation
   item            Item          @relation(fields: [itemId], references: [id])
   requestStatus   RequestStatus @relation(fields: [requestStatusId], references: [id])
-  borrower        User          @relation("borrower", fields: [borrowerId], references: [id])
-  approver        User?         @relation("approver", fields: [approverId], references: [id])
+  borrower        User          @relation(name: "Borrower", fields: [borrowerId], references: [firebaseUid])
+  approver        User?         @relation(name: "Approver", fields: [approverId], references: [firebaseUid])
 }
 
 model Parameter {

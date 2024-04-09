@@ -28,6 +28,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
+import Button from "@/components/states/Button";
 
 interface FiltersProps { // typescript moment, everthing should have a type
     active: boolean;
@@ -47,6 +48,12 @@ interface ModalCardProps {
     open: boolean;
     onClose: () => void;
     item?: Item;
+    userId: String | null;
+}
+
+interface PendingBorrowProps {
+    requests: ItemRequest[];
+    active: boolean;
 }
 
 export default function Borrow() {
@@ -56,15 +63,27 @@ export default function Borrow() {
     const [item, setItem] = useState<Item>(); // to store one item
     const [requests, setRequests] = useState<ItemRequest[]>([]);
     const [loading, setLoading] = useState(true);
-    const [totalrequestCount, setTotalRequestCount] = useState([]);
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const [totalItemCount, setTotalItemCount] = useState(0); // pagination
+    const [totalRequestCount, setTotalRequestCount] = useState(0);
+    const [totalItemCount, setTotalItemCount] = useState(0);
     const [nameFilter, setNameFilter] = useState(''); // name filter
     const [modelFilter, setModelFilter] = useState(''); // model filter
     const [brandFilter, setBrandFilter] = useState(''); // brand filter
     const [locationFilter, setLocationFilter] = useState(''); // location filter
     const [selectedTab, setSelectedTab] = useState('products');
     const [isModalOpen, setModalOpen] = useState(false);
+    const [userId, setUserId] = useState<string | null>(null);
+    const auth = getAuth(app);
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                setUserId(user.uid);
+            } else {
+                setUserId(null);
+            }
+        });
+        return () => unsubscribe(); // Clean up the listener
+    }, [userId]);
 
     // get items with pagination and filter on SERVER SIDE
     async function getItems(nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
@@ -84,7 +103,6 @@ export default function Borrow() {
 
             const data = await response.json();
             setItems(data.items);
-            
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -93,24 +111,20 @@ export default function Borrow() {
     }
 
     // get item requests with pagination and filter on SERVER SIDE
-    async function getPendingBorrows(nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
+    async function getPendingBorrows() {
         setLoading(true);
         try {
+            if (!userId) { return; }
             const queryString = new URLSearchParams({
-                name: nameFilter,
-                model: modelFilter,
-                brand: brandFilter,
-                location: locationFilter
+                userId: userId
             }).toString();
-            const response = await fetch(`/api/itemrequests?${queryString}`);
+            const response = await fetch(`/api/studentitemrequest?${queryString}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-
             const data = await response.json();
-            setRequests(data.items);
-            setTotalRequestCount(data.totalCount);
+            setRequests(data.itemRequests);
         } catch (error) {
             console.error("Failed to fetch item requests:", error);
         } finally {
@@ -171,7 +185,17 @@ export default function Borrow() {
 
     useEffect(() => {
         setTotalItemCount(items.length);
-    },[items])
+    },[items]);
+
+    useEffect(()=> {
+        setTotalRequestCount(requests.length);
+    }, [requests]);
+
+    useEffect(() => {
+        if (userId) {
+            getPendingBorrows();
+        }
+    }, [userId]);
 
     if (!isAuthorized) { return <Unauthorized />; }
 
@@ -181,6 +205,7 @@ export default function Borrow() {
                 open={isModalOpen}
                 onClose={() => setModalOpen(false)}
                 item={item}
+                userId={userId}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
@@ -203,11 +228,16 @@ export default function Borrow() {
                             {totalItemCount}
                         </div>
                     </div>
-                    <div
-                        className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'pending' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
-                        onClick={() => setSelectedTab('pending')}
-                    >
-                        Pending borrows
+                    <div className="relative">
+                        <div
+                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'pending' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
+                            onClick={() => setSelectedTab('pending')}
+                        >
+                            Pending borrows
+                        </div>
+                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-3 transform translate-x-1/2 -translate-y-1/2 text-sm ${selectedTab === 'pending' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
+                            {totalRequestCount}
+                        </div>
                     </div>
                 </div>
                 {selectedTab === "products" ? (
@@ -218,7 +248,10 @@ export default function Borrow() {
                         openModal={openModal}
                     />
                 ) : (
-                    <PendingBorrows />
+                    <PendingBorrows 
+                        requests={requests}
+                        active={active}
+                    />
                 )}
             </div>
         </div>
@@ -551,12 +584,15 @@ function BorrowCard({ active, items, loading, openModal }: BorrowCardProps) {
         switch (item.itemStatusId) {
             case 1:
                 return (
-                    <button 
-                        className="px-4 border-custom-primary bg-custom-primary rounded-lg text-white font-semibold text-lg"
-                        style={{ paddingTop: 2, paddingBottom: 2 }}
-                        onClick={() => openModal(item.id)}>
-                        Borrow
-                    </button>
+                    <Button 
+                        text="Borrow" 
+                        textColor="white" 
+                        borderColor="custom-primary" 
+                        fillColor="custom-primary"
+                        paddingY="py-0"
+                        font="semibold"
+                        onClick={() => openModal(item.id)}
+                    />
                 );
             case 2:
                 return <span>Pending borrow</span>;
@@ -649,23 +685,160 @@ function BorrowCard({ active, items, loading, openModal }: BorrowCardProps) {
     );
 }
 
-function PendingBorrows() {
+function PendingBorrows({ requests, active }: PendingBorrowProps) {
+    const cardContainerHeight = "calc(100vh - 25.6rem)";
+
+    const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll";
+    const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
+
+    if (!requests || requests.length === 0) {
+        return <div>Loading pending borrows...</div>;
+    }
+
     return (
-        <div>
-            Pending borrows
+        <>
+        <div className={active ? listViewClass : gridViewClass} style={{ maxHeight: cardContainerHeight }}>
+                {requests.map((request) => (
+                    <div key={request.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
+                        {active ? (
+                            <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between">
+                                <div className="flex flex-row gap-10 items-center">
+                                    <div>
+                                        <img src={request.item.image} height={100} width={100} alt={request.item.name} />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <div>
+                                            <span className="font-semibold">Name:&nbsp;</span>
+                                            <span>{request.item.name}</span>
+                                        </div>
+                                        <div>
+                                            <span className="font-semibold">Model:&nbsp;</span>
+                                            <span>{request.item.model}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <div>
+                                            <span className="font-semibold">Brand:&nbsp;</span>
+                                            <span>{request.item.brand}</span>
+                                        </div>
+                                        <div>
+                                            <span className="font-semibold">Location:&nbsp;</span>
+                                            <span>{request.item.location.name}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-center gap-1">
+                                    <Button 
+                                        text="Cancel"
+                                        textColor="custom-red"
+                                        borderColor="custom-red" 
+                                        paddingY="py-0"
+                                    />
+                                    <Button 
+                                        text="View" 
+                                        textColor="white" 
+                                        borderColor="custom-primary" 
+                                        fillColor="custom-primary"
+                                        paddingY="py-0"
+                                    />
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <div className="truncate p-2">
+                                    <span className="text-lg font-semibold">{request.item.name}</span>
+                                </div>
+                                <hr />
+                                <div className="flex items-center p-4">
+                                    <div className="w-1/3 flex justify-center">
+                                        <img src={request.item.image} height={140} width={140} alt={request.item.name} />
+                                    </div>
+                                    <div className="flex flex-col items-start w-2/3">
+                                        <div className="flex items-center gap-6">
+                                            <div className="flex flex-col items-start">
+                                                <span className="text-gray-400">Model</span>
+                                                <span>{request.item.model}</span>
+                                            </div>
+                                            <div className="flex flex-col items-start">
+                                                <span className="text-gray-400">Brand</span>
+                                                <span>{request.item.brand}</span>
+                                            </div>
+                                        </div>
+                                        <div className="truncate flex flex-col items-start w-full">
+                                            <span className="text-gray-400">Location</span>
+                                            <span>{request.item.location.name}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div className="flex justify-center items-center p-2">
+                                    <Button 
+                                        text="Cancel"
+                                        textColor="custom-red"
+                                        borderColor="custom-red" 
+                                        paddingY="py-0"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ))}
         </div>
+        </>
     );
 }
 
-function Modal({ open, onClose, item }: ModalCardProps) {
+function Modal({ open, onClose, item, userId }: ModalCardProps) {
     const [value, setValue] = useState(dayjs()); // date picker
-    const [amount, setAmount] = useState(''); // amount for if item == consumable
-    const [isOnTime, setIsOnTime] = useState(false); // change this to view / not view the urgent borrow request
+    const [amount, setAmount] = useState<string | null>(null);
+    const [isUrgent, setIsUrgent] = useState(false); // change this to view / not view the urgent borrow request
     const [file, setFile] = useState<File | null>(null); // file uploader
+    const [startDateTime, setStartDateTime] = useState(new Date('2024-04-08T08:20').toISOString());
+    const [endDateTime, setEndDateTime] = useState(new Date('2024-04-12T08:15').toISOString());
+
+    function checkDateTime(startDate: string, endDate: string) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+    
+        // Function to check if date is a weekday
+        const isWeekday = (date: Date) => {
+            const day = date.getDay();
+            return day >= 1 && day <= 5; // 1 is Monday, 5 is Friday
+        };
+    
+        // Function to check if time is between 8-9 AM or 5-6 PM
+        const isValidTime = (date: Date) => {
+            const hours = date.getHours();
+            return (hours >= 8 && hours < 9) || (hours >= 17 && hours < 18);
+        };
+    
+        // Check if both dates are on weekdays
+        if (!isWeekday(start) || !isWeekday(end)) {
+            setIsUrgent(false);
+            return;
+        }
+    
+        // Check if times are valid
+        if (!isValidTime(start) || !isValidTime(end)) {
+            setIsUrgent(false);
+            return;
+        }
+    
+        // If both dates are the same, ensure start is AM and end is PM
+        if (start.toDateString() === end.toDateString() && (start.getHours() >= 9 || end.getHours() < 17)) {
+            setIsUrgent(false);
+            return;
+        }
+    
+        // If all checks passed, set isUrgent to true
+        setIsUrgent(true);
+    }
 
     const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setAmount(event.target.value);
+        const inputValue = event.target.value;
+        setAmount(inputValue !== '' ? inputValue : null);
     };
+    
 
     const handleDragOver = (event: React.DragEvent<HTMLLabelElement>) => {
         event.preventDefault();
@@ -693,6 +866,35 @@ function Modal({ open, onClose, item }: ModalCardProps) {
             fileInput.value = '';
         }
     };
+
+    async function borrowItem() {
+        if (!item) {console.log("error"); return;}
+        const data = {
+            itemId: item.id,
+            requestStatusId: 1,
+            borrowerId: userId,
+            requestDate: new Date().toISOString(),
+            startBorrowDate: startDateTime,
+            endBorrowDate: endDateTime,
+            file,
+            isUrgent: isUrgent,
+            amountRequest: amount,
+        };
+        
+        const response = await fetch(`/api/studentitemrequest/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ data: data }),
+        });
+
+        if (response.ok) {
+            
+        } else {
+            console.error('Failed to create item request');
+        }
+    }
     
 
     const theme = createTheme({
@@ -731,8 +933,8 @@ function Modal({ open, onClose, item }: ModalCardProps) {
                     </div>
                     <ClearIcon className="cursor-pointer" onClick={onClose} />
                 </div>
-                <div id="borrow-modal-description" className="px-4 py-2 overflow-y-auto h-[87%]">
-                    <div className=" flex flex-col xl:flex-row xl:gap-8 px-8">
+                <div id="borrow-modal-description" className="overflow-y-auto h-[87%]">
+                    <div className=" flex flex-col xl:flex-row xl:gap-8 px-8 py-2">
                         <div className="flex flex-col xl:w-1/2 xl:px-12">
                             <div className="flex justify-center mb-2 xl:justify-start">
                                 <img src={item.image} height={200} width={200} alt={item.name} />
@@ -796,8 +998,8 @@ function Modal({ open, onClose, item }: ModalCardProps) {
                             </ThemeProvider>
                         </div>
                     </div>
-                    {!isOnTime && (
-                        <div className="flex flex-col px-4">
+                    {isUrgent && (
+                        <div className="flex flex-col px-12">
                             <div className="flex flex-row justify-between items-center px-8">
                                 <span className="">Download the file and re-upload it with a signature of your teacher.</span>
                                 <span className="text-custom-blue underline cursor-pointer">Download</span>
@@ -834,19 +1036,19 @@ function Modal({ open, onClose, item }: ModalCardProps) {
                             </div>
                         </div>
                     )}
-                    <div className="flex flex-row justify-between py-2 px-2 md:px-16 mt-2">
+                    <div className="flex flex-row justify-between items-center py-2 px-2 md:px-16 border-t border-t-gray-200 mt-4">
                         <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
                             <button className="text-custom-gray">Cancel</button>
                         </div>
-                        <div className={`border py-1 px-3 rounded-lg ${isOnTime || file ? 'border-custom-green text-custom-green cursor-pointer' : 'border-gray-300 text-gray-300 cursor-not-allowed'}`} 
-                            onClick={!isOnTime && !file ? undefined : onClose}>
-                            <CheckCircleOutlineOutlinedIcon fontSize="small" className={`${isOnTime || file ? 'text-custom-green':'text-custom-gray cursor-not-allowed'}`}/>
-                            <button className={`${isOnTime || file ? 'text-custom-green':'text-custom-gray cursor-not-allowed disabled'}`}>Borrow</button>
+                        <div className={`border py-1 px-3 rounded-lg flex items-center gap-1 ${!isUrgent || file ? 'border-custom-green text-custom-green cursor-pointer' : 'border-gray-300 text-gray-300 cursor-not-allowed'}`} 
+                            onClick={isUrgent && !file ? undefined : borrowItem}>
+                            <CheckCircleOutlineOutlinedIcon fontSize="small" className={`${!isUrgent || file ? 'text-custom-green':'text-custom-gray cursor-not-allowed'}`}/>
+                            <button className={`${!isUrgent || file ? 'text-custom-green':'text-custom-gray cursor-not-allowed disabled'}`}>Borrow</button>
                         </div>
-                        <div className={`border py-1 px-3 rounded-lg ${isOnTime || file ? 'border-custom-primary text-custom-primary cursor-pointer' : 'border-gray-300 text-gray-300 cursor-not-allowed'}`} 
-                            onClick={!isOnTime && !file ? undefined : onClose}>
-                            <ShoppingCartOutlinedIcon fontSize="small" className={`${isOnTime || file ? 'text-custom-primary':'text-custom-gray cursor-not-allowed'}`} />
-                            <button className={`${isOnTime || file ? 'text-custom-primary':'text-custom-gray cursor-not-allowed disabled'}`}>Add cart</button>
+                        <div className={`border py-1 px-3 rounded-lg flex items-center gap-1 ${!isUrgent || file ? 'border-custom-primary text-custom-primary cursor-pointer' : 'border-gray-300 text-gray-300 cursor-not-allowed'}`} 
+                            onClick={isUrgent && !file ? undefined : onClose}>
+                            <ShoppingCartOutlinedIcon fontSize="small" className={`${!isUrgent || file ? 'text-custom-primary':'text-custom-gray cursor-not-allowed'}`} />
+                            <button className={`${!isUrgent || file ? 'text-custom-primary':'text-custom-gray cursor-not-allowed disabled'}`}>Add cart</button>
                         </div>
                     </div>
                 </div>

@@ -4,13 +4,32 @@ type ButtonProps = {
     text: string;
     icon?: ReactNode; 
     onClick?: () => void;
+    textColor?: string;
+    borderColor?: string;
+    fillColor?: string;
+    paddingX?: string;
+    paddingY?: string;
+    font?: string;
 }
 
-export default function Button({ text, icon, onClick }: ButtonProps) {
-    return(
-        <button onClick={onClick} className="border border-gray-300 rounded-lg items-center justify-center py-1 px-4 flex gap-1">
-            {icon}
-            <span className='text-lg'>{text}</span>
+export default function Button({ 
+    text, 
+    icon, 
+    onClick, 
+    textColor = 'black', 
+    borderColor = 'gray-300', 
+    fillColor = 'white',
+    paddingX = 'px-4',
+    paddingY = 'py-1', 
+    font = "normal"
+}: ButtonProps) {
+    const buttonClasses = `border rounded-lg items-center justify-center ${paddingY} ${paddingX} flex gap-1 border-${borderColor} bg-${fillColor}`;
+    const textClasses = `font-${font} text-${textColor}`;
+
+    return (
+        <button onClick={onClick} className={buttonClasses}>
+            {icon && <span className={textClasses}>{icon}</span>}
+            <span className={`text-lg ${textClasses}`}>{text}</span>
         </button>
     );
 }
