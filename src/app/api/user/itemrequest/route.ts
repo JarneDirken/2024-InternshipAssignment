@@ -45,6 +45,11 @@ export async function POST(req: NextApiRequest) {
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const uid = searchParams.get("userId") || '';
+    const nameFilter = searchParams.get('name') || '';
+    const modelFilter = searchParams.get('model') || '';
+    const brandFilter = searchParams.get('brand') || '';
+    const locationFilter = searchParams.get('location') || '';
+
     const user = await prisma.user.findUnique({
         where: {
             firebaseUid: uid,
@@ -62,7 +67,13 @@ export async function GET(request: NextRequest) {
 
     const itemRequests = await prisma.itemRequest.findMany({
         where: {
-            borrowerId: uid
+            borrowerId: uid,
+            item: {
+                name: { contains: nameFilter, mode: 'insensitive' },
+                model: { contains: modelFilter, mode: 'insensitive' },
+                brand: { contains: brandFilter, mode: 'insensitive' },
+                location: { name: { contains: locationFilter, mode: 'insensitive' } }
+            }
         },
         include: { 
             item: {

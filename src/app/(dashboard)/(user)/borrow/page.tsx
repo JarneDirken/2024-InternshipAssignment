@@ -4,7 +4,6 @@ import useAuth from "@/hooks/useAuth";
 import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import TextField from "@mui/material/TextField";
-import SearchIcon from '@mui/icons-material/Search';
 import Autocomplete from "@mui/material/Autocomplete";
 import { useEffect, useState, Dispatch, SetStateAction, useRef, useCallback } from "react";
 import { Location } from "@/models/Location";
@@ -19,7 +18,6 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { getAuth, getIdToken } from 'firebase/auth';
 import app from "@/services/firebase-config";
-import { ItemRequest } from "@/models/ItemRequest";
 import MaterialUIModal  from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import dayjs from 'dayjs';
@@ -29,6 +27,9 @@ import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import Button from "@/components/states/Button";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { itemsState, requestsState } from "@/services/store";
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 interface FiltersProps { // typescript moment, everthing should have a type
     active: boolean;
@@ -39,9 +40,11 @@ interface FiltersProps { // typescript moment, everthing should have a type
 
 interface BorrowCardProps {
     active: boolean;
-    items: Item[];
-    loading: boolean;
     openModal: (id: number) => void;
+    nameFilter: string;
+    modelFilter: string;
+    brandFilter: string;
+    locationFilter: string;
 }
 
 interface ModalCardProps {
@@ -52,16 +55,20 @@ interface ModalCardProps {
 }
 
 interface PendingBorrowProps {
-    requests: ItemRequest[];
     active: boolean;
+    nameFilter: string;
+    modelFilter: string;
+    brandFilter: string;
+    locationFilter: string;
+    userId: string;
 }
 
 export default function Borrow() {
     const isAuthorized = useAuth(['Student']); // you need at least role student to view this page
     const [active, setActive] = useState(true); // this is to toggle from list view to card view
-    const [items, setItems] = useState<Item[]>([]); // to store all items
+    const items = useRecoilValue(itemsState); // to store all items
     const [item, setItem] = useState<Item>(); // to store one item
-    const [requests, setRequests] = useState<ItemRequest[]>([]);
+    const requests = useRecoilValue(requestsState);
     const [loading, setLoading] = useState(true);
     const [totalRequestCount, setTotalRequestCount] = useState(0);
     const [totalItemCount, setTotalItemCount] = useState(0);
@@ -85,50 +92,21 @@ export default function Borrow() {
         return () => unsubscribe(); // Clean up the listener
     }, [userId]);
 
-    // get items with pagination and filter on SERVER SIDE
-    async function getItems(nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
-        setLoading(true);
-        try {
-            const queryString = new URLSearchParams({
-                name: nameFilter,
-                model: modelFilter,
-                brand: brandFilter,
-                location: locationFilter
-            }).toString();
-            const response = await fetch(`/api/items?${queryString}`);
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            setItems(data.items);
-        } catch (error) {
-            console.error("Failed to fetch items:", error);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    // get item requests with pagination and filter on SERVER SIDE
-    async function getPendingBorrows() {
-        setLoading(true);
+    async function getPendingBorrowCount() {
         try {
             if (!userId) { return; }
             const queryString = new URLSearchParams({
                 userId: userId
             }).toString();
-            const response = await fetch(`/api/studentitemrequest?${queryString}`);
+            const response = await fetch(`/api/user/itemrequest?${queryString}`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const data = await response.json();
-            setRequests(data.itemRequests);
+            setTotalRequestCount(data.totalCount);
         } catch (error) {
             console.error("Failed to fetch item requests:", error);
-        } finally {
-            setLoading(false);
         }
     }
 
@@ -138,7 +116,7 @@ export default function Borrow() {
         if (user) {
             try {
                 const token = await getIdToken(user);
-                const response = await fetch(`/api/items/${id}`, {
+                const response = await fetch(`/api/user/items/${id}`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `${token}`
@@ -180,10 +158,6 @@ export default function Borrow() {
     }
 
     useEffect(() => {
-        getItems(nameFilter, modelFilter, brandFilter, locationFilter);
-    }, [nameFilter, modelFilter, brandFilter, locationFilter]);
-
-    useEffect(() => {
         setTotalItemCount(items.length);
     },[items]);
 
@@ -193,7 +167,7 @@ export default function Borrow() {
 
     useEffect(() => {
         if (userId) {
-            getPendingBorrows();
+            getPendingBorrowCount();
         }
     }, [userId]);
 
@@ -243,14 +217,20 @@ export default function Borrow() {
                 {selectedTab === "products" ? (
                     <BorrowCard
                         active={active}
-                        items={items}
-                        loading={loading}
                         openModal={openModal}
+                        nameFilter={nameFilter}
+                        modelFilter={modelFilter}
+                        brandFilter={brandFilter}
+                        locationFilter={locationFilter}
                     />
                 ) : (
                     <PendingBorrows 
-                        requests={requests}
                         active={active}
+                        nameFilter={nameFilter}
+                        modelFilter={modelFilter}
+                        brandFilter={brandFilter}
+                        locationFilter={locationFilter}
+                        userId={userId || ''}
                     />
                 )}
             </div>
@@ -564,11 +544,42 @@ function Filters({ active, setActive, onFilterChange, items }: FiltersProps) {
     );
 }
 
-function BorrowCard({ active, items, loading, openModal }: BorrowCardProps) {
-    const cardContainerHeight = "calc(100vh - 25.6rem)";
+function BorrowCard({ active, openModal, nameFilter, modelFilter, brandFilter, locationFilter }: BorrowCardProps) {
+    const [loading, setLoading] = useState(true);
+    const [items, setItems] = useRecoilState(itemsState);
 
+    const cardContainerHeight = "calc(100vh - 25.6rem)";
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
+
+    // get items with pagination and filter on SERVER SIDE
+    async function getItems(nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
+        setLoading(true);
+        try {
+            const queryString = new URLSearchParams({
+                name: nameFilter,
+                model: modelFilter,
+                brand: brandFilter,
+                location: locationFilter
+            }).toString();
+            const response = await fetch(`/api/user/items?${queryString}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            setItems(data.items);
+        } catch (error) {
+            console.error("Failed to fetch items:", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        getItems(nameFilter, modelFilter, brandFilter, locationFilter);
+    }, [nameFilter, modelFilter, brandFilter, locationFilter]);
 
     if (loading) { return (<Loading />); }
 
@@ -611,7 +622,7 @@ function BorrowCard({ active, items, loading, openModal }: BorrowCardProps) {
 
     return (
         <>
-        <div className={active ? listViewClass : gridViewClass} style={{ maxHeight: cardContainerHeight }}>
+            <div className={active ? listViewClass : gridViewClass} style={{ maxHeight: cardContainerHeight }}>
                 {items.map((item) => (
                     <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
@@ -621,21 +632,21 @@ function BorrowCard({ active, items, loading, openModal }: BorrowCardProps) {
                                         <img src={item.image} height={100} width={100} alt={item.name} />
                                     </div>
                                     <div className="flex flex-col">
-                                        <div>
+                                        <div className="truncate">
                                             <span className="font-semibold">Name:&nbsp;</span>
                                             <span>{item.name}</span>
                                         </div>
-                                        <div>
+                                        <div className="truncate">
                                             <span className="font-semibold">Model:&nbsp;</span>
                                             <span>{item.model}</span>
                                         </div>
                                     </div>
                                     <div className="flex flex-col">
-                                        <div>
+                                        <div className="truncate">
                                             <span className="font-semibold">Brand:&nbsp;</span>
                                             <span>{item.brand}</span>
                                         </div>
-                                        <div>
+                                        <div className="truncate">
                                             <span className="font-semibold">Location:&nbsp;</span>
                                             <span>{item.location.name}</span>
                                         </div>
@@ -646,29 +657,29 @@ function BorrowCard({ active, items, loading, openModal }: BorrowCardProps) {
                                 </div>
                             </div>
                         ) : (
-                            <div>
-                                <div className="truncate p-2">
-                                    <span className="text-lg font-semibold">{item.name}</span>
+                            <div className="overflow-hidden">
+                                <div className="p-2">
+                                    <span className="text-lg font-semibold truncate">{item.name}</span>
                                 </div>
                                 <hr />
-                                <div className="flex items-center p-4">
-                                    <div className="w-1/3 flex justify-center">
+                                <div className="flex items-center p-4 max-w-xs">
+                                    <div className="w-1/3 flex justify-center mr-2">
                                         <img src={item.image} height={140} width={140} alt={item.name} />
                                     </div>
                                     <div className="flex flex-col items-start w-2/3">
-                                        <div className="flex items-center gap-6">
-                                            <div className="flex flex-col items-start">
+                                        <div className="flex items-center gap-6 max-w-full">
+                                            <div className="flex flex-col items-start max-w-2/3">
                                                 <span className="text-gray-400">Model</span>
-                                                <span>{item.model}</span>
+                                                <span className="truncate">{item.model}</span>
                                             </div>
-                                            <div className="flex flex-col items-start">
+                                            <div className="flex flex-col items-start max-w-1/3">
                                                 <span className="text-gray-400">Brand</span>
-                                                <span>{item.brand}</span>
+                                                <span className="truncate">{item.brand}</span>
                                             </div>
                                         </div>
-                                        <div className="truncate flex flex-col items-start w-full">
+                                        <div className="flex flex-col items-start w-full">
                                             <span className="text-gray-400">Location</span>
-                                            <span>{item.location.name}</span>
+                                            <span className="truncate">{item.location.name}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -685,14 +696,58 @@ function BorrowCard({ active, items, loading, openModal }: BorrowCardProps) {
     );
 }
 
-function PendingBorrows({ requests, active }: PendingBorrowProps) {
+function PendingBorrows({ active, nameFilter, modelFilter, brandFilter, locationFilter, userId }: PendingBorrowProps) {
+    const [loading, setLoading] = useState(true);
+    const [requests, setRequests] = useRecoilState(requestsState);
+    
     const cardContainerHeight = "calc(100vh - 25.6rem)";
-
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
+    
+    // get item requests with pagination and filter on SERVER SIDE
+    async function getPendingBorrows(nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
+        setLoading(true);
+        try {
+            if (!userId) { return; }
+            const queryString = new URLSearchParams({
+                userId: userId,
+                name: nameFilter,
+                model: modelFilter,
+                brand: brandFilter,
+                location: locationFilter
+            }).toString();
+            const response = await fetch(`/api/user/itemrequest?${queryString}`);
 
-    if (!requests || requests.length === 0) {
-        return <div>Loading pending borrows...</div>;
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            setRequests(data.itemRequests);
+        } catch (error) {
+            console.error("Failed to fetch item requests:", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        getPendingBorrows(nameFilter, modelFilter, brandFilter, locationFilter);
+    }, [nameFilter, modelFilter, brandFilter, locationFilter]);
+
+    function formatDate(date: Date): string {
+        const options: Intl.DateTimeFormatOptions = {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        };
+        return date.toLocaleDateString('en-US', options);
+    }
+      
+
+    if (loading) { return (<Loading />); }
+
+    if (requests.length === 0) {
+        return <div>No borrow requests found</div>;
     }
 
     return (
@@ -707,23 +762,33 @@ function PendingBorrows({ requests, active }: PendingBorrowProps) {
                                         <img src={request.item.image} height={100} width={100} alt={request.item.name} />
                                     </div>
                                     <div className="flex flex-col">
-                                        <div>
+                                        <div className="truncate">
                                             <span className="font-semibold">Name:&nbsp;</span>
                                             <span>{request.item.name}</span>
                                         </div>
-                                        <div>
+                                        <div className="truncate">
                                             <span className="font-semibold">Model:&nbsp;</span>
                                             <span>{request.item.model}</span>
                                         </div>
                                     </div>
                                     <div className="flex flex-col">
-                                        <div>
+                                        <div className="truncate">
                                             <span className="font-semibold">Brand:&nbsp;</span>
                                             <span>{request.item.brand}</span>
                                         </div>
-                                        <div>
+                                        <div className="truncate">
                                             <span className="font-semibold">Location:&nbsp;</span>
                                             <span>{request.item.location.name}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <div className="flex truncate items-center text-custom-primary gap-1">
+                                            <AccessTimeIcon fontSize="small"/>
+                                            <span>Pending</span>
+                                        </div>
+                                        <div className="flex truncate items-center text-gray-400 gap-1 text-sm">
+                                            <AccessTimeIcon fontSize="small"/>
+                                            <span>{formatDate(new Date(request.startBorrowDate))} - {formatDate(new Date(request.endBorrowDate))}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -744,22 +809,34 @@ function PendingBorrows({ requests, active }: PendingBorrowProps) {
                                 </div>
                             </div>
                         ) : (
-                            <div>
-                                <div className="truncate p-2">
-                                    <span className="text-lg font-semibold">{request.item.name}</span>
+                            <div className="overflow-hidden">
+                                <div className="p-2 flex items-center">
+                                    <div className="flex w-1/2 flex-wrap">
+                                        <span className="text-lg font-semibold flex-wrap">{request.item.name}</span>
+                                    </div>
+                                    <div className="w-1/2 flex flex-col items-end">
+                                        <div className="flex items-center text-custom-primary gap-1">
+                                            <AccessTimeIcon fontSize="small"/>
+                                            <span className="truncate">Pending</span>
+                                        </div>
+                                        <div className="flex truncate items-center text-gray-400 gap-1 text-sm">
+                                            <AccessTimeIcon fontSize="small"/>
+                                            <span>{formatDate(new Date(request.startBorrowDate))} - {formatDate(new Date(request.endBorrowDate))}</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <hr />
                                 <div className="flex items-center p-4">
-                                    <div className="w-1/3 flex justify-center">
+                                    <div className="w-1/3 flex justify-center mr-2">
                                         <img src={request.item.image} height={140} width={140} alt={request.item.name} />
                                     </div>
                                     <div className="flex flex-col items-start w-2/3">
                                         <div className="flex items-center gap-6">
-                                            <div className="flex flex-col items-start">
+                                            <div className="flex flex-col items-start truncate">
                                                 <span className="text-gray-400">Model</span>
                                                 <span>{request.item.model}</span>
                                             </div>
-                                            <div className="flex flex-col items-start">
+                                            <div className="flex flex-col items-start truncate">
                                                 <span className="text-gray-400">Brand</span>
                                                 <span>{request.item.brand}</span>
                                             </div>
@@ -881,7 +958,7 @@ function Modal({ open, onClose, item, userId }: ModalCardProps) {
             amountRequest: amount,
         };
         
-        const response = await fetch(`/api/studentitemrequest/`, {
+        const response = await fetch(`/api/user/itemrequest/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

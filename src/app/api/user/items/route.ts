@@ -1,5 +1,4 @@
 import prisma from '@/services/db';
-import { NextApiRequest } from 'next';
 import { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -19,7 +18,7 @@ export async function GET(request: NextRequest) {
         },
         include: { location: true },
         orderBy: {
-            name: 'asc', // Change 'name' to whichever field you want to sort by
+            name: 'asc',
         },
     });
 
@@ -35,20 +34,6 @@ export async function GET(request: NextRequest) {
 
     return new Response(JSON.stringify({ items, totalCount }), {
         status: 200,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-}
-
-export async function POST(req: NextApiRequest) {
-    const data = await new Response(req.body).json();
-    const createItem = await prisma.item.create({
-        data: data,
-    });
-
-    return new Response(JSON.stringify(createItem), {
-        status: 201,
         headers: {
             'Content-Type': 'application/json',
         },

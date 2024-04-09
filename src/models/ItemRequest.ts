@@ -9,7 +9,7 @@ export interface ItemRequest {
     borrowerId: String,
     approverId?: String,
     requestDate: Date,
-    starBorrowDate: Date,
+    startBorrowDate: Date,
     endBorrowDate: Date,
     decisionDate?: Date,
     borrowDate?: Date,
