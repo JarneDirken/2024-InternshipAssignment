@@ -142,6 +142,11 @@ export default function Borrow() {
         }
     }, [userId, created]);
 
+    useEffect(() => {
+        getPendingBorrowCount();
+        setTotalRequestCount(requests.length);
+    },[created])
+
     if (!isAuthorized) { return <Unauthorized />; }
 
     return (
@@ -158,6 +163,8 @@ export default function Borrow() {
                     setActive={setActive}
                     onFilterChange={handleFilterChange}
                     items={items}
+                    openModal={openModal}
+                    userId={userId}
                 />
             </div>
             <div className="rounded-xl">
