@@ -10,21 +10,29 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
+import useCart from "@/hooks/useCart";
 //icons
 import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import AppsOutlinedIcon from '@mui/icons-material/AppsOutlined';
 import ReorderOutlinedIcon from '@mui/icons-material/ReorderOutlined';
 import ClearIcon from '@mui/icons-material/Clear';
+import IconButton from "@mui/material/IconButton";
+import Button from "@/components/states/Button";
+import { useSnackbar } from "notistack";
+import { useRecoilState } from "recoil";
+import { createRequest } from "@/services/store";
 
 interface FiltersProps { // typescript moment, everthing should have a type
     active: boolean;
     setActive: Dispatch<SetStateAction<boolean>>;
     onFilterChange: (filterType: string, filterValue: string) => void;
     items: Item[];
+    openModal: (id: number) => void;
+    userId: String | null;
 }
 
-export default function Filters({ active, setActive, onFilterChange, items }: FiltersProps) {
+export default function Filters({ active, setActive, onFilterChange, items, openModal, userId }: FiltersProps) {
     const [locations, setLocations] = useState<Location[]>([]);
     const prevWidthRef = useRef(window.innerWidth);
     const [name, setName] = useState('');
@@ -32,6 +40,9 @@ export default function Filters({ active, setActive, onFilterChange, items }: Fi
     const [brand, setBrand] = useState('');
     const [location, setLocation] = useState('');
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const { cart, addToCart, removeFromCart, clearCart } = useCart();
+    const { enqueueSnackbar } = useSnackbar();
+    const [request, setRequest] = useRecoilState(createRequest);
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -110,6 +121,60 @@ export default function Filters({ active, setActive, onFilterChange, items }: Fi
         }
     }
 
+    async function borrowAllItems() {
+        let allSuccessful = true;
+        for (const cartItem of cart) {
+            const data = {
+                itemId: cartItem.item.id,
+                requestStatusId: 1,
+                borrowerId: userId,
+                requestDate: new Date().toISOString(),
+                startBorrowDate: cartItem.borrowDetails.startDateTime,
+                endBorrowDate: cartItem.borrowDetails.endDateTime,
+                file: cartItem.borrowDetails.file,
+                isUrgent: cartItem.borrowDetails.isUrgent,
+                amountRequest: cartItem.borrowDetails.amount,
+            };
+    
+            try {
+                const response = await fetch(`/api/user/itemrequest/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ data: data }),
+                });
+    
+                if (response.ok) {
+                    // Handle individual success
+                    console.log(`Item ${cartItem.item.id} borrowed successfully`);
+                    enqueueSnackbar(`Item ${cartItem.item.name} succesfully borrowed!`, { variant: 'success' });
+                    removeFromCart(cartItem.item.id);
+                } else {
+                    // Handle individual failure
+                    console.error(`Failed to create item request for item ${cartItem.item.id}`);
+                    enqueueSnackbar(`Failed to borrow ${cartItem.item.name}!`, { variant: 'error' });
+                    allSuccessful = false;
+                    setRequest(!request);
+                }
+            } catch (error) {
+                // Handle fetch error
+                console.error(`Fetch error for item ${cartItem.item.id}:`, error);
+                allSuccessful = false;
+                setRequest(!request);
+            }
+        }
+        if (allSuccessful) {
+            enqueueSnackbar('All items successfully borrowed!', { variant: 'success' });
+            clearCart();
+            setRequest(!request);
+        }
+    }
+    
+    const handleSuccess = () => {
+        setRequest(!request);
+    }
+
     const handleNameChange = (value: string | null) => {
         onFilterChange('name', value || '');
         setName(value || '');
@@ -184,7 +249,7 @@ export default function Filters({ active, setActive, onFilterChange, items }: Fi
                                 <ShoppingCartOutlinedIcon fontSize="large" className="cursor-pointer" />
                             </div>
                             <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2">
-                                0
+                                {cart.length}
                             </div>
                             <Menu
                                 anchorEl={anchorEl}
@@ -192,9 +257,46 @@ export default function Filters({ active, setActive, onFilterChange, items }: Fi
                                 onClose={handleMenuClose}
                                 className="cursor-pointer"
                             >
-                                <MenuItem onClick={handleMenuClose}>Menu Item 1 fddf dsfds fsdf sd</MenuItem>
-                                <MenuItem onClick={handleMenuClose}>Menu Item 2</MenuItem>
-                                <MenuItem onClick={handleMenuClose}>Menu Item 3</MenuItem>
+                                {cart.length > 0 ? (
+                                    cart.map((item) => (
+                                        <MenuItem key={item.item.id} onClick={handleMenuClose}>
+                                            <span onClick={(e) => {
+                                                e.stopPropagation(); // Prevent triggering the MenuItem's onClick
+                                                openModal(item.item.id);
+                                            }}>
+                                                {item.item.name}
+                                            </span>
+                                            <IconButton
+                                                edge="end"
+                                                aria-label="remove"
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); // Prevent triggering the MenuItem's onClick
+                                                    removeFromCart(item.item.id);
+                                                    enqueueSnackbar('Item successfully removed from cart', { variant: 'success' });
+                                                }}
+                                                size="small"
+                                            >
+                                                <ClearIcon fontSize="small" />
+                                            </IconButton>
+                                        </MenuItem>
+                                    ))
+                                ) : (
+                                    <MenuItem onClick={handleMenuClose}>No items</MenuItem>
+                                )}
+                                {cart.length > 0 && (
+                                    <MenuItem className="justify-center">
+                                        <Button 
+                                            text="Borrow All"
+                                            fillColor="custom-primary"
+                                            borderColor="custom-primary"
+                                            textColor="white" 
+                                            onClick={() => {
+                                                borrowAllItems();
+                                                handleMenuClose();
+                                            }}
+                                         />
+                                    </MenuItem>
+                                )}
                             </Menu>
                         </div>
                     </Tooltip>

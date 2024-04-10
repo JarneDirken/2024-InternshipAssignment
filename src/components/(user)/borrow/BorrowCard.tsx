@@ -69,7 +69,12 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
 
     useEffect(() => {
         getItems(true);
-    }, [nameFilter, modelFilter, brandFilter, locationFilter, successfullCreated]);
+    }, [nameFilter, modelFilter, brandFilter, locationFilter]);
+
+    useEffect(() => {
+        getItems(true);
+    }, [successfullCreated]);
+
 
     useEffect(() => {
         if (inView && hasMore && !loading) {

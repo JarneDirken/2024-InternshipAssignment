@@ -5,6 +5,26 @@ import { NextRequest } from 'next/server';
 export async function POST(req: NextApiRequest) {
     const { data } = await new Response(req.body).json();
 
+    // Check if the item already has an active request with itemStatusId: 2
+    const existingRequest = await prisma.itemRequest.findFirst({
+        where: {
+            itemId: data.itemId,
+            item: {
+                itemStatusId: 2,
+            },
+        },
+    });
+
+    // If an existing request is found, return an error response
+    if (existingRequest) {
+        return new Response(JSON.stringify({ error: "Item is already in a request." }), {
+            status: 400,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    }
+
     const createItemRequest = await prisma.itemRequest.create({
         data: {
             item: {

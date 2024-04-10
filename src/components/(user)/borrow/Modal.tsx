@@ -11,6 +11,7 @@ import Box from '@mui/material/Box';
 import TextField from "@mui/material/TextField";
 import { LocalizationProvider, StaticDateTimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import useCart from "@/hooks/useCart";
 //icons
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
@@ -34,6 +35,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
     const [endDateTime, setEndDateTime] = useState(new Date('2024-04-12T08:15').toISOString());
     const [request, setRequest] = useRecoilState(createRequest);
     const { enqueueSnackbar } = useSnackbar();
+    const { cart, addToCart, removeFromCart, clearCart } = useCart();
 
     function checkDateTime(startDate: string, endDate: string) {
         const start = new Date(startDate);
@@ -110,8 +112,30 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
         enqueueSnackbar('Borrowed item successfully', { variant: 'success' });
     }
 
+    const handleAddToCart = (item: Item) => {
+        if (!item) {
+            console.error("No item to add");
+            return;
+        }
+    
+        const cartItem = {
+            item,
+            borrowDetails: {
+                startDateTime,
+                endDateTime,
+                isUrgent,
+                file,
+                amount
+            }
+        };
+    
+        const result = addToCart(cartItem);
+        enqueueSnackbar(result.message, { variant: result.success ? 'success' : 'error' });
+        onClose();
+    };
+
     async function borrowItem() {
-        if (!item) {console.log("error"); return;}
+        if (!item) {console.error("error"); return;}
         const data = {
             itemId: item.id,
             requestStatusId: 1,
@@ -139,7 +163,6 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
             console.error('Failed to create item request');
         }
     }
-    
 
     const theme = createTheme({
         palette: {
@@ -290,7 +313,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
                             <button className={`${!isUrgent || file ? 'text-custom-green':'text-custom-gray cursor-not-allowed disabled'}`}>Borrow</button>
                         </div>
                         <div className={`border py-1 px-3 rounded-lg flex items-center gap-1 ${!isUrgent || file ? 'border-custom-primary text-custom-primary cursor-pointer' : 'border-gray-300 text-gray-300 cursor-not-allowed'}`} 
-                            onClick={isUrgent && !file ? undefined : onClose}>
+                            onClick={() => isUrgent && !file ? undefined : handleAddToCart(item)}>
                             <ShoppingCartOutlinedIcon fontSize="small" className={`${!isUrgent || file ? 'text-custom-primary':'text-custom-gray cursor-not-allowed'}`} />
                             <button className={`${!isUrgent || file ? 'text-custom-primary':'text-custom-gray cursor-not-allowed disabled'}`}>Add cart</button>
                         </div>
