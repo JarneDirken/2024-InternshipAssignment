@@ -116,10 +116,11 @@ export default function DashboardHeader() {
                             flex flex-col justify-between overflow-y-auto ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                                 
                 <Image src={'/assets/images/logo.png'} 
-                        className={`overflow-hidden absolute transition-all right-9 top-6`}
-                        height={90}
+                        className="overflow-hidden absolute transition-all right-9 top-6"
+                        alt="Logo"
                         width={90}
-                        alt="Logo" 
+                        height={90}
+                        priority
                 />
                 <div className='flex flex-col w-11/12 mx-auto'>
                     <div className='px-4 mt-24'>
