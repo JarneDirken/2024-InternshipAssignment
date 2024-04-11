@@ -1,3 +1,4 @@
+import { GroupedItem, Item } from '@/models/Item';
 import prisma from '@/services/db';
 import { NextRequest } from 'next/server';
 
@@ -36,10 +37,28 @@ export async function GET(request: NextRequest) {
         }
     });
 
-    return new Response(JSON.stringify({ items, totalCount }), {
+    const groupedItems = groupItems(items as unknown as Item[]);
+
+    return new Response(JSON.stringify({ items: groupedItems, totalCount }), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',
         },
     });
+}
+
+function groupItems(items: Item[]): GroupedItem[] {
+    const grouped: Record<string, GroupedItem> = {};
+
+    items.forEach(item => {
+        const key = `${item.name}-${item.model}-${item.brand}-${item.locationId}-${item.itemStatusId}`;
+        
+        if (!grouped[key]) {
+            grouped[key] = { ...item, count: 1 };
+        } else {
+            grouped[key].count++;
+        }
+    });
+
+    return Object.values(grouped) as GroupedItem[];
 }

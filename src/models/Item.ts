@@ -8,12 +8,16 @@ export interface Item {
     model: string,
     brand: string,
     image?: string,
-    yearBought: Date,
+    yearBought?: Date,
     active: boolean,
     number: string,
     notes?: string,
     schoolNumber?: string,
     location: Location,
     consumable: boolean,
-    amount: number,
+    amount?: number,
+}
+
+export interface GroupedItem extends Item {
+    count: number;
 }
