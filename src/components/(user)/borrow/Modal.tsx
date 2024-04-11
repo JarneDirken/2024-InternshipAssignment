@@ -12,6 +12,7 @@ import TextField from "@mui/material/TextField";
 import { LocalizationProvider, StaticDateTimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import useCart from "@/hooks/useCart";
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 //icons
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
@@ -29,13 +30,15 @@ interface ModalCardProps {
 export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
     const [value, setValue] = useState(dayjs()); // date picker
     const [amount, setAmount] = useState<string | null>(null);
-    const [isUrgent, setIsUrgent] = useState(false); // change this to view / not view the urgent borrow request
+    const [isUrgent, setIsUrgent] = useState(true); // change this to view / not view the urgent borrow request
     const [file, setFile] = useState<File | null>(null); // file uploader
+    const [fileUrl, setFileUrl] = useState('');
     const [startDateTime, setStartDateTime] = useState(new Date('2024-04-08T08:20').toISOString());
     const [endDateTime, setEndDateTime] = useState(new Date('2024-04-12T08:15').toISOString());
     const [request, setRequest] = useRecoilState(createRequest);
     const { enqueueSnackbar } = useSnackbar();
     const { cart, addToCart, removeFromCart, clearCart } = useCart();
+    const primitiveUserId = userId ? String(userId) : null;
 
     function checkDateTime(startDate: string, endDate: string) {
         const start = new Date(startDate);
@@ -75,6 +78,21 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
         setIsUrgent(true);
     }
 
+    const handleUploadToFirebase = async (file: File, userId: string) => {
+        const storage = getStorage();
+        // Ensure you include the authenticated user's UID in the path
+        const storageRef = ref(storage, `files/${userId}/${file.name}`);
+    
+        try {
+            const snapshot = await uploadBytes(storageRef, file);
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            setFileUrl(downloadURL);
+            return downloadURL;
+        } catch (error) {
+            console.error('Error uploading file:', error);
+        }
+    };    
+
     const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = event.target.value;
         setAmount(inputValue !== '' ? inputValue : null);
@@ -84,26 +102,45 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
         event.preventDefault();
     };
     
-    const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+    const handleDrop = async (event: React.DragEvent<HTMLLabelElement>) => {
         event.preventDefault();
         const files = event.dataTransfer.files;
         if (files.length > 0) {
             setFile(files[0]);
+            if (primitiveUserId) {
+                await handleUploadToFirebase(files[0], primitiveUserId);
+              } else {
+                console.error("User ID is null, cannot upload file.");
+              }
         }
     };
     
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
-          setFile(event.target.files[0]);
+            setFile(event.target.files[0]);
+            if (primitiveUserId) {
+                await handleUploadToFirebase(event.target.files[0], primitiveUserId);
+            } else {
+                console.error("User ID is null, cannot upload file.");
+            }
         }
     };
 
-    const handleClearFile = () => {
-        setFile(null);
-        // Reset the file input value
-        const fileInput = document.getElementById('file-upload') as HTMLInputElement;
-        if (fileInput) {
-            fileInput.value = '';
+    const handleClearFile = async () => {
+        if (file) {
+            const storage = getStorage();
+            const fileRef = ref(storage, `gs://internshipassignment-c6d15.appspot.com/files/${file.name}`);
+    
+            try {
+                await deleteObject(fileRef);
+                console.log('File deleted successfully from Firebase Storage');
+                setFile(null);
+                // Reset the file input value if necessary
+                const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+                if (fileInput) fileInput.value = '';
+            } catch (error) {
+                console.error('Error deleting file:', error);
+            }
         }
     };
 
@@ -143,7 +180,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
             requestDate: new Date().toISOString(),
             startBorrowDate: startDateTime,
             endBorrowDate: endDateTime,
-            file,
+            file: fileUrl,
             isUrgent: isUrgent,
             amountRequest: amount,
         };
