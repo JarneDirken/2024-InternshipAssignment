@@ -49,7 +49,7 @@ export default function DashboardLayout({
               <SidebarItem 
               icon={<HistoryOutlinedIcon fontSize="inherit" className="text-3xl" />} 
               text="History"  
-              active={pathname === "/history"}/>
+              active={pathname === "/history"}  />
             </Link>
 
             <SidebarHeading>Supervisor</SidebarHeading>
@@ -59,7 +59,12 @@ export default function DashboardLayout({
           
             <SidebarHeading>Admin</SidebarHeading>
 
-            <SidebarItem icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-3xl" />} text="Products"  />
+            <Link href="/product">
+              <SidebarItem 
+                icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-3xl" />} 
+                text="Products"
+                active={pathname === "/product"}  />
+            </Link>
             <SidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Locations"  />
             <SidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Users"  />
           </Sidebar>

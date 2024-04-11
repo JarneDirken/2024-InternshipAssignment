@@ -140,9 +140,9 @@ export default function DashboardHeader() {
                             </Link>
                             <Link href="/history">
                                 <MobileSidebarItem 
-                                icon={<HistoryOutlinedIcon fontSize="inherit" className="text-2xl" />} 
-                                text="History"  
-                                active={pathname === "/history"}/>
+                                    icon={<HistoryOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    text="History"  
+                                    active={pathname === "/history"}  />
                             </Link>
 
                             <div className='border-b my-5'></div>
@@ -154,7 +154,12 @@ export default function DashboardHeader() {
                             <div className='border-b my-5'></div>
                             <MobileSidebarHeading>Admin</MobileSidebarHeading>
 
-                            <MobileSidebarItem icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-2xl" />} text="Products"  />
+                            <Link href="/product">
+                                <MobileSidebarItem 
+                                    icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    text="Products"
+                                    active={pathname === "/product"}  />
+                            </Link>
                             <MobileSidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Locations"  />
                             <MobileSidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Users"  />
                         </ul>
