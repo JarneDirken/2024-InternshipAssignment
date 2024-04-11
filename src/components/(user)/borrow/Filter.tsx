@@ -35,6 +35,7 @@ interface FiltersProps { // typescript moment, everthing should have a type
 export default function Filters({ active, setActive, onFilterChange, items, openModal, userId }: FiltersProps) {
     const [locations, setLocations] = useState<Location[]>([]);
     const prevWidthRef = useRef(window.innerWidth);
+    const lastActiveRef = useRef<boolean | null>(null);
     const [name, setName] = useState('');
     const [model, setModel] = useState('');
     const [brand, setBrand] = useState('');
@@ -77,18 +78,18 @@ export default function Filters({ active, setActive, onFilterChange, items, open
     }, [])
 
     useEffect(() => {
-        if (window.innerWidth < 1024) {
-            setActive(false);
-        }
-    }, [setActive]);
-
-    useEffect(() => {
         const handleResize = () => {
             const width = window.innerWidth;
             const prevWidth = prevWidthRef.current;
 
-            if (prevWidth >= 1024 && width < 1024) {
+            if (prevWidth >= 1280 && width < 1280) {
+                lastActiveRef.current = active; // Store active only when crossing the boundary from large to small
                 setActive(false);
+            } else if (prevWidth < 1280 && width >= 1280) {
+                // Only restore active when crossing the boundary from small to large
+                if (lastActiveRef.current !== null) {
+                    setActive(lastActiveRef.current);
+                }
             }
 
             prevWidthRef.current = width;
@@ -96,6 +97,13 @@ export default function Filters({ active, setActive, onFilterChange, items, open
 
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
+    }, [active, setActive]);
+
+    // Separate useEffect for initial load
+    useEffect(() => {
+        if (window.innerWidth < 1280) {
+            setActive(false);
+        }
     }, [setActive]);
 
     async function getLocations() {
@@ -147,7 +155,6 @@ export default function Filters({ active, setActive, onFilterChange, items, open
     
                 if (response.ok) {
                     // Handle individual success
-                    console.log(`Item ${cartItem.item.id} borrowed successfully`);
                     enqueueSnackbar(`Item ${cartItem.item.name} succesfully borrowed!`, { variant: 'success' });
                     removeFromCart(cartItem.item.id);
                 } else {
@@ -169,10 +176,6 @@ export default function Filters({ active, setActive, onFilterChange, items, open
             clearCart();
             setRequest(!request);
         }
-    }
-    
-    const handleSuccess = () => {
-        setRequest(!request);
     }
 
     const handleNameChange = (value: string | null) => {
@@ -229,7 +232,7 @@ export default function Filters({ active, setActive, onFilterChange, items, open
                     <h1 className="font-semibold text-2xl">Borrow</h1>
                 </div>
                 <div className="flex items-center gap-6">
-                    <div className="lg:flex items-center gap-1 hidden">
+                    <div className="xl:flex items-center gap-1 hidden">
                         <Tooltip title="List view" arrow>
                             <div className={`cursor-pointer rounded-full p-1 ${active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
                                 onClick={() => setActive(true)}>
@@ -243,7 +246,6 @@ export default function Filters({ active, setActive, onFilterChange, items, open
                             </div>
                         </Tooltip>
                     </div>
-                    <Tooltip title="Shopping cart" arrow placement="top">
                         <div className="relative">
                             <div onClick={handleMenuOpen}>
                                 <ShoppingCartOutlinedIcon fontSize="large" className="cursor-pointer" />
@@ -299,9 +301,8 @@ export default function Filters({ active, setActive, onFilterChange, items, open
                                 )}
                             </Menu>
                         </div>
-                    </Tooltip>
+                    </div>
                 </div>
-            </div>
             <hr className="hidden md:block" />
             <div className="p-4">
                 <ThemeProvider theme={theme}>

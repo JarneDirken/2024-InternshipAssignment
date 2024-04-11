@@ -119,10 +119,9 @@ async function createRoleItem(){
 async function createItem() {
     const items = [
         {
-            id: 1,
-            locationId: 1,
+            locationId: 13,
             itemStatusId: 1,
-            name: "Digital Multimeter UT89XD (01)",
+            name: "Digital Multimeter UT89XD",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
             yearBought: "2018",
@@ -131,10 +130,9 @@ async function createItem() {
             consumable: true
         },
         {
-            id: 2,
-            locationId: 1,
-            itemStatusId: 2,
-            name: "Digital Multimeter UT89XD (02)",
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Digital Multimeter UT89XD",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
             yearBought: "2018",
@@ -142,10 +140,9 @@ async function createItem() {
             image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2Fmultimeter.png?alt=media&token=25081b29-2a6e-4718-aef6-c9a61fe395ce"
         },
         {
-            id: 3,
-            locationId: 3,
+            locationId: 13,
             itemStatusId: 3,
-            name: "Digital Multimeter UT89XD (03)",
+            name: "Digital Multimeter UT89XD",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
             yearBought: "2018",
@@ -153,10 +150,9 @@ async function createItem() {
             image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2Fmultimeter.png?alt=media&token=25081b29-2a6e-4718-aef6-c9a61fe395ce"
         },
         {
-            id: 4,
-            locationId: 3,
+            locationId: 13,
             itemStatusId: 4,
-            name: "Digital Multimeter UT89XD (04)",
+            name: "Digital Multimeter UT89XD",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
             yearBought: "2018",
@@ -164,10 +160,9 @@ async function createItem() {
             image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2Fmultimeter.png?alt=media&token=25081b29-2a6e-4718-aef6-c9a61fe395ce"
         },
         {
-            id: 5,
-            locationId: 3,
+            locationId: 13,
             itemStatusId: 5,
-            name: "Digital Multimeter UT89XD (05)",
+            name: "Digital Multimeter UT89XD",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
             yearBought: "2018",
@@ -175,10 +170,9 @@ async function createItem() {
             image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2Fmultimeter.png?alt=media&token=25081b29-2a6e-4718-aef6-c9a61fe395ce"
         },
         {
-            id: 6,
-            locationId: 3,
+            locationId: 13,
             itemStatusId: 6,
-            name: "Digital Multimeter UT89XD (06)",
+            name: "Digital Multimeter UT89XD",
             model: "MULTIMETER KITS",
             brand: "UNI-T",
             yearBought: "2018",
@@ -186,10 +180,9 @@ async function createItem() {
             image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2Fmultimeter.png?alt=media&token=25081b29-2a6e-4718-aef6-c9a61fe395ce"
         },
         {
-            id: 7,
-            locationId: 3,
+            locationId: 13,
             itemStatusId: 1,
-            name: "Basic Arduino Learning Kit (01)",
+            name: "Basic Arduino Learning Kit",
             model: "COMPUTER ACCESORIES",
             brand: "ThaiEasyElec",
             yearBought: "2018",
@@ -197,10 +190,9 @@ async function createItem() {
             image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
         },
         {
-            id: 8,
-            locationId: 3,
+            locationId: 13,
             itemStatusId: 1,
-            name: "Basic Arduino Learning Kit (02)",
+            name: "Basic Arduino Learning Kit",
             model: "COMPUTER ACCESORIES",
             brand: "ThaiEasyElec",
             yearBought: "2018",
@@ -208,10 +200,9 @@ async function createItem() {
             image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
         },
         {
-            id: 9,
-            locationId: 3,
+            locationId: 13,
             itemStatusId: 1,
-            name: "Basic Arduino Learning Kit (03)",
+            name: "Basic Arduino Learning Kit",
             model: "COMPUTER ACCESORIES",
             brand: "ThaiEasyElec",
             yearBought: "2018",
@@ -219,21 +210,290 @@ async function createItem() {
             image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
         },
         {
-            id: 10,
-            locationId: 3,
+            locationId: 13,
             itemStatusId: 1,
-            name: "Basic Arduino Learning Kit (04)",
+            name: "Basic Arduino Learning Kit",
             model: "COMPUTER ACCESORIES",
             brand: "ThaiEasyElec",
             yearBought: "2018",
             number: "RAI-COMP-ACES-801-04",
             image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
         },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-05",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-06",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-07",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-08",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-09",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-10",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-11",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-12",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-13",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-14",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-15",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-16",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-17",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-18",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-19",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-20",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-21",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-22",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-23",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-24",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-25",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-26",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Basic Arduino Learning Kit",
+            model: "COMPUTER ACCESORIES",
+            brand: "ThaiEasyElec",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-801-27",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino.png?alt=media&token=6f1cdaca-06c9-41bc-85da-a7b9eaf6c2be"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Arduino Mega 2560 R3",
+            model: "COMPUTER ACCESORIES",
+            brand: "Arduino",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-2101-01",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino_Mega_2560_R3-removebg-preview.png?alt=media&token=e756ba4c-2e4f-4aac-aba0-5b5bfbc8593c"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "Arduino Mega 2560 R3",
+            model: "COMPUTER ACCESORIES",
+            brand: "Arduino",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-2101-02",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FArduino_Mega_2560_R3-removebg-preview.png?alt=media&token=e756ba4c-2e4f-4aac-aba0-5b5bfbc8593c"
+        },
+        {
+            locationId: 13,
+            itemStatusId: 1,
+            name: "AC-DC Adapter 9V, 2A",
+            model: "POWER SUPPLIES",
+            brand: "Venus Supply",
+            yearBought: "2018",
+            number: "RAI-ELEC-POW-401-01",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2FAC-DC_Adapter_9V__2A-removebg-preview.png?alt=media&token=d4046e97-a376-433d-84c8-f99e335be33d"
+        },
+        {
+            locationId: 10,
+            itemStatusId: 1,
+            name: "HDMI Cable 3m",
+            model: "COMPUTER ACCESORIES",
+            brand: "Unitek",
+            yearBought: "2018",
+            number: "RAI-COMP-ACES-106-01",
+            image: "https://firebasestorage.googleapis.com/v0/b/internshipassignment-c6d15.appspot.com/o/itemPictures%2Fhdmi_cable-removebg-preview.png?alt=media&token=b547607e-29f0-4283-964c-517f07dd6a98"
+        },
     ];
 
     for (const item of items) {
         await prisma.item.upsert({
-            where: { id: item.id },
+            where: { number: item.number },
             update: {},
             create: {
                 locationId: item.locationId,

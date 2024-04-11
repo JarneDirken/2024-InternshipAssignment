@@ -90,6 +90,10 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
         };
         return date.toLocaleDateString('en-US', options);
     }
+
+    useEffect(() => {
+        console.log(requests);
+    }, [requests])
     
     if (loading) { return (<Loading />); }
 
@@ -106,7 +110,11 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between">
                                 <div className="flex flex-row gap-10 items-center">
                                     <div>
-                                        <img src={request.item.image} height={100} width={100} alt={request.item.name} />
+                                    <img 
+                                        src={request.item.image}
+                                        alt={request.item.name} 
+                                        style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                        />
                                     </div>
                                     <div className="flex flex-col">
                                         <div className="truncate">
@@ -176,7 +184,11 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                 <hr />
                                 <div className="flex items-center p-4">
                                     <div className="w-1/3 flex justify-center mr-2">
-                                        <img src={request.item.image} height={140} width={140} alt={request.item.name} />
+                                    <img 
+                                        src={request.item.image}
+                                        alt={request.item.name} 
+                                        style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                        />
                                     </div>
                                     <div className="flex flex-col items-start w-2/3">
                                         <div className="flex items-center gap-6">
