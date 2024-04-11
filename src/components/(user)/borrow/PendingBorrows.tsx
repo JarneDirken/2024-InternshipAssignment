@@ -90,10 +90,6 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
         };
         return date.toLocaleDateString('en-US', options);
     }
-
-    useEffect(() => {
-        console.log(requests);
-    }, [requests])
     
     if (loading) { return (<Loading />); }
 
@@ -107,16 +103,16 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                 {requests.map((request) => (
                     <div key={request.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
-                            <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between">
-                                <div className="flex flex-row gap-10 items-center">
-                                    <div>
-                                    <img 
-                                        src={request.item.image}
-                                        alt={request.item.name} 
-                                        style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
-                                        />
+                            <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
+                                <div className="flex flex-row items-center w-full">
+                                    <div className="w-1/12">
+                                        <img 
+                                            src={request.item.image}
+                                            alt={request.item.name} 
+                                            style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                            />
                                     </div>
-                                    <div className="flex flex-col">
+                                    <div className="flex flex-col w-1/4">
                                         <div className="truncate">
                                             <span className="font-semibold">Name:&nbsp;</span>
                                             <span>{request.item.name}</span>
@@ -126,7 +122,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                             <span>{request.item.model}</span>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col">
+                                    <div className="flex flex-col w-1/3">
                                         <div className="truncate">
                                             <span className="font-semibold">Brand:&nbsp;</span>
                                             <span>{request.item.brand}</span>
@@ -147,7 +143,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col items-center gap-1">
+                                <div className="flex flex-col items-center gap-1 w-1/12">
                                     <Button 
                                         text="Cancel"
                                         textColor="custom-red"

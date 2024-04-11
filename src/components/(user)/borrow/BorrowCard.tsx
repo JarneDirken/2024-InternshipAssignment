@@ -28,7 +28,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
     const listRef = useRef<HTMLDivElement>(null);
 
     const cardContainerHeight = "calc(100vh - 25.6rem)";
-    const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll";
+    const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll w-full";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
 
     useEffect(() => {
@@ -139,16 +139,16 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                 {items.map((item) => (
                     <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
-                            <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between">
-                                <div className="flex flex-row gap-10 items-center">
-                                    <div>
-                                    <img 
-                                        src={item.image}
-                                        alt={item.name} 
-                                        style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
-                                        />
+                            <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
+                                <div className="flex flex-row items-center w-full">
+                                    <div className="w-1/12">
+                                        <img 
+                                            src={item.image}
+                                            alt={item.name} 
+                                            style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                            />
                                     </div>
-                                    <div className="flex flex-col">
+                                    <div className="flex flex-col w-1/4">
                                         <div className="truncate">
                                             <span className="font-semibold">Name:&nbsp;</span>
                                             <span>{item.name}</span>
@@ -177,13 +177,13 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                         </div>
                                     </div>
                                 </div>
-                                <div>
+                                <div className="w-1/12">
                                     {renderItemStatus(item)}
                                 </div>
                             </div>
                         ) : (
-                            <div className="overflow-hidden">
-                                <div className="flex justify-between">
+                            <div className="overflow-hidden w-full">
+                                <div className="flex justify-between w-full">
                                     <div className="p-2">
                                         <span className="text-lg font-semibold truncate">{item.name}</span>
                                     </div>
@@ -194,12 +194,12 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                     </div>
                                 </div>
                                 <hr />
-                                <div className="flex items-center p-4 max-w-xs">
+                                <div className="flex items-center p-4 max-w-xs w-full">
                                     <div className="w-1/3 flex justify-center mr-2">
-                                    <img 
-                                        src={item.image}
-                                        alt={item.name} 
-                                        style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                        <img 
+                                            src={item.image}
+                                            alt={item.name} 
+                                            style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
                                         />
                                     </div>
                                     <div className="flex flex-col items-start w-2/3">

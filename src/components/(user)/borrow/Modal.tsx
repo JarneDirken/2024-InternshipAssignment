@@ -133,7 +133,6 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
     
             try {
                 await deleteObject(fileRef);
-                console.log('File deleted successfully from Firebase Storage');
                 setFile(null);
                 // Reset the file input value if necessary
                 const fileInput = document.getElementById('file-upload') as HTMLInputElement;
