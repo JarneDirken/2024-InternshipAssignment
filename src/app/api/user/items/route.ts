@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const brandFilter = searchParams.get('brand') || '';
     const locationFilter = searchParams.get('location') || '';
     const offset = parseInt(searchParams.get('offset') || '0');
-    const limit = parseInt(searchParams.get('limit') || '9');
+    const limit = parseInt(searchParams.get('limit') || '10');
 
     const items = await prisma.item.findMany({
         where: {
@@ -23,8 +23,6 @@ export async function GET(request: NextRequest) {
         orderBy: {
             name: 'asc',
         },
-        skip: offset,
-        take: limit,
     });
 
     const totalCount = await prisma.item.count({
@@ -38,8 +36,9 @@ export async function GET(request: NextRequest) {
     });
 
     const groupedItems = groupItems(items as unknown as Item[]);
+    const paginatedGroups = groupedItems.slice(offset, offset + limit);
 
-    return new Response(JSON.stringify({ items: groupedItems, totalCount }), {
+    return new Response(JSON.stringify({ items: paginatedGroups, totalCount }), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',
@@ -52,7 +51,7 @@ function groupItems(items: Item[]): GroupedItem[] {
 
     items.forEach(item => {
         const key = `${item.name}-${item.model}-${item.brand}-${item.locationId}-${item.itemStatusId}`;
-        
+
         if (!grouped[key]) {
             grouped[key] = { ...item, count: 1 };
         } else {
@@ -60,5 +59,5 @@ function groupItems(items: Item[]): GroupedItem[] {
         }
     });
 
-    return Object.values(grouped) as GroupedItem[];
+    return Object.values(grouped);
 }

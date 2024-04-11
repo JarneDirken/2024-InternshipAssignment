@@ -182,7 +182,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
       });
 
     if(!item) { return;}
-    
+
     return (
         <MaterialUIModal
             open={open}

@@ -24,7 +24,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const { ref, inView } = useInView();
-    const NUMBER_OF_ITEMS_TO_FETCH = 9;
+    const NUMBER_OF_ITEMS_TO_FETCH = 10;
     const listRef = useRef<HTMLDivElement>(null);
 
     const cardContainerHeight = "calc(100vh - 25.6rem)";
@@ -55,43 +55,6 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
             });
         }
     }, [inView, loading, hasMore]);
-
-    // get items with pagination and filter on SERVER SIDE
-    // async function getItems(initialLoad = false) {
-    //     if (!hasMore && !initialLoad) return;
-        
-    //     setLoading(true);
-    //     const currentOffset = initialLoad ? 0 : offset;
-    //     const queryString = new URLSearchParams({
-    //         name: nameFilter,
-    //         model: modelFilter,
-    //         brand: brandFilter,
-    //         location: locationFilter,
-    //         offset: currentOffset.toString(),
-    //         limit: NUMBER_OF_ITEMS_TO_FETCH.toString()
-    //     }).toString();
-
-    //     try {
-    //         const response = await fetch(`/api/user/items?${queryString}`);
-    //         if (!response.ok) {
-    //             throw new Error(`HTTP error! Status: ${response.status}`);
-    //         }
-
-    //         const data = await response.json();
-    //         if (initialLoad) {
-    //             setItems(data.items);
-    //         } else {
-    //             setItems(prevItems => [...prevItems, ...data.items]);
-    //         }
-
-    //         setOffset(currentOffset + data.items.length);
-    //         setHasMore(data.items.length === NUMBER_OF_ITEMS_TO_FETCH);
-    //     } catch (error) {
-    //         console.error("Failed to fetch items:", error);
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // }
 
     async function getItems(initialLoad = false) {
         if (!hasMore && !initialLoad) return;
@@ -179,7 +142,11 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between">
                                 <div className="flex flex-row gap-10 items-center">
                                     <div>
-                                        <img src={item.image} height={100} width={100} alt={item.name} />
+                                    <img 
+                                        src={item.image}
+                                        alt={item.name} 
+                                        style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                        />
                                     </div>
                                     <div className="flex flex-col">
                                         <div className="truncate">
@@ -229,7 +196,11 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                 <hr />
                                 <div className="flex items-center p-4 max-w-xs">
                                     <div className="w-1/3 flex justify-center mr-2">
-                                        <img src={item.image} height={140} width={140} alt={item.name} />
+                                    <img 
+                                        src={item.image}
+                                        alt={item.name} 
+                                        style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                        />
                                     </div>
                                     <div className="flex flex-col items-start w-2/3">
                                         <div className="flex items-center gap-6 max-w-full">

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useSnackbar } from "notistack";
 import { CartItem } from "@/models/CartItem";
 
 const CART_EVENT = "cartUpdated";
@@ -9,7 +8,6 @@ export default function useCart() {
         const savedCart = localStorage.getItem("cart");
         return savedCart ? JSON.parse(savedCart) : [];
     });
-    const { enqueueSnackbar } = useSnackbar();
 
     // Update localStorage and dispatch event when the cart changes
     useEffect(() => {

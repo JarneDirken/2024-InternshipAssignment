@@ -246,7 +246,6 @@ export default function Filters({ active, setActive, onFilterChange, items, open
                             </div>
                         </Tooltip>
                     </div>
-                    <Tooltip title="Shopping cart" arrow placement="top">
                         <div className="relative">
                             <div onClick={handleMenuOpen}>
                                 <ShoppingCartOutlinedIcon fontSize="large" className="cursor-pointer" />
@@ -302,9 +301,8 @@ export default function Filters({ active, setActive, onFilterChange, items, open
                                 )}
                             </Menu>
                         </div>
-                    </Tooltip>
+                    </div>
                 </div>
-            </div>
             <hr className="hidden md:block" />
             <div className="p-4">
                 <ThemeProvider theme={theme}>
