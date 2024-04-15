@@ -141,7 +141,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                         {active ? (
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
                                 <div className="flex flex-row items-center w-full">
-                                    <div className="w-1/12">
+                                    <div className="w-1/12 mr-2">
                                         <img 
                                             src={item.image}
                                             alt={item.name} 

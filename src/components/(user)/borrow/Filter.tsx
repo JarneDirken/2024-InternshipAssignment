@@ -74,10 +74,6 @@ export default function Filters({ active, setActive, onFilterChange, items, open
     };
 
     useEffect(() => {
-        getLocations();
-    }, [])
-
-    useEffect(() => {
         const handleResize = () => {
             const width = window.innerWidth;
             const prevWidth = prevWidthRef.current;
@@ -105,29 +101,6 @@ export default function Filters({ active, setActive, onFilterChange, items, open
             setActive(false);
         }
     }, [setActive]);
-
-    async function getLocations() {
-        const auth = getAuth(app);
-        const user = auth.currentUser;
-        if (user) {
-            try {
-                const token = await getIdToken(user);
-                const response = await fetch('/api/locations', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `${token}`
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const data = await response.json();
-                setLocations(data);
-            } catch (error) {
-                console.error("Failed to fetch locations:", error);
-            }
-        }
-    }
 
     async function borrowAllItems() {
         let allSuccessful = true;
@@ -380,7 +353,7 @@ export default function Filters({ active, setActive, onFilterChange, items, open
                                 id="combo-box-demo"
                                 value={location || null}
                                 onChange={(event, value) => handleLocationChange(value)}
-                                options={locations.map(location => location.name)}
+                                options={[...new Set(items.map(item => item.location.name))]} // Ensure unique locations
                                 isOptionEqualToValue={(option, value) => option === value}
                                 sx={{ width: '100%' }}
                                 renderInput={(params) => (

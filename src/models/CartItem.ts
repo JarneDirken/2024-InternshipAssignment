@@ -3,10 +3,10 @@ import { Item } from "./Item";
 export interface CartItem {
     item: Item;
     borrowDetails: {
-        startDateTime: string;
-        endDateTime: string;
+        startDateTime: Date | null;
+        endDateTime: Date | null;
         isUrgent: boolean;
-        file: File | null;
+        file: string | null;
         amount: string | null;
     };
 }

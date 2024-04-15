@@ -94,7 +94,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
     if (loading) { return (<Loading />); }
 
     if (requests.length === 0) {
-        return <div>No borrow requests found!</div>;
+        return <div className="flex justify-center">No borrow requests found!</div>;
     }
 
     return (
@@ -105,7 +105,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                         {active ? (
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
                                 <div className="flex flex-row items-center w-full">
-                                    <div className="w-1/12">
+                                    <div className="w-1/12 mr-2">
                                         <img 
                                             src={request.item.image}
                                             alt={request.item.name} 
