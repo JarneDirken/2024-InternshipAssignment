@@ -151,13 +151,6 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                         paddingY="py-0"
                                         onClick={() => cancelPendingBorrow(request.id, request.itemId)}
                                     />
-                                    <Button 
-                                        text="View" 
-                                        textColor="white" 
-                                        borderColor="custom-primary" 
-                                        fillColor="custom-primary"
-                                        paddingY="py-0"
-                                    />
                                 </div>
                             </div>
                         ) : (
