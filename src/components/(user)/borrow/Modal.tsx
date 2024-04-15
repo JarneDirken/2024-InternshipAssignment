@@ -375,27 +375,25 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold text-gray-400">Borrow date</span>
                                     {borrowDate && returnDate && (
-                                        <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold cursor-pointer"
-                                            onClick={() => handleEditDate("borrow")}>
-                                            <EditIcon fontSize="small" />
+                                        <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold cursor-pointer">
+                                            <EditIcon fontSize="small" onClick={() => handleEditDate("borrow")} />
                                         </div>
                                     )}
                                 </div>
                                 {!borrowDate && (<span>Select a date</span>)}
-                                <span  className="cursor-pointer">{formatDateDisplay(borrowDate)}</span>
+                                <span >{formatDateDisplay(borrowDate)}</span>
                             </div>
                             <div className="flex flex-col">
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold text-gray-400">Return date</span>
                                     {borrowDate && returnDate && (
-                                        <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold cursor-pointer"
-                                            onClick={() => handleEditDate("return")}>
-                                            <EditIcon fontSize="small" />
+                                        <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold cursor-pointer">
+                                            <EditIcon fontSize="small" onClick={() => handleEditDate("return")}/>
                                         </div>
                                     )}
                                 </div>
                                 {!returnDate && (<span>Select a date</span>)}
-                                <span className="cursor-pointer">{formatDateDisplay(returnDate)}</span>
+                                <span>{formatDateDisplay(returnDate)}</span>
                             </div>
                         </div>
                     </div>

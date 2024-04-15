@@ -235,29 +235,33 @@ export default function Filters({ active, setActive, onFilterChange, items, open
                                 {cart.length > 0 ? (
                                     cart.map((item) => (
                                         <MenuItem key={item.item.id} onClick={handleMenuClose}>
-                                            <span onClick={(e) => {
-                                                e.stopPropagation(); // Prevent triggering the MenuItem's onClick
-                                                openModal(item.item.id);
-                                            }}>
-                                                {item.item.name}
-                                            </span>
-                                            <IconButton
-                                                edge="end"
-                                                aria-label="remove"
-                                                onClick={(e) => {
-                                                    e.stopPropagation(); // Prevent triggering the MenuItem's onClick
-                                                    removeFromCart(item.item.id);
-                                                    enqueueSnackbar('Item successfully removed from cart', { variant: 'success' });
-                                                }}
-                                                size="small"
-                                            >
-                                                <ClearIcon fontSize="small" />
-                                            </IconButton>
+                                            <div className="flex justify-between items-center w-full">
+                                                <span onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openModal(item.item.id);
+                                                }}>
+                                                    {item.item.name}
+                                                </span>
+                                                <IconButton
+                                                    edge="end"
+                                                    aria-label="remove"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        removeFromCart(item.item.id);
+                                                        enqueueSnackbar('Item successfully removed from cart', { variant: 'success' });
+                                                    }}
+                                                    size="small"
+                                                    className="justify-end"
+                                                >
+                                                    <ClearIcon fontSize="small" />
+                                                </IconButton>
+                                            </div>
                                         </MenuItem>
                                     ))
                                 ) : (
                                     <MenuItem onClick={handleMenuClose}>No items</MenuItem>
                                 )}
+
                                 {cart.length > 0 && (
                                     <MenuItem className="justify-center">
                                         <Button 

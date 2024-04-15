@@ -163,7 +163,6 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                     <div className="flex flex-col">
                                         <div className="flex gap-8 items-center">
                                         <div className="truncate flex items-center">
-                                                {/* <NumbersIcon fontSize="small" className="text-gray-700"/> */}
                                                 <span className="font-semibold">Amount:&nbsp;</span>
                                                 <span>{item.count}</span>
                                             </div>
@@ -190,7 +189,6 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                         <span className="text-sm font-semibold truncate sm:text-lg">{item.name}</span>
                                     </div>
                                     <div className="truncate flex items-center p-2 text-sm sm:text-base">
-                                        {/* <NumbersIcon fontSize="small" className=""/> */}
                                         <span className="font-semibold">Amount:&nbsp;</span>
                                         <span>{item.count}</span>
                                     </div>
