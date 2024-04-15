@@ -157,14 +157,14 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                             <div className="overflow-hidden">
                                 <div className="p-2 flex items-center">
                                     <div className="flex w-1/2 flex-wrap">
-                                        <span className="text-lg font-semibold flex-wrap">{request.item.name}</span>
+                                        <span className="font-semibold flex-wrap text-sm sm:text-lg">{request.item.name}</span>
                                     </div>
                                     <div className="w-1/2 flex flex-col items-end">
-                                        <div className="flex items-center text-custom-primary gap-1">
+                                        <div className="flex items-center text-custom-primary gap-1 text-sm sm:text-base">
                                             <AccessTimeIcon fontSize="small"/>
                                             <span className="truncate">Pending</span>
                                         </div>
-                                        <div className="flex truncate items-center text-gray-400 gap-1 text-sm">
+                                        <div className="flex truncate items-center text-gray-400 gap-1 text-xs sm:text-sm">
                                             <AccessTimeIcon fontSize="small"/>
                                             <span>{formatDate(new Date(request.startBorrowDate))} - {formatDate(new Date(request.endBorrowDate))}</span>
                                         </div>
@@ -181,16 +181,16 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                     </div>
                                     <div className="flex flex-col items-start w-2/3">
                                         <div className="flex items-center gap-6">
-                                            <div className="flex flex-col items-start truncate">
+                                            <div className="flex flex-col items-start truncate text-sm sm:text-base">
                                                 <span className="text-gray-400">Model</span>
                                                 <span>{request.item.model}</span>
                                             </div>
-                                            <div className="flex flex-col items-start truncate">
+                                            <div className="flex flex-col items-start truncate text-sm sm:text-base">
                                                 <span className="text-gray-400">Brand</span>
                                                 <span>{request.item.brand}</span>
                                             </div>
                                         </div>
-                                        <div className="truncate flex flex-col items-start w-full">
+                                        <div className="truncate flex flex-col items-start w-full text-sm sm:text-base">
                                             <span className="text-gray-400">Location</span>
                                             <span>{request.item.location.name}</span>
                                         </div>

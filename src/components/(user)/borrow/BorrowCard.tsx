@@ -187,9 +187,9 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                             <div className="overflow-hidden w-full">
                                 <div className="flex justify-between w-full">
                                     <div className="p-2">
-                                        <span className="text-lg font-semibold truncate">{item.name}</span>
+                                        <span className="text-sm font-semibold truncate sm:text-lg">{item.name}</span>
                                     </div>
-                                    <div className="truncate flex items-center p-2">
+                                    <div className="truncate flex items-center p-2 text-sm sm:text-base">
                                         {/* <NumbersIcon fontSize="small" className=""/> */}
                                         <span className="font-semibold">Amount:&nbsp;</span>
                                         <span>{item.count}</span>
@@ -206,16 +206,16 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                     </div>
                                     <div className="flex flex-col items-start w-2/3">
                                         <div className="flex items-center gap-6 max-w-full">
-                                            <div className="flex flex-col items-start max-w-2/3">
+                                            <div className="flex flex-col items-start max-w-2/3 text-sm sm:text-base">
                                                 <span className="text-gray-400">Model</span>
                                                 <span className="truncate">{item.model}</span>
                                             </div>
-                                            <div className="flex flex-col items-start max-w-1/3">
+                                            <div className="flex flex-col items-start max-w-1/3 text-sm sm:text-base">
                                                 <span className="text-gray-400">Brand</span>
                                                 <span className="truncate">{item.brand}</span>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col items-start w-full">
+                                        <div className="flex flex-col items-start w-full text-sm sm:text-base">
                                             <span className="text-gray-400">Location</span>
                                             <span className="truncate">{item.location.name}</span>
                                         </div>
