@@ -20,4 +20,5 @@ export interface Item {
 
 export interface GroupedItem extends Item {
     count: number;
+    availableCount?: number;
 }

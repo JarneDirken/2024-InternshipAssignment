@@ -18,7 +18,6 @@ import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import DatePicker from "@/components/states/DatePicker";
 import EditIcon from '@mui/icons-material/Edit';
-import { Padding } from "@mui/icons-material";
 
 interface ModalCardProps {
     open: boolean;
@@ -40,6 +39,19 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
     const [returnDate, setReturnDate] = useState<Date | null>(null); // return date
     const [errorMessage, setErrorMessage] = useState<String | null>(null); // error message with dates
     const [editingDateType, setEditingDateType] = useState<'borrow' | 'return' | null>(null);
+
+    useEffect(() => {
+        if (item){
+            const cartItem = cart.find(cartItem => cartItem.item.id === item.id);
+            if (cartItem) {
+                setAmount(cartItem.borrowDetails.amount ?? null);
+                setIsUrgent(cartItem.borrowDetails.isUrgent ?? false);
+                setFileUrl(cartItem.borrowDetails.file ?? null);
+                setBorrowDate(cartItem.borrowDetails.startDateTime ? new Date(cartItem.borrowDetails.startDateTime) : null);
+                setReturnDate(cartItem.borrowDetails.endDateTime ? new Date(cartItem.borrowDetails.endDateTime) : null);
+            }
+        }
+    }, [item, cart]);    
 
     useEffect(() => {
         if (borrowDate && returnDate) {
@@ -122,7 +134,9 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
     const closeModal = () => {
         setBorrowDate(null);
         setReturnDate(null);
+        setFileUrl(null);
         setIsUrgent(false);
+        setFile(null);
         setEditingDateType(null);
         onClose();
     };
@@ -360,7 +374,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
                             <div className="flex flex-col">
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold text-gray-400">Borrow date</span>
-                                    {borrowDate && (
+                                    {borrowDate && returnDate && (
                                         <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold cursor-pointer"
                                             onClick={() => handleEditDate("borrow")}>
                                             <EditIcon fontSize="small" />
@@ -373,7 +387,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
                             <div className="flex flex-col">
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold text-gray-400">Return date</span>
-                                    {returnDate && (
+                                    {borrowDate && returnDate && (
                                         <div className="rounded-full bg-custom-primary w-6 h-6 flex items-center justify-center text-white font-semibold cursor-pointer"
                                             onClick={() => handleEditDate("return")}>
                                             <EditIcon fontSize="small" />

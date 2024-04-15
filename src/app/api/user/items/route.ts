@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
+    const uid = searchParams.get("userId") || '';
     const nameFilter = searchParams.get('name') || '';
     const modelFilter = searchParams.get('model') || '';
     const brandFilter = searchParams.get('brand') || '';
@@ -11,20 +12,49 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
     const limit = parseInt(searchParams.get('limit') || '10');
 
-    const items = await prisma.item.findMany({
+    const user = await prisma.user.findUnique({
         where: {
-            active: true,
-            name: { contains: nameFilter, mode: 'insensitive' },
-            model: { contains: modelFilter, mode: 'insensitive' },
-            brand: { contains: brandFilter, mode: 'insensitive' },
-            location: { name: { contains: locationFilter, mode: 'insensitive' } }
+            firebaseUid: uid,
         },
+    });
+
+    if (!user){
+        return new Response(JSON.stringify("User not found"), {
+            status: 404,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    }
+
+    let whereClause = {
+        active: true,
+        name: { contains: nameFilter, mode: 'insensitive' as const },
+        model: { contains: modelFilter, mode: 'insensitive' as const },
+        brand: { contains: brandFilter, mode: 'insensitive' as const },
+        location: { name: { contains: locationFilter, mode: 'insensitive' as const } },
+        RoleItem: {}
+    };
+
+    // Additional logic for roleId 2, 3, and 4
+    if ([2, 3, 4].includes(user.roleId)) {
+        
+    } else {
+        whereClause.RoleItem = {
+            some: {
+                roleId: user.roleId,
+            }
+        };
+    }
+
+    const items = await prisma.item.findMany({
+        where: whereClause,
         include: { location: true },
         orderBy: {
             name: 'asc',
         },
     });
-
+    
     const totalCount = await prisma.item.count({
         where: {
             active: true,

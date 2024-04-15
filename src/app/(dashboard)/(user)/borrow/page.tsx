@@ -6,14 +6,14 @@ import { Item } from "@/models/Item";
 import { getAuth, getIdToken } from 'firebase/auth';
 import app from "@/services/firebase-config";
 import { useRecoilValue } from "recoil";
-import { createRequest, itemsState, requestsState } from "@/services/store";
+import { createRequest, requestsState } from "@/services/store";
 import Filters from "@/components/(user)/borrow/Filter"
 import BorrowCard from "@/components/(user)/borrow/BorrowCard";
 import PendingBorrows from "@/components/(user)/borrow/PendingBorrows";
 import Modal from "@/components/(user)/borrow/Modal";
 
 export default function Borrow() {
-    const isAuthorized = useAuth(['Student']); // you need at least role student to view this page
+    const isAuthorized = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']); // you need at least role student to view this page
     const [active, setActive] = useState(true); // this is to toggle from list view to card view
     const [items, setItems] = useState<Item[]>([]);
     const [item, setItem] = useState<Item>(); // to store one item
@@ -86,12 +86,17 @@ export default function Borrow() {
     async function getAllItems(){
         setLoading(true);
         try {
-            const response = await fetch(`/api/user/allitems`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+            if(userId){
+                const queryString = new URLSearchParams({
+                    userId: userId,
+                }).toString();
+                const response = await fetch(`/api/user/allitems?${queryString}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                setItems(Array.isArray(data) ? data : []);
             }
-            const data = await response.json();
-            setItems(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Failed to fetch items:", error);
             setItems([]); // Ensure items is always an array
@@ -126,7 +131,7 @@ export default function Borrow() {
 
     useEffect(() => {
         getAllItems();
-    }, []);
+    }, [userId]);
 
     useEffect(() => {
         setTotalItemCount(items.length);
@@ -200,6 +205,7 @@ export default function Borrow() {
                         modelFilter={modelFilter}
                         brandFilter={brandFilter}
                         locationFilter={locationFilter}
+                        userId={userId || ''}
                     />
                 ) : (
                     <PendingBorrows 
