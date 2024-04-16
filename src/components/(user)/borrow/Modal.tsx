@@ -38,20 +38,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
     const [borrowDate, setBorrowDate] = useState<Date | null>(null); // borrow date
     const [returnDate, setReturnDate] = useState<Date | null>(null); // return date
     const [errorMessage, setErrorMessage] = useState<String | null>(null); // error message with dates
-    const [editingDateType, setEditingDateType] = useState<'borrow' | 'return' | null>(null);
-
-    // useEffect(() => {
-    //     if (item){
-    //         const cartItem = cart.find(cartItem => cartItem.item.id === item.id);
-    //         if (cartItem) {
-    //             setAmount(cartItem.borrowDetails.amount ?? null);
-    //             setIsUrgent(cartItem.borrowDetails.isUrgent ?? false);
-    //             setFileUrl(cartItem.borrowDetails.file ?? null);
-    //             setBorrowDate(cartItem.borrowDetails.startDateTime ? new Date(cartItem.borrowDetails.startDateTime) : null);
-    //             setReturnDate(cartItem.borrowDetails.endDateTime ? new Date(cartItem.borrowDetails.endDateTime) : null);
-    //         }
-    //     }
-    // }, [item, cart]);    
+    const [editingDateType, setEditingDateType] = useState<'borrow' | 'return' | null>(null); 
 
     useEffect(() => {
         if (borrowDate && returnDate) {

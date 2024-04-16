@@ -28,11 +28,10 @@ interface FiltersProps { // typescript moment, everthing should have a type
     setActive: Dispatch<SetStateAction<boolean>>;
     onFilterChange: (filterType: string, filterValue: string) => void;
     items: Item[];
-    openModal: (id: number) => void;
     userId: String | null;
 }
 
-export default function Filters({ active, setActive, onFilterChange, items, openModal, userId }: FiltersProps) {
+export default function Filters({ active, setActive, onFilterChange, items, userId }: FiltersProps) {
     const [locations, setLocations] = useState<Location[]>([]);
     const prevWidthRef = useRef(window.innerWidth);
     const lastActiveRef = useRef<boolean | null>(null);
@@ -238,7 +237,6 @@ export default function Filters({ active, setActive, onFilterChange, items, open
                                             <div className="flex justify-between items-center w-full">
                                                 <span onClick={(e) => {
                                                     e.stopPropagation();
-                                                    openModal(item.item.id);
                                                 }}>
                                                     {item.item.name}
                                                 </span>

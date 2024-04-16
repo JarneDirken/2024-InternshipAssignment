@@ -20,5 +20,5 @@ export interface Item {
 
 export interface GroupedItem extends Item {
     count: number;
-    availableCount?: number;
+    items: Item[]; // Array to store all items within the group
 }

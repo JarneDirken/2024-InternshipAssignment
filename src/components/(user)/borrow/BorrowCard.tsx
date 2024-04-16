@@ -10,7 +10,7 @@ import NumbersIcon from '@mui/icons-material/Numbers';
 
 interface BorrowCardProps {
     active: boolean;
-    openModal: (id: number) => void;
+    openModal: (groupItem: GroupedItem) => void;
     nameFilter: string;
     modelFilter: string;
     brandFilter: string;
@@ -39,7 +39,6 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
     useEffect(() => {
         getItems(true);
     }, [successfullCreated]);
-
 
     useEffect(() => {
         if (inView && hasMore && !loading) {
@@ -96,7 +95,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
         }
     }
 
-    function renderItemStatus(item: Item) {
+    function renderItemStatus(item: GroupedItem) {
         switch (item.itemStatusId) {
             case 1:
                 return (
@@ -107,7 +106,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                         fillColor="custom-primary"
                         paddingY="py-0"
                         font="semibold"
-                        onClick={() => openModal(item.id)}
+                        onClick={() => openModal(item)}
                     />
                 );
             case 2:

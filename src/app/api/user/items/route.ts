@@ -83,9 +83,12 @@ function groupItems(items: Item[]): GroupedItem[] {
         const key = `${item.name}-${item.model}-${item.brand}-${item.locationId}-${item.itemStatusId}`;
 
         if (!grouped[key]) {
-            grouped[key] = { ...item, count: 1 };
+            // Initialize a new grouped item with an items array containing the current item
+            grouped[key] = { ...item, count: 1, items: [item] };
         } else {
+            // Increment count and add current item to the items array
             grouped[key].count++;
+            grouped[key].items.push(item);
         }
     });
 

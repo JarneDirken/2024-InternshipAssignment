@@ -2,7 +2,7 @@
 import Unauthorized from "@/app/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
-import { Item } from "@/models/Item";
+import { GroupedItem, Item } from "@/models/Item";
 import { getAuth, getIdToken } from 'firebase/auth';
 import app from "@/services/firebase-config";
 import { useRecoilValue } from "recoil";
@@ -11,6 +11,8 @@ import Filters from "@/components/(user)/borrow/Filter"
 import BorrowCard from "@/components/(user)/borrow/BorrowCard";
 import PendingBorrows from "@/components/(user)/borrow/PendingBorrows";
 import Modal from "@/components/(user)/borrow/Modal";
+import useCart from "@/hooks/useCart";
+import { useSnackbar } from "notistack";
 
 export default function Borrow() {
     const isAuthorized = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']); // you need at least role student to view this page
@@ -30,6 +32,8 @@ export default function Borrow() {
     const [userId, setUserId] = useState<string | null>(null);
     const auth = getAuth(app);
     const created = useRecoilValue(createRequest);
+    const { cart, addToCart, removeFromCart, clearCart } = useCart(); // useCart hook
+    const { enqueueSnackbar } = useSnackbar(); // snackbar popup
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -124,10 +128,18 @@ export default function Borrow() {
         }
     };
 
-    const openModal = (id: number) => {
-        getItemData(id);
-        setModalOpen(true);
-    }
+    const openModal = (groupedItem: GroupedItem) => {
+        // Find the first available item that is not in the cart
+        const availableItem = groupedItem.items.find(item => !cart.some(cartItem => cartItem.item.id === item.id));
+        
+        if (availableItem) {
+            // Set the item for the modal to open
+            getItemData(availableItem.id);
+            setModalOpen(true);
+        } else {
+            enqueueSnackbar('All items of this type are currently in your cart.', { variant: 'error' });
+        }
+    } 
 
     useEffect(() => {
         getAllItems();
@@ -168,7 +180,6 @@ export default function Borrow() {
                     setActive={setActive}
                     onFilterChange={handleFilterChange}
                     items={items}
-                    openModal={openModal}
                     userId={userId}
                 />
             </div>

@@ -4,10 +4,15 @@ import { CartItem } from "@/models/CartItem";
 const CART_EVENT = "cartUpdated";
 
 export default function useCart() {
-    const [cart, setCart] = useState<CartItem[]>(() => {
+    const [cart, setCart] = useState<CartItem[]>([]);
+
+    // Effect to load the initial cart from localStorage when component mounts
+    useEffect(() => {
         const savedCart = localStorage.getItem("cart");
-        return savedCart ? JSON.parse(savedCart) : [];
-    });
+        if (savedCart) {
+            setCart(JSON.parse(savedCart));
+        }
+    }, []);
 
     // Update localStorage and dispatch event when the cart changes
     useEffect(() => {
@@ -18,9 +23,9 @@ export default function useCart() {
 
     // Listen for changes to the cart from other tabs or parts of the application
     useEffect(() => {
-        const handleStorageChange = (event: Event) => {  // Specify the type here
+        const handleStorageChange = (event: Event) => {
             if (event.type === CART_EVENT) {
-                const customEvent = event as CustomEvent;  // Cast the event to CustomEvent to access the detail property
+                const customEvent = event as CustomEvent;
                 setCart(customEvent.detail);
             } else {
                 const savedCart = localStorage.getItem("cart");
@@ -47,9 +52,9 @@ export default function useCart() {
             return { success: true, message: 'Item successfully added to cart' };
         }
     };
-    
+
     const removeFromCart = (itemId: number) => {
-        setCart((prevCart) => prevCart.filter(cartItem => cartItem.item.id !== itemId));
+        setCart(prevCart => prevCart.filter(cartItem => cartItem.item.id !== itemId));
     };
 
     const clearCart = () => {
