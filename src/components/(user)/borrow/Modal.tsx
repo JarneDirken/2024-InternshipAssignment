@@ -33,7 +33,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
     const [fileUrl, setFileUrl] = useState<string | null>(null); // file url from firebase
     const [request, setRequest] = useRecoilState(createRequest); // check if request is made
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
-    const { cart, addToCart, removeFromCart, clearCart } = useCart(); // useCart hook
+    const { addToCart } = useCart(); // useCart hook
     const primitiveUserId = userId ? String(userId) : null; // uid from firebase
     const [borrowDate, setBorrowDate] = useState<Date | null>(null); // borrow date
     const [returnDate, setReturnDate] = useState<Date | null>(null); // return date
@@ -145,7 +145,9 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
 
     const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = event.target.value;
-        setAmount(inputValue !== '' ? inputValue : null);
+        if ((inputValue === '' || !isNaN(parseFloat(inputValue))) && inputValue.match(/^[-]?\d*\.?\d*$/)) {
+            setAmount(inputValue !== '' ? inputValue : null);
+        }
     };
 
     const handleDragOver = (event: React.DragEvent<HTMLLabelElement>) => {
@@ -213,7 +215,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
                 endDateTime: returnDate,
                 isUrgent,
                 file: fileUrl,
-                amount
+                amountRequest: amount,
             }
         };
 
@@ -332,6 +334,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
                                                     size="small"
                                                     className="bg-white w-full"
                                                     name="amount"
+                                                    type="number"
                                                     value={amount}
                                                     onChange={handleAmountChange}
                                                     placeholder="Search"

@@ -1,10 +1,8 @@
 'use client';
 import { Item } from "@/models/Item";
 import { Location } from "@/models/Location";
-import app from "@/services/firebase-config";
 import Tooltip from "@mui/material/Tooltip";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { getAuth, getIdToken } from "firebase/auth";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -113,7 +111,7 @@ export default function Filters({ active, setActive, onFilterChange, items, user
                 endBorrowDate: cartItem.borrowDetails.endDateTime,
                 file: cartItem.borrowDetails.file,
                 isUrgent: cartItem.borrowDetails.isUrgent,
-                amountRequest: cartItem.borrowDetails.amount,
+                amountRequest: cartItem.borrowDetails.amountRequest,
             };
     
             try {

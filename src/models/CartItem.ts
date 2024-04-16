@@ -7,6 +7,6 @@ export interface CartItem {
         endDateTime: Date | null;
         isUrgent: boolean;
         file: string | null;
-        amount: string | null; // amount of items we want to order NOTHING TO DO WITH HOW MANY ITEMS IN GROUP
+        amountRequest: string | null,
     };
 }

@@ -15,7 +15,7 @@ import useCart from "@/hooks/useCart";
 import { useSnackbar } from "notistack";
 
 export default function Borrow() {
-    const isAuthorized = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']); // you need at least role student to view this page
+    const isAuthorized = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']); // All these roles can view this page
     const [active, setActive] = useState(true); // this is to toggle from list view to card view
     const [items, setItems] = useState<Item[]>([]);
     const [item, setItem] = useState<Item>(); // to store one item
@@ -27,12 +27,12 @@ export default function Borrow() {
     const [modelFilter, setModelFilter] = useState(''); // model filter
     const [brandFilter, setBrandFilter] = useState(''); // brand filter
     const [locationFilter, setLocationFilter] = useState(''); // location filter
-    const [selectedTab, setSelectedTab] = useState('products');
-    const [isModalOpen, setModalOpen] = useState(false);
-    const [userId, setUserId] = useState<string | null>(null);
-    const auth = getAuth(app);
-    const created = useRecoilValue(createRequest);
-    const { cart, addToCart, removeFromCart, clearCart } = useCart(); // useCart hook
+    const [selectedTab, setSelectedTab] = useState('products'); // standard open tab
+    const [isModalOpen, setModalOpen] = useState(false); // modal
+    const [userId, setUserId] = useState<string | null>(null); // userID
+    const auth = getAuth(app); // Get authentication
+    const created = useRecoilValue(createRequest); // see if an item has been borrowed (for refresh)
+    const { cart } = useCart(); // useCart hook
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
 
     useEffect(() => {

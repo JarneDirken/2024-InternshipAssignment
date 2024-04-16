@@ -1,12 +1,11 @@
 'use client';
 import Button from "@/components/states/Button";
 import Loading from "@/components/states/Loading";
-import { GroupedItem, Item } from "@/models/Item";
-import { createRequest, itemsState } from "@/services/store";
+import { GroupedItem } from "@/models/Item";
+import { createRequest } from "@/services/store";
 import { useEffect, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilValue } from "recoil";
 import { useInView } from 'react-intersection-observer';
-import NumbersIcon from '@mui/icons-material/Numbers';
 
 interface BorrowCardProps {
     active: boolean;
