@@ -2,18 +2,20 @@
 import Unauthorized from "@/app/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
-import { Item } from "@/models/Item";
+import { GroupedItem, Item } from "@/models/Item";
 import { getAuth, getIdToken } from 'firebase/auth';
 import app from "@/services/firebase-config";
 import { useRecoilValue } from "recoil";
-import { createRequest, itemsState, requestsState } from "@/services/store";
+import { createRequest, requestsState } from "@/services/store";
 import Filters from "@/components/(user)/borrow/Filter"
 import BorrowCard from "@/components/(user)/borrow/BorrowCard";
 import PendingBorrows from "@/components/(user)/borrow/PendingBorrows";
 import Modal from "@/components/(user)/borrow/Modal";
+import useCart from "@/hooks/useCart";
+import { useSnackbar } from "notistack";
 
 export default function Borrow() {
-    const isAuthorized = useAuth(['Student']); // you need at least role student to view this page
+    const isAuthorized = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']); // All these roles can view this page
     const [active, setActive] = useState(true); // this is to toggle from list view to card view
     const [items, setItems] = useState<Item[]>([]);
     const [item, setItem] = useState<Item>(); // to store one item
@@ -25,11 +27,13 @@ export default function Borrow() {
     const [modelFilter, setModelFilter] = useState(''); // model filter
     const [brandFilter, setBrandFilter] = useState(''); // brand filter
     const [locationFilter, setLocationFilter] = useState(''); // location filter
-    const [selectedTab, setSelectedTab] = useState('products');
-    const [isModalOpen, setModalOpen] = useState(false);
-    const [userId, setUserId] = useState<string | null>(null);
-    const auth = getAuth(app);
-    const created = useRecoilValue(createRequest);
+    const [selectedTab, setSelectedTab] = useState('products'); // standard open tab
+    const [isModalOpen, setModalOpen] = useState(false); // modal
+    const [userId, setUserId] = useState<string | null>(null); // userID
+    const auth = getAuth(app); // Get authentication
+    const created = useRecoilValue(createRequest); // see if an item has been borrowed (for refresh)
+    const { cart } = useCart(); // useCart hook
+    const { enqueueSnackbar } = useSnackbar(); // snackbar popup
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -86,12 +90,17 @@ export default function Borrow() {
     async function getAllItems(){
         setLoading(true);
         try {
-            const response = await fetch(`/api/user/allitems`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+            if(userId){
+                const queryString = new URLSearchParams({
+                    userId: userId,
+                }).toString();
+                const response = await fetch(`/api/user/allitems?${queryString}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                setItems(Array.isArray(data) ? data : []);
             }
-            const data = await response.json();
-            setItems(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Failed to fetch items:", error);
             setItems([]); // Ensure items is always an array
@@ -119,14 +128,22 @@ export default function Borrow() {
         }
     };
 
-    const openModal = (id: number) => {
-        getItemData(id);
-        setModalOpen(true);
-    }
+    const openModal = (groupedItem: GroupedItem) => {
+        // Find the first available item that is not in the cart
+        const availableItem = groupedItem.items.find(item => !cart.some(cartItem => cartItem.item.id === item.id));
+        
+        if (availableItem) {
+            // Set the item for the modal to open
+            getItemData(availableItem.id);
+            setModalOpen(true);
+        } else {
+            enqueueSnackbar('All items of this type are currently in your cart.', { variant: 'error' });
+        }
+    } 
 
     useEffect(() => {
         getAllItems();
-    }, []);
+    }, [userId]);
 
     useEffect(() => {
         setTotalItemCount(items.length);
@@ -163,12 +180,11 @@ export default function Borrow() {
                     setActive={setActive}
                     onFilterChange={handleFilterChange}
                     items={items}
-                    openModal={openModal}
                     userId={userId}
                 />
             </div>
             <div className="rounded-xl">
-                <div className="flex border-b border-b-gray-300 bg-white rounded-tl-xl rounded-tr-xl z-0">
+                <div className="flex border-b border-b-gray-300 bg-white rounded-tl-xl rounded-tr-xl z-0 overflow-x-scroll" id="selectTabs">
                     <div className="relative">
                         <div
                             className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'products' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
@@ -176,7 +192,7 @@ export default function Borrow() {
                         >
                             Products
                         </div>
-                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-11 transform translate-x-1/2 -translate-y-1/2 text-sm ${selectedTab === 'products' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
+                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-11 transform translate-x-1/2 -translate-y-1/2 text-xs ${selectedTab === 'products' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
                             {totalItemCount}
                         </div>
                     </div>
@@ -187,7 +203,7 @@ export default function Borrow() {
                         >
                             Pending borrows
                         </div>
-                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-3 transform translate-x-1/2 -translate-y-1/2 text-sm ${selectedTab === 'pending' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
+                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-3 transform translate-x-1/2 -translate-y-1/2 text-xs ${selectedTab === 'pending' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
                             {totalRequestCount}
                         </div>
                     </div>
@@ -200,6 +216,7 @@ export default function Borrow() {
                         modelFilter={modelFilter}
                         brandFilter={brandFilter}
                         locationFilter={locationFilter}
+                        userId={userId || ''}
                     />
                 ) : (
                     <PendingBorrows 

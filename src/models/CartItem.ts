@@ -1,12 +1,12 @@
-import { Item } from "./Item";
+import { GroupedItem, Item } from "./Item";
 
 export interface CartItem {
-    item: Item;
+    item: Item | GroupedItem;
     borrowDetails: {
-        startDateTime: string;
-        endDateTime: string;
+        startDateTime: Date | null;
+        endDateTime: Date | null;
         isUrgent: boolean;
-        file: File | null;
-        amount: string | null;
+        file: string | null;
+        amountRequest: string | null,
     };
 }

@@ -1,10 +1,8 @@
 'use client';
 import { Item } from "@/models/Item";
 import { Location } from "@/models/Location";
-import app from "@/services/firebase-config";
 import Tooltip from "@mui/material/Tooltip";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { getAuth, getIdToken } from "firebase/auth";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -28,11 +26,10 @@ interface FiltersProps { // typescript moment, everthing should have a type
     setActive: Dispatch<SetStateAction<boolean>>;
     onFilterChange: (filterType: string, filterValue: string) => void;
     items: Item[];
-    openModal: (id: number) => void;
     userId: String | null;
 }
 
-export default function Filters({ active, setActive, onFilterChange, items, openModal, userId }: FiltersProps) {
+export default function Filters({ active, setActive, onFilterChange, items, userId }: FiltersProps) {
     const [locations, setLocations] = useState<Location[]>([]);
     const prevWidthRef = useRef(window.innerWidth);
     const lastActiveRef = useRef<boolean | null>(null);
@@ -74,10 +71,6 @@ export default function Filters({ active, setActive, onFilterChange, items, open
     };
 
     useEffect(() => {
-        getLocations();
-    }, [])
-
-    useEffect(() => {
         const handleResize = () => {
             const width = window.innerWidth;
             const prevWidth = prevWidthRef.current;
@@ -106,29 +99,6 @@ export default function Filters({ active, setActive, onFilterChange, items, open
         }
     }, [setActive]);
 
-    async function getLocations() {
-        const auth = getAuth(app);
-        const user = auth.currentUser;
-        if (user) {
-            try {
-                const token = await getIdToken(user);
-                const response = await fetch('/api/locations', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `${token}`
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const data = await response.json();
-                setLocations(data);
-            } catch (error) {
-                console.error("Failed to fetch locations:", error);
-            }
-        }
-    }
-
     async function borrowAllItems() {
         let allSuccessful = true;
         for (const cartItem of cart) {
@@ -141,7 +111,7 @@ export default function Filters({ active, setActive, onFilterChange, items, open
                 endBorrowDate: cartItem.borrowDetails.endDateTime,
                 file: cartItem.borrowDetails.file,
                 isUrgent: cartItem.borrowDetails.isUrgent,
-                amountRequest: cartItem.borrowDetails.amount,
+                amountRequest: cartItem.borrowDetails.amountRequest,
             };
     
             try {
@@ -262,29 +232,32 @@ export default function Filters({ active, setActive, onFilterChange, items, open
                                 {cart.length > 0 ? (
                                     cart.map((item) => (
                                         <MenuItem key={item.item.id} onClick={handleMenuClose}>
-                                            <span onClick={(e) => {
-                                                e.stopPropagation(); // Prevent triggering the MenuItem's onClick
-                                                openModal(item.item.id);
-                                            }}>
-                                                {item.item.name}
-                                            </span>
-                                            <IconButton
-                                                edge="end"
-                                                aria-label="remove"
-                                                onClick={(e) => {
-                                                    e.stopPropagation(); // Prevent triggering the MenuItem's onClick
-                                                    removeFromCart(item.item.id);
-                                                    enqueueSnackbar('Item successfully removed from cart', { variant: 'success' });
-                                                }}
-                                                size="small"
-                                            >
-                                                <ClearIcon fontSize="small" />
-                                            </IconButton>
+                                            <div className="flex justify-between items-center w-full">
+                                                <span onClick={(e) => {
+                                                    e.stopPropagation();
+                                                }}>
+                                                    {item.item.name}
+                                                </span>
+                                                <IconButton
+                                                    edge="end"
+                                                    aria-label="remove"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        removeFromCart(item.item.id);
+                                                        enqueueSnackbar('Item successfully removed from cart', { variant: 'success' });
+                                                    }}
+                                                    size="small"
+                                                    className="justify-end"
+                                                >
+                                                    <ClearIcon fontSize="small" />
+                                                </IconButton>
+                                            </div>
                                         </MenuItem>
                                     ))
                                 ) : (
                                     <MenuItem onClick={handleMenuClose}>No items</MenuItem>
                                 )}
+
                                 {cart.length > 0 && (
                                     <MenuItem className="justify-center">
                                         <Button 
@@ -380,7 +353,7 @@ export default function Filters({ active, setActive, onFilterChange, items, open
                                 id="combo-box-demo"
                                 value={location || null}
                                 onChange={(event, value) => handleLocationChange(value)}
-                                options={locations.map(location => location.name)}
+                                options={[...new Set(items.map(item => item.location.name))]} // Ensure unique locations
                                 isOptionEqualToValue={(option, value) => option === value}
                                 sx={{ width: '100%' }}
                                 renderInput={(params) => (

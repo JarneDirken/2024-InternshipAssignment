@@ -33,3 +33,7 @@
 ::-webkit-scrollbar-thumb:hover {
   background-color: darkgray;
 }
+
+#selectTabs::-webkit-scrollbar {
+  display: none;
+}

@@ -75,8 +75,8 @@ async function createItemStatus() {
 async function createRole() {
     const roles = [
         "Student",
+        "Teacher",
         "Supervisor",
-        "Manager",
         "Admin",
     ];
 
@@ -95,13 +95,188 @@ async function createRoleItem(){
             id: 1,
             roleId: 1,
             itemId: 1,
-            
         },
         {
             id: 2,
             roleId: 2,
             itemId: 2,
-        }
+        },
+        {
+            id: 3,
+            roleId: 1,
+            itemId: 3,
+        },
+        {
+            id: 4,
+            roleId: 1,
+            itemId: 4,
+        },
+        {
+            id: 5,
+            roleId: 1,
+            itemId: 5,
+        },
+        {
+            id: 6,
+            roleId: 1,
+            itemId: 6,
+        },
+        {
+            id: 7,
+            roleId: 1,
+            itemId: 7,
+        },
+        {
+            id: 8,
+            roleId: 1,
+            itemId: 8,
+        },
+        {
+            id: 9,
+            roleId: 1,
+            itemId: 9,
+        },
+        {
+            id: 10,
+            roleId: 1,
+            itemId: 10,
+        },
+        {
+            id: 11,
+            roleId: 1,
+            itemId: 11,
+        },
+        {
+            id: 12,
+            roleId: 1,
+            itemId: 12,
+        },
+        {
+            id: 13,
+            roleId: 1,
+            itemId: 13,
+        },
+        {
+            id: 14,
+            roleId: 1,
+            itemId: 14,
+        },
+        {
+            id: 15,
+            roleId: 1,
+            itemId: 15,
+        },
+        {
+            id: 16,
+            roleId: 1,
+            itemId: 16,
+        },
+        {
+            id: 17,
+            roleId: 1,
+            itemId: 17,
+        },
+        {
+            id: 18,
+            roleId: 1,
+            itemId: 18,
+        },
+        {
+            id: 19,
+            roleId: 1,
+            itemId: 19,
+        },
+        {
+            id: 20,
+            roleId: 1,
+            itemId: 20,
+        },
+        {
+            id: 21,
+            roleId: 1,
+            itemId: 21,
+        },
+        {
+            id: 22,
+            roleId: 1,
+            itemId: 22,
+        },
+        {
+            id: 23,
+            roleId: 1,
+            itemId: 23,
+        },
+        {
+            id: 24,
+            roleId: 1,
+            itemId: 24,
+        },
+        {
+            id: 25,
+            roleId: 1,
+            itemId: 25,
+        },
+        {
+            id: 26,
+            roleId: 1,
+            itemId: 26,
+        },
+        {
+            id: 27,
+            roleId: 1,
+            itemId: 27,
+        },
+        {
+            id: 28,
+            roleId: 1,
+            itemId: 28,
+        },
+
+        {
+            id: 29,
+            roleId: 1,
+            itemId: 29,
+        },
+        {
+            id: 30,
+            roleId: 1,
+            itemId: 30,
+        },
+        {
+            id: 31,
+            roleId: 1,
+            itemId: 31,
+        },
+        {
+            id: 32,
+            roleId: 1,
+            itemId: 32,
+        },
+        {
+            id: 33,
+            roleId: 1,
+            itemId: 33,
+        },
+        {
+            id: 34,
+            roleId: 1,
+            itemId: 34,
+        },
+        {
+            id: 35,
+            roleId: 1,
+            itemId: 35,
+        },
+        {
+            id: 36,
+            roleId: 1,
+            itemId: 36,
+        },
+        {
+            id: 37,
+            roleId: 1,
+            itemId: 37,
+        },
     ];
 
     for (const item of roleItem) {

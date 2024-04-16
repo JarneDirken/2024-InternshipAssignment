@@ -94,7 +94,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
     if (loading) { return (<Loading />); }
 
     if (requests.length === 0) {
-        return <div>No borrow requests found!</div>;
+        return <div className="flex justify-center">No borrow requests found!</div>;
     }
 
     return (
@@ -105,7 +105,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                         {active ? (
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
                                 <div className="flex flex-row items-center w-full">
-                                    <div className="w-1/12">
+                                    <div className="w-1/12 mr-2">
                                         <img 
                                             src={request.item.image}
                                             alt={request.item.name} 
@@ -151,27 +151,20 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                         paddingY="py-0"
                                         onClick={() => cancelPendingBorrow(request.id, request.itemId)}
                                     />
-                                    <Button 
-                                        text="View" 
-                                        textColor="white" 
-                                        borderColor="custom-primary" 
-                                        fillColor="custom-primary"
-                                        paddingY="py-0"
-                                    />
                                 </div>
                             </div>
                         ) : (
                             <div className="overflow-hidden">
                                 <div className="p-2 flex items-center">
                                     <div className="flex w-1/2 flex-wrap">
-                                        <span className="text-lg font-semibold flex-wrap">{request.item.name}</span>
+                                        <span className="font-semibold flex-wrap text-sm sm:text-lg">{request.item.name}</span>
                                     </div>
                                     <div className="w-1/2 flex flex-col items-end">
-                                        <div className="flex items-center text-custom-primary gap-1">
+                                        <div className="flex items-center text-custom-primary gap-1 text-sm sm:text-base">
                                             <AccessTimeIcon fontSize="small"/>
                                             <span className="truncate">Pending</span>
                                         </div>
-                                        <div className="flex truncate items-center text-gray-400 gap-1 text-sm">
+                                        <div className="flex truncate items-center text-gray-400 gap-1 text-xs sm:text-sm">
                                             <AccessTimeIcon fontSize="small"/>
                                             <span>{formatDate(new Date(request.startBorrowDate))} - {formatDate(new Date(request.endBorrowDate))}</span>
                                         </div>
@@ -188,16 +181,16 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                     </div>
                                     <div className="flex flex-col items-start w-2/3">
                                         <div className="flex items-center gap-6">
-                                            <div className="flex flex-col items-start truncate">
+                                            <div className="flex flex-col items-start truncate text-sm sm:text-base">
                                                 <span className="text-gray-400">Model</span>
                                                 <span>{request.item.model}</span>
                                             </div>
-                                            <div className="flex flex-col items-start truncate">
+                                            <div className="flex flex-col items-start truncate text-sm sm:text-base">
                                                 <span className="text-gray-400">Brand</span>
                                                 <span>{request.item.brand}</span>
                                             </div>
                                         </div>
-                                        <div className="truncate flex flex-col items-start w-full">
+                                        <div className="truncate flex flex-col items-start w-full text-sm sm:text-base">
                                             <span className="text-gray-400">Location</span>
                                             <span>{request.item.location.name}</span>
                                         </div>

@@ -24,7 +24,7 @@ export default function Button({
     font = "normal"
 }: ButtonProps) {
     const buttonClasses = `border rounded-lg items-center justify-center ${paddingY} ${paddingX} flex gap-1 border-${borderColor} bg-${fillColor}`;
-    const textClasses = `font-${font} text-${textColor}`;
+    const textClasses = `font-${font} text-${textColor} text-sm sm:text-lg`;
 
     return (
         <button onClick={onClick} className={buttonClasses}>

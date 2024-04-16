@@ -1,23 +1,23 @@
 'use client';
 import Button from "@/components/states/Button";
 import Loading from "@/components/states/Loading";
-import { GroupedItem, Item } from "@/models/Item";
-import { createRequest, itemsState } from "@/services/store";
+import { GroupedItem } from "@/models/Item";
+import { createRequest } from "@/services/store";
 import { useEffect, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilValue } from "recoil";
 import { useInView } from 'react-intersection-observer';
-import NumbersIcon from '@mui/icons-material/Numbers';
 
 interface BorrowCardProps {
     active: boolean;
-    openModal: (id: number) => void;
+    openModal: (groupItem: GroupedItem) => void;
     nameFilter: string;
     modelFilter: string;
     brandFilter: string;
     locationFilter: string;
+    userId: string;
 }
 
-export default function BorrowCard({ active, openModal, nameFilter, modelFilter, brandFilter, locationFilter }: BorrowCardProps) {
+export default function BorrowCard({ active, openModal, nameFilter, modelFilter, brandFilter, locationFilter, userId }: BorrowCardProps) {
     const [loading, setLoading] = useState(true);
     const [items, setItems] = useState<GroupedItem[]>([]);
     const successfullCreated = useRecoilValue(createRequest);
@@ -38,7 +38,6 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
     useEffect(() => {
         getItems(true);
     }, [successfullCreated]);
-
 
     useEffect(() => {
         if (inView && hasMore && !loading) {
@@ -66,6 +65,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
             model: modelFilter,
             brand: brandFilter,
             location: locationFilter,
+            userId: userId,
             offset: currentOffset.toString(),
             limit: NUMBER_OF_ITEMS_TO_FETCH.toString()
         }).toString();
@@ -94,7 +94,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
         }
     }
 
-    function renderItemStatus(item: Item) {
+    function renderItemStatus(item: GroupedItem) {
         switch (item.itemStatusId) {
             case 1:
                 return (
@@ -105,7 +105,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                         fillColor="custom-primary"
                         paddingY="py-0"
                         font="semibold"
-                        onClick={() => openModal(item.id)}
+                        onClick={() => openModal(item)}
                     />
                 );
             case 2:
@@ -141,7 +141,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                         {active ? (
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
                                 <div className="flex flex-row items-center w-full">
-                                    <div className="w-1/12">
+                                    <div className="w-1/12 mr-2">
                                         <img 
                                             src={item.image}
                                             alt={item.name} 
@@ -161,7 +161,6 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                     <div className="flex flex-col">
                                         <div className="flex gap-8 items-center">
                                         <div className="truncate flex items-center">
-                                                {/* <NumbersIcon fontSize="small" className="text-gray-700"/> */}
                                                 <span className="font-semibold">Amount:&nbsp;</span>
                                                 <span>{item.count}</span>
                                             </div>
@@ -185,10 +184,9 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                             <div className="overflow-hidden w-full">
                                 <div className="flex justify-between w-full">
                                     <div className="p-2">
-                                        <span className="text-lg font-semibold truncate">{item.name}</span>
+                                        <span className="text-sm font-semibold truncate sm:text-lg">{item.name}</span>
                                     </div>
-                                    <div className="truncate flex items-center p-2">
-                                        {/* <NumbersIcon fontSize="small" className=""/> */}
+                                    <div className="truncate flex items-center p-2 text-sm sm:text-base">
                                         <span className="font-semibold">Amount:&nbsp;</span>
                                         <span>{item.count}</span>
                                     </div>
@@ -204,16 +202,16 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                     </div>
                                     <div className="flex flex-col items-start w-2/3">
                                         <div className="flex items-center gap-6 max-w-full">
-                                            <div className="flex flex-col items-start max-w-2/3">
+                                            <div className="flex flex-col items-start max-w-2/3 text-sm sm:text-base">
                                                 <span className="text-gray-400">Model</span>
                                                 <span className="truncate">{item.model}</span>
                                             </div>
-                                            <div className="flex flex-col items-start max-w-1/3">
+                                            <div className="flex flex-col items-start max-w-1/3 text-sm sm:text-base">
                                                 <span className="text-gray-400">Brand</span>
                                                 <span className="truncate">{item.brand}</span>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col items-start w-full">
+                                        <div className="flex flex-col items-start w-full text-sm sm:text-base">
                                             <span className="text-gray-400">Location</span>
                                             <span className="truncate">{item.location.name}</span>
                                         </div>
