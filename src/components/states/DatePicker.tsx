@@ -172,9 +172,8 @@ export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setR
         }
     };
     
-
-    const daysInMonth = getDaysInMonth(parseInt(month), parseInt(year));
     const firstDayOfMonth = new Date(parseInt(year), parseInt(month), 1).getDay();
+    const daysInMonth = getDaysInMonth(parseInt(year), parseInt(month));
     const years = Array.from({ length: 4 }, (_, index) => currentYear + index);
 
     const days = [];
@@ -196,6 +195,11 @@ export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setR
             </button>
         );
     }
+    
+    // Render weekdays header
+    const weekDaysHeader = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day, index) => (
+        <span key={index} className="m-px w-10 block text-center text-sm text-gray-500">{day}</span>
+    ));
     
     return (
         <div>
@@ -253,19 +257,8 @@ export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setR
                                 </button>
                             </div>
                         </div>
-                        <div className="flex pb-1.5">
-                            <span className="m-px w-10 block text-center text-sm text-gray-500">Mo</span>
-                            <span className="m-px w-10 block text-center text-sm text-gray-500">Tu</span>
-                            <span className="m-px w-10 block text-center text-sm text-gray-500">We</span>
-                            <span className="m-px w-10 block text-center text-sm text-gray-500">Th</span>
-                            <span className="m-px w-10 block text-center text-sm text-gray-500">Fr</span>
-                            <span className="m-px w-10 block text-center text-sm text-gray-500">Sa</span>
-                            <span className="m-px w-10 block text-center text-sm text-gray-500">Su</span>
-                        </div>
-                        {/* Days */}
-                        <div className="flex flex-wrap">
-                            {days}
-                        </div>
+                        <div className="flex pb-1.5">{weekDaysHeader}</div>
+                        <div className="flex flex-wrap">{days}</div>
                     </div>
                     <div className="mt-3 flex justify-center items-center gap-x-2">
                         <div className="inline-flex border border-gray-200 rounded-lg p-1">

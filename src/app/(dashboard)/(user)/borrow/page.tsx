@@ -181,7 +181,7 @@ export default function Borrow() {
                         >
                             Products
                         </div>
-                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-11 transform translate-x-1/2 -translate-y-1/2 text-sm ${selectedTab === 'products' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
+                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-11 transform translate-x-1/2 -translate-y-1/2 text-xs ${selectedTab === 'products' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
                             {totalItemCount}
                         </div>
                     </div>
@@ -192,7 +192,7 @@ export default function Borrow() {
                         >
                             Pending borrows
                         </div>
-                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-3 transform translate-x-1/2 -translate-y-1/2 text-sm ${selectedTab === 'pending' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
+                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-3 transform translate-x-1/2 -translate-y-1/2 text-xs ${selectedTab === 'pending' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
                             {totalRequestCount}
                         </div>
                     </div>

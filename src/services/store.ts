@@ -1,7 +1,7 @@
 "use client";
 import { atom } from 'recoil';
 import { User } from '@/models/User';
-import { Item } from '@/models/Item';
+import { GroupedItem, Item } from '@/models/Item';
 import { ItemRequest } from '@/models/ItemRequest';
 
 export const userProfileState = atom<User | null>({
@@ -9,7 +9,7 @@ export const userProfileState = atom<User | null>({
     default: null,
 });
 
-export const itemsState = atom<Item[]>({
+export const itemsState = atom<GroupedItem[] | []>({
     key: 'itemsState',
     default: [],
 });
