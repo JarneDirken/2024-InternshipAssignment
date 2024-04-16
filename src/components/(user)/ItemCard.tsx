@@ -5,11 +5,12 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 interface BorrowCardProps {
     active: boolean;
     openModal: (groupItem: ItemRequest) => void;
-    userId: string;
     items: ItemRequest[];
+    calculateReturnDate?: (returnDate?: Date | string) => JSX.Element | null; // Now returns JSX.Element or null
+    calculateHistoryDate?: (expectedReturnDate?: Date | string, actualReturnDate?: Date | string) => JSX.Element | null; // Now returns JSX.Element or null
 }
 
-export default function ReturnCard({ active, openModal, userId, items }: BorrowCardProps) {
+export default function ItemCard({ active, openModal, items, calculateReturnDate, calculateHistoryDate }: BorrowCardProps) {
     const cardContainerHeight = "calc(100vh - 25.6rem)";
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll w-full";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
@@ -21,39 +22,6 @@ export default function ReturnCard({ active, openModal, userId, items }: BorrowC
             </div>
         );
     }
-
-    const calculateDaysRemaining = (returnDate?: Date | string) => {
-        if (!returnDate) {
-            return <span>Return date not set</span>;
-        }
-    
-        // Convert returnDate to a Date object if it's not one.
-        const validReturnDate = returnDate instanceof Date ? returnDate : new Date(returnDate);
-    
-        const currentDate = new Date();
-        const returnDateOnly = new Date(validReturnDate.getFullYear(), validReturnDate.getMonth(), validReturnDate.getDate());
-        const currentDateOnly = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-    
-        // Use getTime() to get timestamps and calculate the difference in milliseconds
-        const msPerDay = 24 * 60 * 60 * 1000; // Number of milliseconds per day
-        const daysDiff = Math.round((returnDateOnly.getTime() - currentDateOnly.getTime()) / msPerDay);
-    
-        let urgent = daysDiff < 2;
-        let tooLate = daysDiff < 0;
-
-        const dayLabel = Math.abs(daysDiff) === 1 ? "day" : "days";
-    
-        return (
-            <div className={`flex items-center gap-1 ${urgent ? 'text-custom-red' : 'text-custom-primary'}`}>
-                <AccessTimeIcon fontSize="small" />
-                {tooLate ? (
-                    <span>{Math.abs(daysDiff)} {dayLabel} late</span>
-                ) : (
-                    <span>{daysDiff} {dayLabel} remaining</span>
-                )}
-            </div>
-        );
-    };
 
     const formatDate = (date?: Date | string) => {
         if (!date) {
@@ -87,7 +55,8 @@ export default function ReturnCard({ active, openModal, userId, items }: BorrowC
                                     </div>
                                     <div className="flex flex-col w-1/3">
                                         <div className="truncate">
-                                            <span>{calculateDaysRemaining(item.endBorrowDate)}</span>
+                                            {calculateReturnDate && (calculateReturnDate(item.endBorrowDate))}
+                                            {calculateHistoryDate && calculateHistoryDate(item.endBorrowDate, item.returnDate)}
                                         </div>
                                         <div className="truncate">
                                             <span className="font-semibold">Name:&nbsp;</span>
@@ -101,14 +70,32 @@ export default function ReturnCard({ active, openModal, userId, items }: BorrowC
                                     <div className="flex flex-col w-1/3">
                                         <div className="flex gap-8 items-center">
                                             <div className="truncate">
-                                                <span className="font-semibold">Borrow date:&nbsp;</span>
-                                                <span>{formatDate(item.borrowDate)}</span>
+                                                {calculateReturnDate ? (
+                                                    <div>
+                                                        <span className="font-semibold">Borrow date:&nbsp;</span>
+                                                        <span>{formatDate(item.borrowDate)}</span>
+                                                    </div>
+                                                ): (
+                                                    <div>
+                                                        <span className="font-semibold">Borrowed:&nbsp;</span>
+                                                        <span>{formatDate(item.borrowDate)}</span>
+                                                    </div>
+                                                )}
                                             </div>
                                             
                                         </div>
                                         <div className="truncate">
-                                            <span className="font-semibold">Return date:&nbsp;</span>
-                                            <span>{formatDate(item.endBorrowDate)}</span>
+                                            {calculateReturnDate ? (
+                                                <div>
+                                                    <span className="font-semibold">Return date:&nbsp;</span>
+                                                    <span>{formatDate(item.endBorrowDate)}</span>
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <span className="font-semibold">Returned:&nbsp;</span>
+                                                    <span>{formatDate(item.returnDate)}</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="flex flex-col w-1/3">
@@ -126,15 +113,27 @@ export default function ReturnCard({ active, openModal, userId, items }: BorrowC
                                     </div>
                                 </div>
                                 <div className="w-1/12">
-                                    <Button 
-                                        text="Return" 
-                                        textColor="white" 
-                                        borderColor="custom-primary" 
-                                        fillColor="custom-primary"
-                                        paddingY="py-0"
-                                        font="semibold"
-                                        onClick={() => openModal(item)}
-                                    />
+                                    {calculateReturnDate ? (
+                                            <Button 
+                                                text="Return" 
+                                                textColor="white" 
+                                                borderColor="custom-primary" 
+                                                fillColor="custom-primary"
+                                                paddingY="py-0"
+                                                font="semibold"
+                                                onClick={() => openModal(item)}
+                                            />
+                                        ) : (
+                                            <Button 
+                                                text="View" 
+                                                textColor="white" 
+                                                borderColor="custom-primary" 
+                                                fillColor="custom-primary"
+                                                paddingY="py-0"
+                                                font="semibold"
+                                                onClick={() => openModal(item)}
+                                            />
+                                        )}
                                 </div>
                             </div>
                         ) : (
@@ -145,7 +144,8 @@ export default function ReturnCard({ active, openModal, userId, items }: BorrowC
                                     </div>
                                     <div className="flex w-1/2 flex-col items-end">
                                         <div className="flex items-center text-custom-primary gap-1 text-sm sm:text-base">
-                                            {calculateDaysRemaining(item.endBorrowDate)}
+                                            {calculateReturnDate && (calculateReturnDate(item.endBorrowDate))}
+                                            {calculateHistoryDate && calculateHistoryDate(item.endBorrowDate, item.returnDate)}
                                         </div>
                                         <div className="flex truncate items-center text-gray-400 gap-1 text-xs sm:text-sm">
                                             <AccessTimeIcon fontSize="small"/>
@@ -181,15 +181,27 @@ export default function ReturnCard({ active, openModal, userId, items }: BorrowC
                                 </div>
                                 <hr />
                                 <div className="flex justify-center items-center p-2">
-                                    <Button 
-                                        text="Return" 
-                                        textColor="white" 
-                                        borderColor="custom-primary" 
-                                        fillColor="custom-primary"
-                                        paddingY="py-0"
-                                        font="semibold"
-                                        onClick={() => openModal(item)}
-                                    />
+                                    {calculateReturnDate ? (
+                                        <Button 
+                                            text="Return" 
+                                            textColor="white" 
+                                            borderColor="custom-primary" 
+                                            fillColor="custom-primary"
+                                            paddingY="py-0"
+                                            font="semibold"
+                                            onClick={() => openModal(item)}
+                                        />
+                                    ) : (
+                                        <Button 
+                                            text="View" 
+                                            textColor="white" 
+                                            borderColor="custom-primary" 
+                                            fillColor="custom-primary"
+                                            paddingY="py-0"
+                                            font="semibold"
+                                            onClick={() => openModal(item)}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         )}

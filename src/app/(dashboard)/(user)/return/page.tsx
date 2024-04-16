@@ -2,11 +2,12 @@
 import Unauthorized from "@/app/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
-import { getAuth, getIdToken } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import app from "@/services/firebase-config";
 import Filters from "@/components/(user)/return/Filter";
 import { ItemRequest } from "@/models/ItemRequest";
-import ReturnCard from "@/components/(user)/return/ReturnCard";
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ItemCard from "@/components/(user)/ItemCard";
 
 export default function Return() {
     const isAuthorized = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']); // All these roles can view this page
@@ -85,6 +86,39 @@ export default function Return() {
         }
     };
 
+    const calculateDaysRemaining = (returnDate?: Date | string) => {
+        if (!returnDate) {
+            return <span>Return date not set</span>;
+        }
+    
+        // Convert returnDate to a Date object if it's not one.
+        const validReturnDate = returnDate instanceof Date ? returnDate : new Date(returnDate);
+    
+        const currentDate = new Date();
+        const returnDateOnly = new Date(validReturnDate.getFullYear(), validReturnDate.getMonth(), validReturnDate.getDate());
+        const currentDateOnly = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+    
+        // Use getTime() to get timestamps and calculate the difference in milliseconds
+        const msPerDay = 24 * 60 * 60 * 1000; // Number of milliseconds per day
+        const daysDiff = Math.round((returnDateOnly.getTime() - currentDateOnly.getTime()) / msPerDay);
+    
+        let urgent = daysDiff < 2;
+        let tooLate = daysDiff < 0;
+
+        const dayLabel = Math.abs(daysDiff) === 1 ? "day" : "days";
+    
+        return (
+            <div className={`flex items-center gap-1 ${urgent ? 'text-custom-red' : 'text-custom-primary'}`}>
+                <AccessTimeIcon fontSize="small" />
+                {tooLate ? (
+                    <span>{Math.abs(daysDiff)} {dayLabel} late</span>
+                ) : (
+                    <span>{daysDiff} {dayLabel} remaining</span>
+                )}
+            </div>
+        );
+    };
+
     if (!isAuthorized) { return <Unauthorized />; }
 
     return (
@@ -112,11 +146,11 @@ export default function Return() {
                         </div>
                     </div>
                 </div>
-                <ReturnCard 
+                <ItemCard 
                     active={active}
                     openModal={openModal}
-                    userId={userId || ''}
                     items={items}
+                    calculateReturnDate={calculateDaysRemaining}
                 />
             </div>
         </div>

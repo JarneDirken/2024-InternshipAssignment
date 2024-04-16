@@ -6,7 +6,8 @@ import { getAuth } from 'firebase/auth';
 import app from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
 import Filters from "@/components/(user)/history/Filter";
-import HistoryCard from "@/components/(user)/history/HistoryCard";
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ItemCard from "@/components/(user)/ItemCard";
 
 
 export default function History() {
@@ -34,7 +35,6 @@ export default function History() {
     useEffect(() => {
         if(userId) {
             getItems();
-            console.log(items);
         }
     }, [userId]);
 
@@ -71,7 +71,6 @@ export default function History() {
         const queryString = new URLSearchParams(params).toString();
     
         try {
-            console.log("going in for key");
             const response = await fetch(`/api/user/history?${queryString}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -86,6 +85,40 @@ export default function History() {
         } catch (error) {
             console.error("Failed to fetch items:", error);
         }
+    };
+
+    const calculateOnTime = (expectedReturnDate?: Date | string, actualReturnDate?: Date | string) => {
+        if (!expectedReturnDate || !actualReturnDate) {
+            return <span>Return date not set</span>;
+        }
+    
+        // Convert strings to Date objects if necessary
+        const expectedDate = expectedReturnDate instanceof Date ? expectedReturnDate : new Date(expectedReturnDate);
+        const actualDate = actualReturnDate instanceof Date ? actualReturnDate : new Date(actualReturnDate);
+    
+        // Reset time components to compare only dates
+        const expected = new Date(expectedDate.getFullYear(), expectedDate.getMonth(), expectedDate.getDate()).getTime();
+        const actual = new Date(actualDate.getFullYear(), actualDate.getMonth(), actualDate.getDate()).getTime();
+    
+        // Calculate the difference in days
+        const msPerDay = 24 * 60 * 60 * 1000; // Number of milliseconds per day
+        const timeDiff = actual - expected;
+        const daysDiff = Math.round(timeDiff / msPerDay);
+    
+        // Determine if the return was on time or late
+        const onTime = timeDiff <= 0;
+        const dayLabel = Math.abs(daysDiff) === 1 ? "day" : "days";
+    
+        return (
+            <div className={`flex items-center gap-1 ${onTime ? 'text-custom-green' : 'text-custom-red'}`}>
+                <AccessTimeIcon fontSize="small" />
+                {!onTime ? (
+                    <span>{Math.abs(daysDiff)} {dayLabel} late</span>
+                ) : (
+                    <span>On Time</span>
+                )}
+            </div>
+        );
     };
 
     if (!isAuthorized) { return <Unauthorized />; }
@@ -115,11 +148,11 @@ export default function History() {
                         </div>
                     </div>
                 </div>
-                <HistoryCard 
+                <ItemCard 
                     active={active}
                     openModal={openModal}
-                    userId={userId || ''}
                     items={items}
+                    calculateHistoryDate={calculateOnTime}
                 />
             </div>
         </div>
