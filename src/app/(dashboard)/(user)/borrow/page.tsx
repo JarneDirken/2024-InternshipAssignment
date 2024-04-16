@@ -70,6 +70,7 @@ export default function Borrow() {
         if (user) {
             try {
                 const token = await getIdToken(user);
+                // console.log(token);
                 const response = await fetch(`/api/user/items/${id}`, {
                     method: 'GET',
                     headers: {
