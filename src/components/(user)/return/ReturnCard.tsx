@@ -139,9 +139,18 @@ export default function ReturnCard({ active, openModal, userId, items }: BorrowC
                             </div>
                         ) : (
                             <div className="overflow-hidden w-full">
-                                <div className="flex justify-between w-full">
-                                    <div className="p-2">
-                                        <span className="text-sm font-semibold truncate sm:text-lg">{item.item.name}</span>
+                                <div className="p-2 flex items-center flex-wrap">
+                                    <div className="flex w-1/2 flex-wrap">
+                                        <span className="font-semibold flex-wrap text-sm sm:text-lg">{item.item.name}</span>
+                                    </div>
+                                    <div className="flex w-1/2 flex-col items-end">
+                                        <div className="flex items-center text-custom-primary gap-1 text-sm sm:text-base">
+                                            {calculateDaysRemaining(item.endBorrowDate)}
+                                        </div>
+                                        <div className="flex truncate items-center text-gray-400 gap-1 text-xs sm:text-sm">
+                                            <AccessTimeIcon fontSize="small"/>
+                                            <span>{formatDate(item.borrowDate)} - {formatDate(item.endBorrowDate)}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <hr />
