@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
-
 interface PendingBorrowProps {
     active: boolean;
     nameFilter: string;

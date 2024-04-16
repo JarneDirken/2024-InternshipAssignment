@@ -93,8 +93,10 @@ export async function GET(request: NextRequest) {
                 name: { contains: nameFilter, mode: 'insensitive' },
                 model: { contains: modelFilter, mode: 'insensitive' },
                 brand: { contains: brandFilter, mode: 'insensitive' },
-                location: { name: { contains: locationFilter, mode: 'insensitive' } }
-            }
+                location: { name: { contains: locationFilter, mode: 'insensitive' } },
+                itemStatusId: 2,
+            },
+            requestStatusId: 1,
         },
         include: { 
             item: {
@@ -107,7 +109,11 @@ export async function GET(request: NextRequest) {
 
     const totalCount = await prisma.itemRequest.count({
         where: {
-            borrowerId: uid
+            borrowerId: uid,
+            item: {
+                itemStatusId: 2,
+            },
+            requestStatusId: 1,
         }
     });
 
