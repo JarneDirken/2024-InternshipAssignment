@@ -1,11 +1,11 @@
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+'use client';
+import { Dispatch, SetStateAction, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Item } from "@/models/Item";
-import { Location } from "@/models/Location";
-import { getAuth, getIdToken } from "firebase/auth";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
+import AppsOutlinedIcon from '@mui/icons-material/AppsOutlined';
+import ReorderOutlinedIcon from '@mui/icons-material/ReorderOutlined';
 import Tooltip from "@mui/material/Tooltip";
 import ClearIcon from '@mui/icons-material/Clear';
 import MenuItem from '@mui/material/MenuItem';
@@ -24,6 +24,8 @@ interface Filter {
 interface FiltersProps {
     title: string;
     icon: JSX.Element;
+    active: boolean;
+    setActive: Dispatch<SetStateAction<boolean>>;
     onFilterChange: (filterType: string, filterValue: string) => void;
     onSortChange: (sortBy: string, sortDirection: 'asc' | 'desc') => void;
     filters: Filter[];
@@ -33,10 +35,43 @@ interface FiltersProps {
     sortOptions: string[];
 }
 
-export default function Filters({ title, icon, onFilterChange, onSortChange, filters, items, openModal, userId, sortOptions}: FiltersProps) {
+export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, openModal, userId, sortOptions}: FiltersProps) {
+    const prevWidthRef = useRef<number | null>(null);
+    const lastActiveRef = useRef<boolean | null>(null);
     const [sortBy, setSortBy] = useState('');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+    useLayoutEffect(() => {
+        const handleResize = () => {
+            const width = window.innerWidth;
+            const prevWidth = prevWidthRef.current;
+
+            if (prevWidth && prevWidth >= 1280 && width < 1280) {
+                lastActiveRef.current = active; // Store active only when crossing the boundary from large to small
+                setActive(false);
+            } else if (prevWidth && prevWidth < 1280 && width >= 1280) {
+                // Only restore active when crossing the boundary from small to large
+                if (lastActiveRef.current !== null) {
+                    setActive(lastActiveRef.current);
+                }
+            }
+
+            prevWidthRef.current = width;
+        };
+
+        handleResize(); // Initial call to set the previous width
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [active, setActive]);
+
+    // Separate useEffect for initial load
+    useEffect(() => {
+        if (window.innerWidth < 1280) {
+            setActive(false);
+        }
+    }, [setActive]);
 
     const handleSortClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -123,6 +158,22 @@ export default function Filters({ title, icon, onFilterChange, onSortChange, fil
                     {icon}
                     <h1 className="font-semibold text-2xl">{title}</h1>
                 </div>
+                <div className="flex items-center gap-6">
+                <div className="xl:flex items-center gap-1 hidden">
+                    <Tooltip title="List view" arrow>
+                        <div className={`cursor-pointer rounded-full p-1 ${active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
+                            onClick={() => setActive(true)}>
+                            <ReorderOutlinedIcon />
+                        </div>
+                    </Tooltip>
+                    <Tooltip title="Card view" arrow>
+                        <div className={`cursor-pointer rounded-full p-1 ${!active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
+                            onClick={() => setActive(false)}>
+                            <AppsOutlinedIcon />
+                        </div>
+                    </Tooltip>
+                </div>
+            </div>
             </div>
             <div className="p-4">
                 <ThemeProvider theme={theme}>
@@ -151,7 +202,7 @@ export default function Filters({ title, icon, onFilterChange, onSortChange, fil
                             </div>
                         ))}
                         <div>
-                        <Button onClick={handleSortClick} startIcon={<SwapVertRoundedIcon />} endIcon={<KeyboardArrowRightRoundedIcon />} >
+                        <Button onClick={handleSortClick} startIcon={<SwapVertRoundedIcon />} endIcon={<KeyboardArrowRightRoundedIcon />} className="" >
                             Sort by {sortBy ? sortBy : 'Select'} {sortDirection === 'asc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
                         </Button>
                             <Menu

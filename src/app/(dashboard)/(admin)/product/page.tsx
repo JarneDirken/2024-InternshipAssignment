@@ -12,18 +12,21 @@ interface Filter {
 }
 
 export default function Product() {
+    const [active, setActive] = useState(true);
     const [items, setItems] = useState<Item[]>([]);
     const [item, setItem] = useState<Item>(); // to store one item
     const [name, setName] = useState<string>('');
     const [model, setModel] = useState<string>('');
     const [brand, setBrand] = useState<string>('');
     const [location, setLocation] = useState<string>('');
+    const [year, setYear] = useState<string>('');
 
     const filters: Filter[] = [
         { label: 'Name', state: [name, setName] },
         { label: 'Model', state: [model, setModel] },
         { label: 'Brand', state: [brand, setBrand] },
-        { label: 'Location', state: [location, setLocation] }
+        { label: 'Location', state: [location, setLocation] },
+        { label: 'Year', state: [year, setYear] }
     ];
 
     const [isModalOpen, setModalOpen] = useState(false);
@@ -71,6 +74,12 @@ export default function Product() {
             case 'location':
                 setLocation(value);
                 break;
+            case 'year':
+                setYear(value);
+                break;
+            case 'year':
+                setYear(value);
+                break;
             default:
                 break;
         }
@@ -85,6 +94,8 @@ export default function Product() {
         <div>
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
+                    active={active}
+                    setActive={setActive}
                     title="Products"
                     icon={<Inventory2OutlinedIcon fontSize="large" />}
                     onFilterChange={handleFilterChange}
