@@ -1,6 +1,5 @@
 'use client';
 import { Item } from "@/models/Item";
-import { Location } from "@/models/Location";
 import Tooltip from "@mui/material/Tooltip";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
@@ -30,7 +29,6 @@ interface FiltersProps { // typescript moment, everthing should have a type
 }
 
 export default function Filters({ active, setActive, onFilterChange, items, userId }: FiltersProps) {
-    const [locations, setLocations] = useState<Location[]>([]);
     const prevWidthRef = useRef(window.innerWidth);
     const lastActiveRef = useRef<boolean | null>(null);
     const [name, setName] = useState('');

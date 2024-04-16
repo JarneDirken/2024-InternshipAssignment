@@ -4,7 +4,6 @@ import { NextRequest } from 'next/server';
 
 export async function POST(req: NextApiRequest) {
     const { data } = await new Response(req.body).json();
-    console.log(data);
 
     // Check if the item already has an active request with itemStatusId: 3
     const existingRequest = await prisma.itemRequest.findFirst({
@@ -93,8 +92,10 @@ export async function GET(request: NextRequest) {
                 name: { contains: nameFilter, mode: 'insensitive' },
                 model: { contains: modelFilter, mode: 'insensitive' },
                 brand: { contains: brandFilter, mode: 'insensitive' },
-                location: { name: { contains: locationFilter, mode: 'insensitive' } }
-            }
+                location: { name: { contains: locationFilter, mode: 'insensitive' } },
+                itemStatusId: 2,
+            },
+            requestStatusId: 1,
         },
         include: { 
             item: {
@@ -107,7 +108,11 @@ export async function GET(request: NextRequest) {
 
     const totalCount = await prisma.itemRequest.count({
         where: {
-            borrowerId: uid
+            borrowerId: uid,
+            item: {
+                itemStatusId: 2,
+            },
+            requestStatusId: 1,
         }
     });
 

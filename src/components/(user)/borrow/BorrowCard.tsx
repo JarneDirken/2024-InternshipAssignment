@@ -148,7 +148,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                             style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
                                             />
                                     </div>
-                                    <div className="flex flex-col w-1/4">
+                                    <div className="flex flex-col w-1/4 mr-2">
                                         <div className="truncate">
                                             <span className="font-semibold">Name:&nbsp;</span>
                                             <span>{item.name}</span>
@@ -158,7 +158,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                             <span>{item.model}</span>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col">
+                                    <div className="flex flex-col w-3/4">
                                         <div className="flex gap-8 items-center">
                                         <div className="truncate flex items-center">
                                                 <span className="font-semibold">Amount:&nbsp;</span>
