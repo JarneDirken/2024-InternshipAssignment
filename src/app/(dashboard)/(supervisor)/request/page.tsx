@@ -154,6 +154,7 @@ export default function History() {
                     items={items}
                     itemLoading={itemLoading}
                 />
+                
                 <DateRangePicker 
                     borrowDate={borrowDate}
                     returnDate={returnDate}
