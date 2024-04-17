@@ -95,7 +95,7 @@ export default function Filters({ active, setActive, onFilterChange, items, user
             <div className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-3">
                     <PersonAddAltOutlinedIcon fontSize="large" />
-                    <h1 className="font-semibold text-2xl">Return</h1>
+                    <h1 className="font-semibold text-2xl">History</h1>
                 </div>
                 <div className="flex items-center gap-6">
                     <div className="xl:flex items-center gap-1 hidden">

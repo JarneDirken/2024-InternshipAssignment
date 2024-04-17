@@ -6,6 +6,7 @@ import { createRequest } from "@/services/store";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { useInView } from 'react-intersection-observer';
+import Image from 'next/image';
 
 interface BorrowCardProps {
     active: boolean;
@@ -142,11 +143,20 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
                                 <div className="flex flex-row items-center w-full">
                                     <div className="w-1/12 mr-2">
-                                        <img 
-                                            src={item.image}
-                                            alt={item.name} 
-                                            style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                    {!item.image ? (
+                                            <Image 
+                                                src="/assets/images/defaultImage.jpg"
+                                                width={72}
+                                                height={100}
+                                                alt="Default iamge"
+                                          />
+                                        ) : (
+                                            <img 
+                                                src={item.image}
+                                                alt={item.name} 
+                                                style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
                                             />
+                                        )}
                                     </div>
                                     <div className="flex flex-col w-1/4 mr-2">
                                         <div className="truncate">
@@ -194,11 +204,20 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                 <hr />
                                 <div className="flex items-center p-4 max-w-xs w-full">
                                     <div className="w-1/3 flex justify-center mr-2">
-                                        <img 
-                                            src={item.image}
-                                            alt={item.name} 
-                                            style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
-                                        />
+                                    {!item.image ? (
+                                            <Image 
+                                                src="/assets/images/defaultImage.jpg"
+                                                width={72}
+                                                height={100}
+                                                alt="Default iamge"
+                                          />
+                                        ) : (
+                                            <img 
+                                                src={item.image}
+                                                alt={item.name} 
+                                                style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                            />
+                                        )}
                                     </div>
                                     <div className="flex flex-col items-start w-2/3">
                                         <div className="flex items-center gap-6 max-w-full">

@@ -17,14 +17,18 @@ import DashboardContext from "@/components/layout/sidebarcontext";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { SnackbarProvider } from 'notistack';
+import useAuth from "@/hooks/useAuth";
+import Loading from "@/components/states/Loading";
 
 export default function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
+  const { userRole, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
   const pathname = usePathname();
+
+  if (loading) return <Loading />;
 
   return (
     <SnackbarProvider maxSnack={3}>
@@ -33,40 +37,45 @@ export default function DashboardLayout({
         <DashboardHeader/>
         <div className="hidden sm:block">
           <Sidebar>
-            <Link href="/borrow">
-              <SidebarItem 
-                icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-3xl" />} 
-                text="Borrow" 
-                active={pathname === "/borrow"}  />
-            </Link>
-            <Link href="/return">
-              <SidebarItem 
-                icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-3xl" />} 
-                text="Return" 
-                active={pathname === "/return"}  />
-            </Link>
-            <Link href="/history">
-              <SidebarItem 
-              icon={<HistoryOutlinedIcon fontSize="inherit" className="text-3xl" />} 
-              text="History"  
-              active={pathname === "/history"}  />
-            </Link>
+            {['Student', 'Teacher', 'Supervisor', 'Admin'].includes(userRole || '') && (
+              <>
+                <Link href="/borrow">
+                  <SidebarItem icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Borrow" active={pathname === "/borrow"} />
+                </Link>
+                <Link href="/return">
+                  <SidebarItem icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Return" active={pathname === "/return"} />
+                </Link>
+                <Link href="/history">
+                  <SidebarItem icon={<HistoryOutlinedIcon fontSize="inherit" className="text-3xl" />} text="History" active={pathname === "/history"} />
+                </Link>
+              </>
+            )}
 
-            <SidebarHeading>Supervisor</SidebarHeading>
-            <SidebarItem icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Requests"  />
-            <SidebarItem icon={<HandymanOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Repairs"  />
-            <SidebarItem icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Lendings"  />
-          
-            <SidebarHeading>Admin</SidebarHeading>
+            {['Supervisor', 'Admin'].includes(userRole || '') && (
+              <>
+                <SidebarHeading>Supervisor</SidebarHeading>
+                <Link href="/request">
+                  <SidebarItem icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Requests" active={pathname === "/request"} />
+                </Link>
+                <Link href="/repair">
+                  <SidebarItem icon={<HandymanOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Repairs" active={pathname === "/repair"} />
+                </Link>
+                <Link href="/lending">
+                  <SidebarItem icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Lendings" active={pathname === "/lending"} />
+                </Link>
+              </>
+            )}
 
-            <Link href="/product">
-              <SidebarItem 
-                icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-3xl" />} 
-                text="Products"
-                active={pathname === "/product"}  />
-            </Link>
-            <SidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Locations"  />
-            <SidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Users"  />
+            {userRole === 'Admin' && (
+              <>
+                <SidebarHeading>Admin</SidebarHeading>
+                <Link href="/product">
+                  <SidebarItem icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-3xl" />} text="Products" active={pathname === "/product"} />
+                </Link>
+                <SidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Locations" />
+                <SidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Users" />
+              </>
+            )}
           </Sidebar>
         </div>
         <DashboardFrame>

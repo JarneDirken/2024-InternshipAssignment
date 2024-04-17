@@ -6,6 +6,7 @@ import { useSnackbar } from "notistack";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import Image from 'next/image';
 
 interface PendingBorrowProps {
     active: boolean;
@@ -105,11 +106,20 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
                                 <div className="flex flex-row items-center w-full">
                                     <div className="w-1/12 mr-2">
-                                        <img 
-                                            src={request.item.image}
-                                            alt={request.item.name} 
-                                            style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                    {!request.item.image ? (
+                                            <Image 
+                                                src="/assets/images/defaultImage.jpg"
+                                                width={72}
+                                                height={100}
+                                                alt="Default iamge"
+                                          />
+                                        ) : (
+                                            <img 
+                                                src={request.item.image}
+                                                alt={request.item.name} 
+                                                style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
                                             />
+                                        )}
                                     </div>
                                     <div className="flex flex-col w-1/4">
                                         <div className="truncate">
@@ -172,11 +182,20 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                 <hr />
                                 <div className="flex items-center p-4">
                                     <div className="w-1/3 flex justify-center mr-2">
-                                    <img 
-                                        src={request.item.image}
-                                        alt={request.item.name} 
-                                        style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
-                                        />
+                                    {!request.item.image ? (
+                                            <Image 
+                                                src="/assets/images/defaultImage.jpg"
+                                                width={72}
+                                                height={100}
+                                                alt="Default iamge"
+                                          />
+                                        ) : (
+                                            <img 
+                                                src={request.item.image}
+                                                alt={request.item.name} 
+                                                style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                            />
+                                        )}
                                     </div>
                                     <div className="flex flex-col items-start w-2/3">
                                         <div className="flex items-center gap-6">
