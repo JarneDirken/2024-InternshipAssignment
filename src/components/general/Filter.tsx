@@ -11,6 +11,13 @@ import ClearIcon from '@mui/icons-material/Clear';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
+import InputLabel from '@mui/material/InputLabel';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import Checkbox from '@mui/material/Checkbox';
+import ListItemText from '@mui/material/ListItemText';
+import React from "react";
+import { DateRangePicker } from "@nextui-org/react";
 import SwapVertRoundedIcon from '@mui/icons-material/SwapVertRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
@@ -19,6 +26,7 @@ import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
 interface Filter {
     label: string;
     state: [string, Dispatch<SetStateAction<string>>];
+    inputType: 'text' | 'dateRange' | 'multipleSelect';
 }
 
 interface FiltersProps {
@@ -33,9 +41,10 @@ interface FiltersProps {
     openModal: (id: number) => void;
     userId: string | null;
     sortOptions: string[];
+    isCardView: boolean;
 }
 
-export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, openModal, userId, sortOptions}: FiltersProps) {
+export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, openModal, userId, sortOptions, isCardView }: FiltersProps) {
     const prevWidthRef = useRef<number | null>(null);
     const lastActiveRef = useRef<boolean | null>(null);
     const [sortBy, setSortBy] = useState('');
@@ -158,47 +167,65 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                     {icon}
                     <h1 className="font-semibold text-2xl">{title}</h1>
                 </div>
-                <div className="flex items-center gap-6">
-                <div className="xl:flex items-center gap-1 hidden">
-                    <Tooltip title="List view" arrow>
-                        <div className={`cursor-pointer rounded-full p-1 ${active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
-                            onClick={() => setActive(true)}>
-                            <ReorderOutlinedIcon />
+                {isCardView && (
+                    <div className="flex items-center gap-6">
+                        <div className="xl:flex items-center gap-1 hidden">
+                            <Tooltip title="List view" arrow>
+                                <div className={`cursor-pointer rounded-full p-1 ${active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
+                                    onClick={() => setActive(true)}>
+                                    <ReorderOutlinedIcon />
+                                </div>
+                            </Tooltip>
+                            <Tooltip title="Card view" arrow>
+                                <div className={`cursor-pointer rounded-full p-1 ${!active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
+                                    onClick={() => setActive(false)}>
+                                    <AppsOutlinedIcon />
+                                </div>
+                            </Tooltip>
                         </div>
-                    </Tooltip>
-                    <Tooltip title="Card view" arrow>
-                        <div className={`cursor-pointer rounded-full p-1 ${!active ? 'bg-custom-primary text-white' : 'bg-transparent text-black'}`}
-                            onClick={() => setActive(false)}>
-                            <AppsOutlinedIcon />
-                        </div>
-                    </Tooltip>
-                </div>
-            </div>
+                    </div>
+                )}
             </div>
             <div className="p-4">
                 <ThemeProvider theme={theme}>
                     <div className="grid grid-cols-2 gap-4 mb-4 lg:grid-cols-4">
                         {filters.map((filter, index) => (
                             <div key={index}>
-                                <Autocomplete
-                                    disablePortal
-                                    size="small"
-                                    value={filter.state[0] || null}
-                                    onChange={(event, value) => handleFilterChange(filter.label, value)}
-                                    options={[...new Set(items.map(item => item.name))]}
-                                    isOptionEqualToValue={(option, value) => option === value}
-                                    sx={{ width: '100%' }}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            label={filter.label}
-                                            placeholder="Search"
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                        />
-                                    )}
-                                />
+                                {filter.inputType === 'text' && (
+                                    <Autocomplete
+                                        disablePortal
+                                        size="small"
+                                        value={filter.state[0] || null}
+                                        onChange={(event, value) => handleFilterChange(filter.label, value)}
+                                        options={[...new Set(items.map(item => item.name))]}
+                                        isOptionEqualToValue={(option, value) => option === value}
+                                        sx={{ width: '100%' }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label={filter.label}
+                                                placeholder="Search"
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                )}
+                                {filter.inputType === 'dateRange' && (
+                                    <DateRangePicker
+                                        label={filter.label}
+                                        className="max-w-xs"
+                                    />
+                                )}
+                                {filter.inputType === 'multipleSelect' && (
+                                    <MultipleSelectCheckmarks
+                                        label={filter.label}
+                                        options={names}
+                                        selected={filter.state[0]}
+                                        onChange={(selected) => handleFilterChange(filter.label, selected.join(','))}
+                                    />
+                                )}
                             </div>
                         ))}
                         <div>
@@ -231,5 +258,58 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                 </div>
             </div>
         </>
+    );
+}
+
+function MultipleSelectCheckmarks({ label, options, selected, onChange }: { label: string; options: string[]; selected: string; onChange: (selected: string[]) => void }) {
+    const [personName, setPersonName] = useState<string[]>(selected.split(','));
+
+    const handleChange = (event: SelectChangeEvent<typeof personName>) => {
+        const {
+            target: { value },
+        } = event;
+        setPersonName(
+            // On autofill we get a stringified value.
+            typeof value === 'string' ? value.split(',') : value,
+        );
+    };
+
+    const ITEM_HEIGHT = 48;
+    const ITEM_PADDING_TOP = 8;
+
+    const MenuProps = {
+        PaperProps: {
+          style: {
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+            width: 250,
+          },
+        },
+      };
+
+    useEffect(() => {
+        onChange(personName);
+    }, [personName, onChange]);
+
+    return (
+        <div>
+                <InputLabel id={`multiple-select-label-${label}`}>{label}</InputLabel>
+                <Select
+                    labelId={`multiple-select-label-${label}`}
+                    id={`multiple-select-${label}`}
+                    multiple
+                    value={personName}
+                    onChange={handleChange}
+                    input={<OutlinedInput label={label} />}
+                    renderValue={(selected) => selected.join(', ')}
+                    MenuProps={MenuProps}
+                >
+                    {options.map((name) => (
+                        <MenuItem key={name} value={name}>
+                            <Checkbox checked={personName.indexOf(name) > -1} />
+                            <ListItemText primary={name} />
+                        </MenuItem>
+                    ))}
+                </Select>
+        </div>
     );
 }
