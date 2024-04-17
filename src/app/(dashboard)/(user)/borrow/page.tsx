@@ -1,5 +1,5 @@
 'use client';
-import Unauthorized from "@/app/(error)/unauthorized/page";
+import Unauthorized from "@/app/(dashboard)/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { GroupedItem, Item } from "@/models/Item";
@@ -13,14 +13,14 @@ import PendingBorrows from "@/components/(user)/borrow/PendingBorrows";
 import Modal from "@/components/(user)/borrow/Modal";
 import useCart from "@/hooks/useCart";
 import { useSnackbar } from "notistack";
+import Loading from "@/components/states/Loading";
 
 export default function Borrow() {
-    const isAuthorized = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']); // All these roles can view this page
+    const { isAuthorized, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
     const [active, setActive] = useState(true); // this is to toggle from list view to card view
     const [items, setItems] = useState<Item[]>([]);
     const [item, setItem] = useState<Item>(); // to store one item
     const requests = useRecoilValue(requestsState);
-    const [loading, setLoading] = useState(true);
     const [totalRequestCount, setTotalRequestCount] = useState(0);
     const [totalItemCount, setTotalItemCount] = useState(0);
     const [nameFilter, setNameFilter] = useState(''); // name filter
@@ -43,7 +43,7 @@ export default function Borrow() {
                 setUserId(null);
             }
         });
-        return () => unsubscribe(); // Clean up the listener
+        return () => unsubscribe();
     }, [userId]);
 
     async function getPendingBorrowCount() {
@@ -61,7 +61,7 @@ export default function Borrow() {
             setTotalRequestCount(data.totalCount);
         } catch (error) {
             console.error("Failed to fetch item requests:", error);
-        }
+        } 
     }
 
     async function getItemData(id: number) {
@@ -89,7 +89,7 @@ export default function Borrow() {
     }
 
     async function getAllItems(){
-        setLoading(true);
+        
         try {
             if(userId){
                 const queryString = new URLSearchParams({
@@ -105,9 +105,7 @@ export default function Borrow() {
         } catch (error) {
             console.error("Failed to fetch items:", error);
             setItems([]); // Ensure items is always an array
-        } finally {
-            setLoading(false);
-        }
+        } 
     }
 
     const handleFilterChange = (filterType: string, value: string) => {
@@ -163,7 +161,9 @@ export default function Borrow() {
     useEffect(() => {
         getPendingBorrowCount();
         setTotalRequestCount(requests.length);
-    },[created])
+    },[created]);
+
+    if (loading || isAuthorized === null) { return <Loading/>; }
 
     if (!isAuthorized) { return <Unauthorized />; }
 

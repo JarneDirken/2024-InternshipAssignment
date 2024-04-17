@@ -1,5 +1,5 @@
 'use client';
-import Unauthorized from "@/app/(error)/unauthorized/page";
+import Unauthorized from "@/app/(dashboard)/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { getAuth } from 'firebase/auth';
@@ -8,11 +8,13 @@ import Filters from "@/components/(user)/return/Filter";
 import { ItemRequest } from "@/models/ItemRequest";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ItemCard from "@/components/(user)/ItemCard";
+import Loading from "@/components/states/Loading";
 
 export default function Return() {
-    const isAuthorized = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']); // All these roles can view this page
+    const { isAuthorized, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
     const [active, setActive] = useState(true); // this is to toggle from list view to card view
     const [userId, setUserId] = useState<string | null>(null); // userID
+    const [itemLoading, setItemLoading] = useState(true);
     const auth = getAuth(app); // Get authentication
     const [items, setItems] = useState<ItemRequest[]>([]);
     const [totalItemCount, setTotalItemCount] = useState(0);
@@ -58,6 +60,7 @@ export default function Return() {
     }
 
     async function getItems() {
+        setItemLoading(true);
         const params: Record<string, string> = {
             name: nameFilter,
         };
@@ -83,6 +86,8 @@ export default function Return() {
             setItems(fetchedItems);
         } catch (error) {
             console.error("Failed to fetch items:", error);
+        } finally {
+            setItemLoading(false);
         }
     };
 
@@ -104,8 +109,17 @@ export default function Return() {
     
         let urgent = daysDiff < 2;
         let tooLate = daysDiff < 0;
-
+    
         const dayLabel = Math.abs(daysDiff) === 1 ? "day" : "days";
+    
+        // if (daysDiff === 0) {
+        //     return (
+        //         <div className="flex items-center gap-1 text-custom-red">
+        //             <AccessTimeIcon fontSize="small" />
+        //             <span>Today</span>
+        //         </div>
+        //     );
+        // }
     
         return (
             <div className={`flex items-center gap-1 ${urgent ? 'text-custom-red' : 'text-custom-primary'}`}>
@@ -118,6 +132,9 @@ export default function Return() {
             </div>
         );
     };
+    
+
+    if (loading || isAuthorized === null) { return <Loading/>; }
 
     if (!isAuthorized) { return <Unauthorized />; }
 
@@ -137,7 +154,7 @@ export default function Return() {
                 <div className="flex border-b border-b-gray-300 bg-white rounded-tl-xl rounded-tr-xl z-0 overflow-x-scroll" id="selectTabs">
                     <div className="relative">
                         <div
-                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer border-b-4 border-b-custom-primary text-custom-primary font-semibold`}
+                            className={`w-48 flex justify-center py-3 uppercase border-b-4 border-b-custom-primary text-custom-primary font-semibold`}
                         >
                             Current borrows
                         </div>
@@ -151,6 +168,7 @@ export default function Return() {
                     openModal={openModal}
                     items={items}
                     calculateReturnDate={calculateDaysRemaining}
+                    itemLoading={itemLoading}
                 />
             </div>
         </div>

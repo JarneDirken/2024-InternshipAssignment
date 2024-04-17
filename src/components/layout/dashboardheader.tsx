@@ -56,6 +56,11 @@ export default function DashboardHeader() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    const handleLogout = () => {
+        const auth = getAuth();
+        auth.signOut();
+    };
+
     async function fetchUserProfile(uid: string) {
         const endpoint = `/api/userprofile/${uid}`;
         try {
@@ -146,12 +151,29 @@ export default function DashboardHeader() {
                             </Link>
 
                             <div className='border-b my-5'></div>
+
                             <MobileSidebarHeading>Supervisor</MobileSidebarHeading>
-                            <MobileSidebarItem icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Requests"  />
-                            <MobileSidebarItem icon={<HandymanOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Repairs"  />
-                            <MobileSidebarItem icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Lendings"  />
+                            <Link href="/request">
+                                <MobileSidebarItem 
+                                    icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    text="Requests"  
+                                    active={pathname === "/request"} />
+                            </Link>
+                            <Link href="/repair">
+                                <MobileSidebarItem 
+                                    icon={<HandymanOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    text="Repairs"  
+                                    active={pathname === "/repair"} />
+                            </Link>
+                            <Link href="/lending">
+                                <MobileSidebarItem 
+                                icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                text="Lendings"  
+                                active={pathname === "/lending"} />
+                            </Link>
                         
                             <div className='border-b my-5'></div>
+
                             <MobileSidebarHeading>Admin</MobileSidebarHeading>
 
                             <Link href="/product">
@@ -168,7 +190,7 @@ export default function DashboardHeader() {
                 
                 <div className='p-8 w-11/12 mx-auto'>
                     <div className='border-b my-6'></div>
-                    <button className={`bg-gray-100 flex py-1.5 hover:bg-gray-200 overflow-hidden transition-all w-full justify-center`}>
+                    <button className={`bg-gray-100 flex py-1.5 hover:bg-gray-200 overflow-hidden transition-all w-full justify-center`} onClick={handleLogout}>
                         <LogoutRoundedIcon className={`text-2xl mr-1.5`} />
                         <p className={`font-semibold ml-1.5`}>Log Out</p>
                     </button>

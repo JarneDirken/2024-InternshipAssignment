@@ -1,5 +1,5 @@
 import prisma from '@/services/db';
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiResponse } from 'next';
 import admin from '@/services/firebase-admin-config';
 import { headers } from 'next/headers'
 

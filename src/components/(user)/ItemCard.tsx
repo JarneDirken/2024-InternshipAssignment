@@ -1,6 +1,7 @@
 import Button from "@/components/states/Button";
 import { ItemRequest } from "@/models/ItemRequest";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import Loading from "@/components/states/Loading";
 
 interface BorrowCardProps {
     active: boolean;
@@ -8,12 +9,15 @@ interface BorrowCardProps {
     items: ItemRequest[];
     calculateReturnDate?: (returnDate?: Date | string) => JSX.Element | null; // Now returns JSX.Element or null
     calculateHistoryDate?: (expectedReturnDate?: Date | string, actualReturnDate?: Date | string) => JSX.Element | null; // Now returns JSX.Element or null
+    itemLoading: boolean;
 }
 
-export default function ItemCard({ active, openModal, items, calculateReturnDate, calculateHistoryDate }: BorrowCardProps) {
+export default function ItemCard({ active, openModal, items, calculateReturnDate, calculateHistoryDate, itemLoading }: BorrowCardProps) {
     const cardContainerHeight = "calc(100vh - 25.6rem)";
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll w-full";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
+
+    if (itemLoading) { return (<Loading />); }
 
     if (items.length === 0) {
         return (
