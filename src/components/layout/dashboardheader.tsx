@@ -25,12 +25,14 @@ import MobileSidebarHeading from './sidebarheading';
 import { useRecoilState } from 'recoil';
 import { userProfileState } from '@/services/store';
 import Tooltip from '@mui/material/Tooltip';
+import useAuth from '@/hooks/useAuth';
 
 export default function DashboardHeader() {
     const [isOpen, setIsOpen] = useState(false);
     const [profile, setProfile] = useRecoilState(userProfileState);
     const pathname = usePathname();
     const auth = getAuth();
+    const { userRole, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
@@ -73,11 +75,13 @@ export default function DashboardHeader() {
         } catch (error) {
             console.error("Fetching user profile failed:", error);
         }
-    }
+    };
 
     function capitalizeFirstLetter(string: string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
-    }    
+    };
+
+    if (loading) return <Loading />;
 
     return(
         <nav className="bg-gray-50 z-10 shadow-sm w-full h-20 flex items-center sm:justify-end justify-between fixed top-0 left-0 right-0 z-1">
@@ -129,60 +133,69 @@ export default function DashboardHeader() {
                 <div className='flex flex-col w-11/12 mx-auto'>
                     <div className='px-4 mt-24'>
                         <ul className={`flex-1 px-3 mx-auto"}`}>
-                            <MobileSidebarHeading>Links</MobileSidebarHeading>
-                            <Link href="/borrow">
-                                <MobileSidebarItem 
-                                    icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-2xl" />} 
-                                    text="Borrow" 
-                                    active={pathname === "/borrow"}  />
-                            </Link>
-                            <Link href="/return">
-                                <MobileSidebarItem 
-                                    icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-2xl" />} 
-                                    text="Return" 
-                                    active={pathname === "/return"}  />
-                            </Link>
-                            <Link href="/history">
-                                <MobileSidebarItem 
-                                    icon={<HistoryOutlinedIcon fontSize="inherit" className="text-2xl" />} 
-                                    text="History"  
-                                    active={pathname === "/history"}  />
-                            </Link>
+                        {['Student', 'Teacher', 'Supervisor', 'Admin'].includes(userRole || '') && (
+                            <>
+                                <MobileSidebarHeading>Links</MobileSidebarHeading>
+                                <Link href="/borrow">
+                                    <MobileSidebarItem 
+                                        icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                        text="Borrow" 
+                                        active={pathname === "/borrow"}  />
+                                </Link>
+                                <Link href="/return">
+                                    <MobileSidebarItem 
+                                        icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                        text="Return" 
+                                        active={pathname === "/return"}  />
+                                </Link>
+                                <Link href="/history">
+                                    <MobileSidebarItem 
+                                        icon={<HistoryOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                        text="History"  
+                                        active={pathname === "/history"}  />
+                                </Link>
+                            </> 
+                        )}
+                        {['Supervisor', 'Admin'].includes(userRole || '') && (
+                            <>
+                                <div className='border-b my-5'></div>
 
-                            <div className='border-b my-5'></div>
+                                <MobileSidebarHeading>Supervisor</MobileSidebarHeading>
+                                <Link href="/request">
+                                    <MobileSidebarItem 
+                                        icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                        text="Requests"  
+                                        active={pathname === "/request"} />
+                                </Link>
+                                <Link href="/repair">
+                                    <MobileSidebarItem 
+                                        icon={<HandymanOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                        text="Repairs"  
+                                        active={pathname === "/repair"} />
+                                </Link>
+                                <Link href="/lending">
+                                    <MobileSidebarItem 
+                                    icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    text="Lendings"  
+                                    active={pathname === "/lending"} />
+                                </Link>
+                            </> 
+                        )}
+                        {userRole === 'Admin' && (
+                            <>
+                                <div className='border-b my-5'></div>
 
-                            <MobileSidebarHeading>Supervisor</MobileSidebarHeading>
-                            <Link href="/request">
-                                <MobileSidebarItem 
-                                    icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-2xl" />} 
-                                    text="Requests"  
-                                    active={pathname === "/request"} />
-                            </Link>
-                            <Link href="/repair">
-                                <MobileSidebarItem 
-                                    icon={<HandymanOutlinedIcon fontSize="inherit" className="text-2xl" />} 
-                                    text="Repairs"  
-                                    active={pathname === "/repair"} />
-                            </Link>
-                            <Link href="/lending">
-                                <MobileSidebarItem 
-                                icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-2xl" />} 
-                                text="Lendings"  
-                                active={pathname === "/lending"} />
-                            </Link>
-                        
-                            <div className='border-b my-5'></div>
-
-                            <MobileSidebarHeading>Admin</MobileSidebarHeading>
-
-                            <Link href="/product">
-                                <MobileSidebarItem 
-                                    icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-2xl" />} 
-                                    text="Products"
-                                    active={pathname === "/product"}  />
-                            </Link>
-                            <MobileSidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Locations"  />
-                            <MobileSidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Users"  />
+                                <MobileSidebarHeading>Admin</MobileSidebarHeading>
+                                <Link href="/product">
+                                    <MobileSidebarItem 
+                                        icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                        text="Products"
+                                        active={pathname === "/product"}  />
+                                </Link>
+                                <MobileSidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Locations"  />
+                                <MobileSidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Users"  />
+                            </>
+                        )}
                         </ul>
                     </div>
                 </div>

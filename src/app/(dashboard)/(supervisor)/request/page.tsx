@@ -59,6 +59,7 @@ export default function History() {
     }
 
     async function getItems() {
+        setItemLoading(true);
         const params: Record<string, string> = {
             name: nameFilter,
         };
@@ -84,6 +85,8 @@ export default function History() {
             setItems(fetchedItems);
         } catch (error) {
             console.error("Failed to fetch items:", error);
+        } finally {
+            setItemLoading(false);
         }
     };
 
