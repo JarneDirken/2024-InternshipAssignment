@@ -2,6 +2,8 @@ import Button from "@/components/states/Button";
 import { ItemRequest } from "@/models/ItemRequest";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Loading from "@/components/states/Loading";
+import useAuth from "@/hooks/useAuth";
+import Image from 'next/image';
 
 interface BorrowCardProps {
     active: boolean;
@@ -51,11 +53,20 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
                                 <div className="flex flex-row items-end w-5/6">
                                     <div className="w-1/12 mr-2">
-                                        <img 
-                                            src={item.item.image}
-                                            alt={item.item.name} 
-                                            style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                        {!item.item.image ? (
+                                            <Image 
+                                                src="/assets/images/defaultImage.jpg"
+                                                width={72}
+                                                height={100}
+                                                alt="Default iamge"
+                                          />
+                                        ) : (
+                                            <img 
+                                                src={item.item.image}
+                                                alt={item.item.name} 
+                                                style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
                                             />
+                                        )}
                                     </div>
                                     <div className="flex flex-col w-1/3">
                                         <div className="truncate">
@@ -160,11 +171,20 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                 <hr />
                                 <div className="flex items-center p-4 max-w-xs w-full">
                                     <div className="w-1/3 flex justify-center mr-2">
-                                        <img 
-                                            src={item.item.image}
-                                            alt={item.item.name} 
-                                            style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
-                                        />
+                                        {!item.item.image ? (
+                                            <Image 
+                                                src="/assets/images/defaultImage.jpg"
+                                                width={72}
+                                                height={100}
+                                                alt="Default iamge"
+                                          />
+                                        ) : (
+                                            <img 
+                                                src={item.item.image}
+                                                alt={item.item.name} 
+                                                style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                            />
+                                        )}
                                     </div>
                                     <div className="flex flex-col items-start w-2/3">
                                         <div className="flex items-center gap-6 max-w-full">
