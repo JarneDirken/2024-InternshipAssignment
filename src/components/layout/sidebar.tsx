@@ -41,7 +41,6 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                         <LogoutRoundedIcon className={`text-2xl ${expanded ? "mr-2" : "mx-auto"}`} />
                         <p className={`font-semibold ${expanded ? "block" : "hidden"}`}>Log Out</p>
                     </button>
-                    
                 </div>
             </nav>
         </aside>

@@ -37,25 +37,40 @@ export default function DashboardLayout({
               <SidebarItem 
                 icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-3xl" />} 
                 text="Borrow" 
-                active={pathname === "/borrow"}  />
+                active={pathname === "/borrow"} />
             </Link>
             <Link href="/return">
               <SidebarItem 
                 icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-3xl" />} 
                 text="Return" 
-                active={pathname === "/return"}  />
+                active={pathname === "/return"} />
             </Link>
             <Link href="/history">
               <SidebarItem 
-              icon={<HistoryOutlinedIcon fontSize="inherit" className="text-3xl" />} 
-              text="History"  
-              active={pathname === "/history"}  />
+                icon={<HistoryOutlinedIcon fontSize="inherit" className="text-3xl" />} 
+                text="History"  
+                active={pathname === "/history"} />
             </Link>
 
             <SidebarHeading>Supervisor</SidebarHeading>
-            <SidebarItem icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Requests"  />
-            <SidebarItem icon={<HandymanOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Repairs"  />
-            <SidebarItem icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Lendings"  />
+            <Link href="/request">
+              <SidebarItem 
+                icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-3xl" />} 
+                text="Requests"
+                active={pathname === "/request"} />
+            </Link>
+            <Link href="/repair">
+              <SidebarItem 
+                icon={<HandymanOutlinedIcon fontSize="inherit" className="text-3xl" />} 
+                text="Repairs"  
+                active={pathname === "/repair"} />
+            </Link>
+            <Link href="/lending">
+              <SidebarItem 
+                icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-3xl" />} 
+                text="Lendings"  
+                active={pathname === "/lending"} />
+            </Link>
           
             <SidebarHeading>Admin</SidebarHeading>
 
@@ -63,7 +78,7 @@ export default function DashboardLayout({
               <SidebarItem 
                 icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-3xl" />} 
                 text="Products"
-                active={pathname === "/product"}  />
+                active={pathname === "/product"} />
             </Link>
             <SidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Locations"  />
             <SidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Users"  />

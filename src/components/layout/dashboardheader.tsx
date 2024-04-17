@@ -91,7 +91,6 @@ export default function DashboardHeader() {
                 {!profile ? (
                     <Loading />
                 ) : (
-
                     <div className='flex items-center ml-6'>
                         <Tooltip title="Account info" arrow>
                             <Link href="/profile">
@@ -187,7 +186,6 @@ export default function DashboardHeader() {
                         </ul>
                     </div>
                 </div>
-                
                 <div className='p-8 w-11/12 mx-auto'>
                     <div className='border-b my-6'></div>
                     <button className={`bg-gray-100 flex py-1.5 hover:bg-gray-200 overflow-hidden transition-all w-full justify-center`} onClick={handleLogout}>
