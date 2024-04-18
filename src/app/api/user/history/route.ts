@@ -38,6 +38,9 @@ export async function GET(request: NextRequest) {
                 }
             }
         },
+        orderBy: {
+            returnDate: "desc"
+        }
     });
     
     const totalCount = await prisma.itemRequest.count({

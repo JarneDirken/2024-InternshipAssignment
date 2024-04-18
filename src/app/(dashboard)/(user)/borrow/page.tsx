@@ -14,6 +14,7 @@ import Modal from "@/components/(user)/borrow/Modal";
 import useCart from "@/hooks/useCart";
 import { useSnackbar } from "notistack";
 import Loading from "@/components/states/Loading";
+import MessageModal from "@/components/(user)/borrow/MessageModal";
 
 export default function Borrow() {
     const { isAuthorized, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
@@ -29,6 +30,8 @@ export default function Borrow() {
     const [locationFilter, setLocationFilter] = useState(''); // location filter
     const [selectedTab, setSelectedTab] = useState('products'); // standard open tab
     const [isModalOpen, setModalOpen] = useState(false); // modal
+    const [isMessageModalOpen, setMessageModalOpen] = useState(false); // Message modal
+    const [message, setMessage] = useState("");
     const [userId, setUserId] = useState<string | null>(null); // userID
     const auth = getAuth(app); // Get authentication
     const created = useRecoilValue(createRequest); // see if an item has been borrowed (for refresh)
@@ -62,31 +65,7 @@ export default function Borrow() {
         } catch (error) {
             console.error("Failed to fetch item requests:", error);
         } 
-    }
-
-    async function getItemData(id: number) {
-        const auth = getAuth(app);
-        const user = auth.currentUser;
-        if (user) {
-            try {
-                const token = await getIdToken(user);
-                // console.log(token);
-                const response = await fetch(`/api/user/items/${id}`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `${token}`
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const data = await response.json();
-                setItem(data);
-            } catch (error) {
-                console.error("Failed to fetch item:", error);
-            }
-        }
-    }
+    };
 
     async function getAllItems(){
         
@@ -106,7 +85,7 @@ export default function Borrow() {
             console.error("Failed to fetch items:", error);
             setItems([]); // Ensure items is always an array
         } 
-    }
+    };
 
     const handleFilterChange = (filterType: string, value: string) => {
         switch (filterType) {
@@ -133,12 +112,12 @@ export default function Borrow() {
         
         if (availableItem) {
             // Set the item for the modal to open
-            getItemData(availableItem.id);
+            setItem(availableItem);
             setModalOpen(true);
         } else {
             enqueueSnackbar('All items of this type are currently in your cart.', { variant: 'error' });
         }
-    } 
+    } ;
 
     useEffect(() => {
         getAllItems();
@@ -163,12 +142,17 @@ export default function Borrow() {
         setTotalRequestCount(requests.length);
     },[created]);
 
-    if (loading || isAuthorized === null) { return <Loading/>; }
+    if (loading || isAuthorized === null) { return <Loading/>; };
 
-    if (!isAuthorized) { return <Unauthorized />; }
+    if (!isAuthorized) { return <Unauthorized />; };
 
     return (
         <div>
+            <MessageModal 
+                open={isMessageModalOpen}
+                onClose={() => setMessageModalOpen(false)}
+                message={message}
+            />
             <Modal
                 open={isModalOpen}
                 onClose={() => setModalOpen(false)}
@@ -227,6 +211,8 @@ export default function Borrow() {
                         brandFilter={brandFilter}
                         locationFilter={locationFilter}
                         userId={userId || ''}
+                        openMessageModal={setMessageModalOpen}
+                        setMessage={setMessage}
                     />
                 )}
             </div>

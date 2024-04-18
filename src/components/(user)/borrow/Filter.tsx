@@ -144,7 +144,7 @@ export default function Filters({ active, setActive, onFilterChange, items, user
             clearCart();
             setRequest(!request);
         }
-    }
+    };
 
     const handleNameChange = (value: string | null) => {
         onFilterChange('name', value || '');

@@ -1,10 +1,13 @@
-import prisma from '@/services/db';
-import { NextRequest } from 'next/server';
+import prisma from "@/services/db";
+import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const uid = searchParams.get("userId") || '';
     const nameFilter = searchParams.get('name') || '';
+    const modelFilter = searchParams.get('model') || '';
+    const brandFilter = searchParams.get('brand') || '';
+    const locationFilter = searchParams.get('location') || '';
 
     const user = await prisma.user.findUnique({
         where: {
@@ -23,36 +26,49 @@ export async function GET(request: NextRequest) {
 
     const itemRequests = await prisma.itemRequest.findMany({
         where: {
-            borrowerId: uid,
             item: {
                 name: { contains: nameFilter, mode: 'insensitive' },
-                itemStatusId: 3,
+                itemStatusId: 2,
             },
-            requestStatusId: 4,
+            isUrgent: false,
+            requestStatusId: 1,
         },
         include: { 
             item: {
                 include: {
                     location: true
                 }
+            },
+            borrower: {
+
             }
         },
         orderBy: {
-            endBorrowDate: "desc"
-        }
-    });
-    
-    const totalCount = await prisma.itemRequest.count({
-        where: {
-            borrowerId: uid,
-            requestStatusId: 4,
-            item: {
-                itemStatusId: 3,
-            }
+            requestDate: "desc"
         }
     });
 
-    return new Response(JSON.stringify({ itemRequests, totalCount }), {
+    const totalCount = await prisma.itemRequest.count({
+        where: {
+            item: {
+                itemStatusId: 2,
+            },
+            isUrgent: false,
+            requestStatusId: 1,
+        }
+    });
+
+    const totalCountUrgent = await prisma.itemRequest.count({
+        where: {
+            item: {
+                itemStatusId: 2,
+            },
+            isUrgent: true,
+            requestStatusId: 1,
+        }
+    });
+
+    return new Response(JSON.stringify({itemRequests, totalCount, totalCountUrgent}), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',

@@ -7,6 +7,9 @@ import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Image from 'next/image';
+import { ItemRequest } from "@/models/ItemRequest";
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 
 interface PendingBorrowProps {
     active: boolean;
@@ -15,9 +18,11 @@ interface PendingBorrowProps {
     brandFilter: string;
     locationFilter: string;
     userId: string;
+    openMessageModal: (value: boolean) => void;
+    setMessage: (value: string) => void;
 }
 
-export default function PendingBorrows({ active, nameFilter, modelFilter, brandFilter, locationFilter, userId }: PendingBorrowProps) {
+export default function PendingBorrows({ active, nameFilter, modelFilter, brandFilter, locationFilter, userId, openMessageModal, setMessage }: PendingBorrowProps) {
     const [loading, setLoading] = useState(true);
     const [requests, setRequests] = useRecoilState(requestsState);
     const [canceled, setCanceled] = useState(false);
@@ -51,7 +56,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     async function cancelPendingBorrow(requestId: number, itemId: number){
         try {
@@ -71,12 +76,44 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
         } catch (error) {
             console.error("Failed to cancel pending borrow request: ", error)
         }
-    }
+    };
 
     const handleSuccessCancle = () => {
         setCanceled(current => !current);
         enqueueSnackbar('Request cancelled successfully', { variant: 'success' });
-    }
+    };
+
+    const checkAvailability = (request: ItemRequest) => {
+        if(request.item.itemStatusId === 2 && request.requestStatusId === 1) {
+            return (
+                <div className="flex truncate items-center text-custom-primary gap-1">
+                    <AccessTimeIcon fontSize="small"/>
+                    <span>Pending</span>
+                </div>
+            );
+        }
+        if (request.item.itemStatusId === 3 && request.requestStatusId === 2) {
+            return (
+                <div className="flex truncate items-center text-custom-green gap-1">
+                    <CheckCircleOutlineOutlinedIcon fontSize="small"/>
+                    <span>Accepted</span>
+                </div>
+            );
+        }
+        if (request.item.itemStatusId === 1 && request.requestStatusId === 3) {
+            return (
+                <div className="flex truncate items-center text-custom-red gap-1">
+                    <CancelOutlinedIcon fontSize="small"/>
+                    <span>Rejected</span>
+                </div>
+            );
+        }
+    };
+
+    const openMessage = (message: string) => {
+        openMessageModal(true);
+        setMessage(message);
+    };
 
     useEffect(() => {
         getPendingBorrows(nameFilter, modelFilter, brandFilter, locationFilter);
@@ -89,13 +126,13 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
           day: 'numeric',
         };
         return date.toLocaleDateString('en-US', options);
-    }
+    };
     
-    if (loading) { return (<Loading />); }
+    if (loading) { return (<Loading />); };
 
     if (requests.length === 0) {
         return <div className="flex justify-center">No borrow requests found!</div>;
-    }
+    };
 
     return (
         <div>
@@ -142,25 +179,34 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                         </div>
                                     </div>
                                     <div className="flex flex-col">
-                                        <div className="flex truncate items-center text-custom-primary gap-1">
-                                            <AccessTimeIcon fontSize="small"/>
-                                            <span>Pending</span>
-                                        </div>
+                                        {checkAvailability(request)}
                                         <div className="flex truncate items-center text-gray-400 gap-1 text-sm">
                                             <AccessTimeIcon fontSize="small"/>
                                             <span>{formatDate(new Date(request.startBorrowDate))} - {formatDate(new Date(request.endBorrowDate))}</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col items-center gap-1 w-1/12">
-                                    <Button 
-                                        text="Cancel"
-                                        textColor="custom-red"
-                                        borderColor="custom-red" 
-                                        paddingY="py-0"
-                                        onClick={() => cancelPendingBorrow(request.id, request.itemId)}
-                                    />
-                                </div>
+                                {request.requestStatusId === 1 && request.item.itemStatusId === 2 && (
+                                    <div className="flex flex-col items-center gap-1 w-1/12">
+                                        <Button 
+                                            text="Cancel"
+                                            textColor="custom-red"
+                                            borderColor="custom-red" 
+                                            paddingY="py-0"
+                                            onClick={() => cancelPendingBorrow(request.id, request.itemId)}
+                                        />
+                                    </div>
+                                )}
+                                {request.requestStatusId === 3 && request.item.itemStatusId === 1 && (
+                                    <div className="flex flex-col items-center gap-1 w-1/12">
+                                        <Button 
+                                            text="Message"
+                                            paddingY="py-0"
+                                            paddingX="px-2"
+                                            onClick={() => openMessage(request.approveMessage)}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <div className="overflow-hidden">
@@ -169,10 +215,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                         <span className="font-semibold flex-wrap text-sm sm:text-lg">{request.item.name}</span>
                                     </div>
                                     <div className="w-1/2 flex flex-col items-end">
-                                        <div className="flex items-center text-custom-primary gap-1 text-sm sm:text-base">
-                                            <AccessTimeIcon fontSize="small"/>
-                                            <span className="truncate">Pending</span>
-                                        </div>
+                                        {checkAvailability(request)}
                                         <div className="flex truncate items-center text-gray-400 gap-1 text-xs sm:text-sm">
                                             <AccessTimeIcon fontSize="small"/>
                                             <span>{formatDate(new Date(request.startBorrowDate))} - {formatDate(new Date(request.endBorrowDate))}</span>

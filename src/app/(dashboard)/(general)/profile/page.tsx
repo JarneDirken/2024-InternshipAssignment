@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import "@/services/firebase-config";
-import PersonIcon from '@mui/icons-material/Person';
 import Avatar from '@mui/material/Avatar';
 import Loading from '@/components/states/Loading';
 import Button from '@/components/states/Button';
@@ -14,6 +13,7 @@ import { userProfileState } from '@/services/store';
 import TextField from '@mui/material/TextField';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CheckIcon from '@mui/icons-material/Check';
+import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 
 export default function Profile() {
     const [profile, setProfile] = useRecoilState(userProfileState);
@@ -192,7 +192,7 @@ export default function Profile() {
     return (
         <>
             <div className='flex gap-1 mb-4 text-2xl items-center font-semibold'>
-                <PersonIcon fontSize="large"/>
+                <PersonOutlineOutlinedIcon fontSize="large"/>
                 <h1>User Profile</h1>
             </div>
             <div className='bg-white rounded-xl py-2'>
