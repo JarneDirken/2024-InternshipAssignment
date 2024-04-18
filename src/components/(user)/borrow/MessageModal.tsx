@@ -19,7 +19,7 @@ export default function MessageModal({ open, onClose, message }: ModalCardProps)
             aria-describedby="borrow-modal-description"
         >
             <Box
-                className="modal-box bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[50%] rounded-lg shadow-lg h-[50%] flex flex-col"
+                className="modal-box bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] md:w-[50%] rounded-lg shadow-lg h-[50%] flex flex-col"
                 >
                 <div className="flex px-4 py-4 justify-between items-center border-b border-b-gray-300">
                     <div className="flex items-center gap-2">
