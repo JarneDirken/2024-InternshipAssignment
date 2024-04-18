@@ -19,6 +19,11 @@ export const createRequest = atom({
     default: false,
 });
 
+export const updateRequest = atom({
+    key: 'updateRequest',
+    default: false,
+});
+
 export const requestsState = atom<ItemRequest[]>({
     key: 'requestsState',
     default: [],

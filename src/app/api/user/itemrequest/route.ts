@@ -93,9 +93,13 @@ export async function GET(request: NextRequest) {
                 model: { contains: modelFilter, mode: 'insensitive' },
                 brand: { contains: brandFilter, mode: 'insensitive' },
                 location: { name: { contains: locationFilter, mode: 'insensitive' } },
-                itemStatusId: 2,
+                itemStatusId: {
+                    in: [1,2,3]
+                }
             },
-            requestStatusId: 1,
+            requestStatusId: {
+                in: [1, 2, 3]
+            }
         },
         include: { 
             item: {
@@ -104,15 +108,22 @@ export async function GET(request: NextRequest) {
                 }
             }
         },
+        orderBy: {
+            requestDate: "desc"
+        }
     });
 
     const totalCount = await prisma.itemRequest.count({
         where: {
             borrowerId: uid,
             item: {
-                itemStatusId: 2,
+                itemStatusId: {
+                    in: [1,2,3]
+                }
             },
-            requestStatusId: 1,
+            requestStatusId: {
+                in: [1, 2, 3]
+            }
         }
     });
 

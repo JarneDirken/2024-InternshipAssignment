@@ -93,7 +93,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     function renderItemStatus(item: GroupedItem) {
         switch (item.itemStatusId) {
@@ -122,9 +122,9 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
             default:
                 return null;
         }
-    }
+    };
 
-    if (loading) { return (<Loading />); }
+    if (loading) { return (<Loading />); };
 
     if (items.length === 0) {
         return (
@@ -132,7 +132,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                 No items found.
             </div>
         );
-    }
+    };
 
     return (
         <>

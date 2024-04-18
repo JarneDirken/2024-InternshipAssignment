@@ -10,6 +10,7 @@ import Box from '@mui/material/Box';
 import TextField from "@mui/material/TextField";
 import useCart from "@/hooks/useCart";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import Image from 'next/image';
 //icons
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
@@ -304,7 +305,20 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
                         <div className="flex flex-col xl:flex-row xl:gap-8 py-2">
                             <div className="flex flex-col xl:w-1/2">
                                 <div className="flex justify-center mb-2 xl:justify-start">
-                                    <img src={item.image} height={200} width={200} alt={item.name} />
+                                    {!item.image ? (
+                                            <Image 
+                                                src="/assets/images/defaultImage.jpg"
+                                                width={72}
+                                                height={100}
+                                                alt="Default iamge"
+                                          />
+                                        ) : (
+                                            <img 
+                                                src={item.image}
+                                                alt={item.name} 
+                                                style={{ width: '200px', height: '200px', objectFit: 'cover' }} 
+                                            />
+                                        )}
                                 </div>
                                 <div className="flex flex-col gap-3 lg:mt-4">
                                     <div className="flex flex-col">

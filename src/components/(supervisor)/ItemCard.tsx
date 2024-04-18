@@ -2,24 +2,25 @@ import Button from "@/components/states/Button";
 import { ItemRequest } from "@/models/ItemRequest";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Loading from "@/components/states/Loading";
-import useAuth from "@/hooks/useAuth";
+import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import Image from 'next/image';
 
 interface BorrowCardProps {
     active: boolean;
-    openModal: (groupItem: ItemRequest) => void;
+    openModal: (itemRequest: ItemRequest) => void;
     items: ItemRequest[];
-    calculateReturnDate?: (returnDate?: Date | string) => JSX.Element | null; // Now returns JSX.Element or null
-    calculateHistoryDate?: (expectedReturnDate?: Date | string, actualReturnDate?: Date | string) => JSX.Element | null; // Now returns JSX.Element or null
     itemLoading: boolean;
+    setRejected?: (value: boolean) => void;
+    setApproved?: (value: boolean) => void;
+    setRequestStatusId?: (value: number) => void;
 }
 
-export default function ItemCard({ active, openModal, items, calculateReturnDate, calculateHistoryDate, itemLoading }: BorrowCardProps) {
+export default function ItemCard({ active, openModal, items, itemLoading, setApproved, setRejected, setRequestStatusId }: BorrowCardProps) {
     const cardContainerHeight = "calc(100vh - 25.6rem)";
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll w-full";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
 
-    if (itemLoading) { return (<Loading />); }
+    if (itemLoading) { return (<Loading />); };
 
     if (items.length === 0) {
         return (
@@ -27,7 +28,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                 No items found.
             </div>
         );
-    }
+    };
 
     const formatDate = (date?: Date | string) => {
         if (!date) {
@@ -42,6 +43,31 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
             day: 'numeric'
         };
         return dateObj.toLocaleDateString('en-US', options);
+    };
+
+    const formatDateYear = (date?: Date | string) => {
+        if (!date) {
+            return <div>No date found</div>;
+        }
+    
+        const dateObj = new Date(date);
+        const year = dateObj.getFullYear();
+    
+        return (
+                <span>{year}</span>
+        );
+    };
+
+    const rejected = (item: ItemRequest) => {
+        setRejected!(true);
+        openModal(item);
+        setRequestStatusId!(3); // 3 === rejected
+    };
+
+    const approved = (item: ItemRequest) => {
+        setApproved!(true);
+        openModal(item);
+        setRequestStatusId!(2); // 2 === accepted
     };
 
     return (
@@ -89,7 +115,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                         </div>
                                         <div className="truncate">
                                             <span className="font-semibold">Year:&nbsp;</span>
-                                            <span>{item.item.yearBought}</span>
+                                            <span>{formatDateYear(item.item.yearBought)}</span>
                                         </div>
                                         <div className="truncate">
                                             <span className="font-semibold">Brand:&nbsp;</span>
@@ -100,7 +126,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                         <div className="flex gap-8 items-center">
                                             <div className="truncate">
                                                 <span className="font-semibold">Requestor:&nbsp;</span>
-                                                <span>{item.borrowerId}</span>
+                                                <span className="capitalize">{item.borrower.firstName} {item.borrower.lastName}</span>
                                             </div>
                                             
                                         </div>
@@ -117,7 +143,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                         borderColor="custom-red"
                                         paddingY="py-0"
                                         font="semibold"
-                                        onClick={() => openModal(item)}
+                                        onClick={() => rejected(item)}
                                     />
                                     <Button 
                                         text="Approve" 
@@ -125,7 +151,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                         borderColor="custom-green" 
                                         paddingY="py-0"
                                         font="semibold"
-                                        onClick={() => openModal(item)}
+                                        onClick={() => approved(item)}
                                     />
                                     <Button 
                                         text="View" 
@@ -141,17 +167,18 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                         ) : (
                             <div className="overflow-hidden w-full">
                                 <div className="p-2 flex items-center flex-wrap">
-                                    <div className="flex w-1/2 flex-wrap">
-                                        <span className="font-semibold flex-wrap text-sm sm:text-md">{item.borrowerId}</span>
+                                    <div className="flex items-center w-1/2 flex-wrap truncate">
+                                        <PersonOutlineOutlinedIcon fontSize="medium"/>
+                                        <span className="font-semibold flex-wrap text-sm sm:text-lg capitalize">{item.borrower.firstName} {item.borrower.lastName}</span>
                                     </div>
-                                    <div className="flex w-1/2 flex-col items-end">
+                                    <div className="flex w-1/2 flex-col items-end truncate">
                                         <div className="flex truncate items-center text-custom-primary gap-1 text-xs sm:text-sm">
                                             <AccessTimeIcon fontSize="small"/>
                                             <span>Pending</span>
                                         </div>
                                         <div className="flex truncate items-center text-gray-400 gap-1 text-xs sm:text-sm">
                                             <AccessTimeIcon fontSize="small"/>
-                                            <span>{formatDate(item.borrowDate)} - {formatDate(item.endBorrowDate)}</span>
+                                            <span>{formatDate(item.startBorrowDate)} - {formatDate(item.endBorrowDate)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -192,7 +219,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                     <div className="flex gap-0 w-full">
                                         <div className="flex flex-col items-start w-1/3 text-sm sm:text-base truncate">
                                             <span className="text-gray-400">Year</span>
-                                            <span className="truncate">{item.item.yearBought}</span>
+                                            <span className="truncate">{formatDateYear(item.item.yearBought)}</span>
                                         </div>
                                         <div className="flex flex-col items-start w-2/3 text-sm sm:text-base pl-2 truncate">
                                             <span className="text-gray-400">Location</span>
@@ -208,7 +235,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                         borderColor="custom-red"
                                         paddingY="py-0"
                                         font="semibold"
-                                        onClick={() => openModal(item)}
+                                        onClick={() => rejected(item)}
                                     />
                                     <Button 
                                         text="Approve" 
@@ -216,7 +243,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                         borderColor="custom-green" 
                                         paddingY="py-0"
                                         font="semibold"
-                                        onClick={() => openModal(item)}
+                                        onClick={() => approved(item)}
                                     />
                                 </div>
                             </div>
