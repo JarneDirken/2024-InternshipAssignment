@@ -17,7 +17,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
 import React from "react";
-import { DateRangePicker } from "@nextui-org/react";
+import DateRangePicker from "@/components/states/DateRangePicker";
 import SwapVertRoundedIcon from '@mui/icons-material/SwapVertRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
@@ -39,17 +39,21 @@ interface FiltersProps {
     filters: Filter[];
     items: Item[];
     openModal: (id: number) => void;
-    userId: string | null;
     sortOptions: string[];
-    isCardView: boolean;
+    isCardView?: boolean;
+    names?: string[];
 }
 
-export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, openModal, userId, sortOptions, isCardView }: FiltersProps) {
+export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, openModal, sortOptions, isCardView, names }: FiltersProps) {
     const prevWidthRef = useRef<number | null>(null);
     const lastActiveRef = useRef<boolean | null>(null);
     const [sortBy, setSortBy] = useState('');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+    const [borrowDate, setBorrowDate] = useState<Date | null>(null); // borrow date
+    const [returnDate, setReturnDate] = useState<Date | null>(null); // return date
+    const [errorMessage, setErrorMessage] = useState<String | null>(null); // error message with dates
 
     useLayoutEffect(() => {
         const handleResize = () => {
@@ -213,16 +217,19 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                     />
                                 )}
                                 {filter.inputType === 'dateRange' && (
-                                    <DateRangePicker
-                                        label={filter.label}
-                                        className="max-w-xs"
+                                    <DateRangePicker 
+                                        borrowDate={borrowDate}
+                                        returnDate={returnDate}
+                                        setBorrowDate={setBorrowDate}
+                                        setReturnDate={setReturnDate}
+                                        setErrorMessage={setErrorMessage}
                                     />
                                 )}
-                                {filter.inputType === 'multipleSelect' && (
+                                {filter.inputType === 'multipleSelect' && names && (
                                     <MultipleSelectCheckmarks
                                         label={filter.label}
                                         options={names}
-                                        selected={filter.state[0]}
+                                        selected={Array.isArray(filter.state[0]) ? filter.state[0] : [filter.state[0]]}
                                         onChange={(selected) => handleFilterChange(filter.label, selected.join(','))}
                                     />
                                 )}
@@ -261,18 +268,25 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
     );
 }
 
-function MultipleSelectCheckmarks({ label, options, selected, onChange }: { label: string; options: string[]; selected: string; onChange: (selected: string[]) => void }) {
-    const [personName, setPersonName] = useState<string[]>(selected.split(','));
+interface MultipleSelectCheckmarksProps {
+    label: string;
+    options: string[];
+    selected: string[];
+    onChange: (selected: string[]) => void;
+}
 
-    const handleChange = (event: SelectChangeEvent<typeof personName>) => {
-        const {
-            target: { value },
-        } = event;
-        setPersonName(
-            // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',') : value,
-        );
+function MultipleSelectCheckmarks({ label, options, selected, onChange }: MultipleSelectCheckmarksProps) {
+    const [option, setOption] = useState<string[]>(selected);
+
+    const handleChange = (event: SelectChangeEvent<string[]>) => {
+        const value = event.target.value;
+        setOption(Array.isArray(value) ? value : [value]); // Ensure value is always an array
     };
+
+
+    useEffect(() => {
+        onChange(option);
+    }, [option, onChange]);
 
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -286,10 +300,6 @@ function MultipleSelectCheckmarks({ label, options, selected, onChange }: { labe
         },
       };
 
-    useEffect(() => {
-        onChange(personName);
-    }, [personName, onChange]);
-
     return (
         <div>
                 <InputLabel id={`multiple-select-label-${label}`}>{label}</InputLabel>
@@ -297,7 +307,7 @@ function MultipleSelectCheckmarks({ label, options, selected, onChange }: { labe
                     labelId={`multiple-select-label-${label}`}
                     id={`multiple-select-${label}`}
                     multiple
-                    value={personName}
+                    value={option}
                     onChange={handleChange}
                     input={<OutlinedInput label={label} />}
                     renderValue={(selected) => selected.join(', ')}
@@ -305,7 +315,7 @@ function MultipleSelectCheckmarks({ label, options, selected, onChange }: { labe
                 >
                     {options.map((name) => (
                         <MenuItem key={name} value={name}>
-                            <Checkbox checked={personName.indexOf(name) > -1} />
+                            <Checkbox checked={option.indexOf(name) > -1} />
                             <ListItemText primary={name} />
                         </MenuItem>
                     ))}
