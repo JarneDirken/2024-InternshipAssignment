@@ -259,13 +259,23 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                 </div>
                                 <hr />
                                 <div className="flex justify-center items-center p-2">
-                                    <Button 
-                                        text="Cancel"
-                                        textColor="custom-red"
-                                        borderColor="custom-red" 
-                                        paddingY="py-0"
-                                        onClick={() => cancelPendingBorrow(request.id, request.itemId)}
-                                    />
+                                    {request.requestStatusId === 1 && request.item.itemStatusId === 2 && (
+                                        <Button 
+                                            text="Cancel"
+                                            textColor="custom-red"
+                                            borderColor="custom-red" 
+                                            paddingY="py-0"
+                                            onClick={() => cancelPendingBorrow(request.id, request.itemId)}
+                                        />
+                                    )}
+                                     {request.requestStatusId === 3 && request.item.itemStatusId === 1 && (
+                                        <Button 
+                                            text="Message"
+                                            paddingY="py-0"
+                                            paddingX="px-2"
+                                            onClick={() => openMessage(request.approveMessage)}
+                                        />
+                                     )}
                                 </div>
                             </div>
                         )}
