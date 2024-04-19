@@ -26,6 +26,7 @@ import { useRecoilState } from 'recoil';
 import { userProfileState } from '@/services/store';
 import Tooltip from '@mui/material/Tooltip';
 import useAuth from '@/hooks/useAuth';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 
 export default function DashboardHeader() {
     const [isOpen, setIsOpen] = useState(false);
@@ -194,6 +195,12 @@ export default function DashboardHeader() {
                                 </Link>
                                 <MobileSidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Locations"  />
                                 <MobileSidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Users"  />
+                                <Link href="/parameter">
+                                    <MobileSidebarItem 
+                                    icon={<SettingsOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    text="Parameters"  
+                                    active={pathname === "/parameter"} />
+                                </Link>
                             </>
                         )}
                         </ul>
