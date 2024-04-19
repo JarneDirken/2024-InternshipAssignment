@@ -99,7 +99,6 @@ export default function Profile() {
     }
 
     async function RemovePhoto() {
-        console.log("clicked");
         if (!profile || !profile.firebaseUid || !profile.profilePic) {
             console.error('No profile or profile picture found');
             return;
@@ -111,7 +110,6 @@ export default function Profile() {
         try {
             // Delete the file from Firebase Storage
             await deleteObject(fileRef);
-            console.log('File deleted successfully from Firebase Storage');
     
             // Update the profile in the database
             const response = await fetch(`/api/userprofilepic/`, {

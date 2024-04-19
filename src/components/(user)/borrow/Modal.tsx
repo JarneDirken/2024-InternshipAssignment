@@ -19,6 +19,8 @@ import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import DatePicker from "@/components/states/DatePicker";
 import EditIcon from '@mui/icons-material/Edit';
+import dayjs, { Dayjs } from "dayjs";
+import { ParameterType } from "@/models/ParameterType";
 
 interface ModalCardProps {
     open: boolean;
@@ -39,7 +41,16 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
     const [borrowDate, setBorrowDate] = useState<Date | null>(null); // borrow date
     const [returnDate, setReturnDate] = useState<Date | null>(null); // return date
     const [errorMessage, setErrorMessage] = useState<String | null>(null); // error message with dates
-    const [editingDateType, setEditingDateType] = useState<'borrow' | 'return' | null>(null); 
+    const [editingDateType, setEditingDateType] = useState<'borrow' | 'return' | null>(null);
+    const [startMorningTime, setStartMorningTime] = useState<Dayjs | null>(null);
+    const [endMorningTime, setEndMorningTime] = useState<Dayjs | null>(null);
+    const [startEveningTime, setStartEveningTime] = useState<Dayjs | null>(null);
+    const [endEveningTime, setEndEveningTime] = useState<Dayjs | null>(null);
+    const [startMorningTimeString, setStartMorningTimeString] = useState('');
+    const [endMorningTimeString, setEndMorningTimeString] = useState('');
+    const [startEveningTimeString, setStartEveningTimeString] = useState('');
+    const [endEveningTimeString, setEndEveningTimeString] = useState('');
+    type DayjsSetterType = (value: Dayjs | null) => void;
 
     useEffect(() => {
         if (borrowDate && returnDate) {
@@ -47,52 +58,59 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
         }
     }, [borrowDate, returnDate, editingDateType]);
 
+    useEffect(() => {
+        getParameters();
+    }, []);
+
     const handleEditDate = (type: 'borrow' | 'return') => {
         setEditingDateType(type);
     };
 
     function checkDateTime(startDate: string, endDate: string) {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-
+        const start = dayjs(startDate);
+        const end = dayjs(endDate);
+    
         // Function to check if date is a weekday
-        const isWeekday = (date: Date) => {
-            const day = date.getDay();
-            return day >= 1 && day <= 5;  // Monday to Friday
+        const isWeekday = (date: Dayjs) => {
+            const day = date.day();
+            return day !== 0 && day !== 6; // Exclude Saturday (6) and Sunday (0)
         };
-
-        // Function to check if time is within specific hours
-        const isWithinTime = (date: Date, startHour: number, endHour: number): boolean => {
-            const hour = date.getHours();
-            return hour >= startHour && hour < endHour;
+    
+        // Function to check if time is within specific Dayjs hours and minutes
+        const isWithinTime = (date: Dayjs, startTimeString: string, endTimeString: string): boolean => {
+            const dayFormat = date.format('YYYY-MM-DD');
+            const startTime = dayjs(dayFormat + 'T' + startTimeString);
+            const endTime = dayjs(dayFormat + 'T' + endTimeString);
+        
+            // Check if the date time is same or after start time and before end time
+            return (date.isSame(startTime) || date.isAfter(startTime)) && date.isBefore(endTime);
         };
-
-        // Validate weekdays
+    
+        // Check for weekend
         if (!isWeekday(start) || !isWeekday(end)) {
             setIsUrgent(true);
             return;
         }
+    
+        // Validate specific time slots using Dayjs objects
+        const startMorningValid = isWithinTime(start, startMorningTimeString, endMorningTimeString);
+        const endMorningValid = isWithinTime(end, startMorningTimeString, endMorningTimeString);
+        const startEveningValid = isWithinTime(start, startEveningTimeString, endEveningTimeString);
+        const endEveningValid = isWithinTime(end, startEveningTimeString, endEveningTimeString);
 
-        // Validate specific time slots
-        const startMorning = isWithinTime(start, 8, 9);
-        const endEvening = isWithinTime(end, 17, 18);
-        const startEvening = isWithinTime(start, 17, 18);
-        const endMorning = isWithinTime(end, 8, 9);
-
-        // Check same-day and different time slots
-        if (start.toDateString() === end.toDateString()) {
-            if (startMorning && endEvening) {
+        // Same day check with specific conditions
+        if (start.isSame(end, 'day')) {
+            // Check that start is morning and end is evening for same-day return
+            if (startMorningValid && endEveningValid) {
                 setIsUrgent(false);  // Non-urgent for correct same-day timing
             } else {
                 setIsUrgent(true);
             }
         } else {
-            // Different days but must match any of the specific time slots
-            if ((startMorning || startEvening) && (endMorning || endEvening)) {
-                setIsUrgent(false);
-            } else {
-                setIsUrgent(true);
-            }
+            // For different days, simply check if start and end times are valid
+            const startValid = startMorningValid || startEveningValid;
+            const endValid = endMorningValid || endEveningValid;
+            setIsUrgent(!(startValid && endValid));
         }
     };
 
@@ -104,7 +122,6 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
         }
     };
 
-    // Function to format dates for display
     const formatDateDisplay = (date: Date | null) => {
         if (!date) return '';
         const options: Intl.DateTimeFormatOptions = {
@@ -126,6 +143,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
         setIsUrgent(false);
         setFile(null);
         setEditingDateType(null);
+        setErrorMessage(null);
         onClose();
     };
 
@@ -262,7 +280,34 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
         } else {
             console.error('Failed to create item request');
         }
-    }
+    };
+
+    async function getParameters() {
+        try {
+            const response = await fetch(`/api/admin/parameter`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data: ParameterType[] = await response.json();
+            
+            // Define setTime with explicit types for parameters
+            const setTime = (paramName: string, dayjsSetter: DayjsSetterType, stringSetter: React.Dispatch<React.SetStateAction<string>>) => {
+                const param = data.find(p => p.name === paramName);
+                if (param) {
+                    const [hour, minute] = param.value.split(':');
+                    const dayjsTime = dayjs().hour(parseInt(hour)).minute(parseInt(minute)).second(0);
+                    dayjsSetter(dayjsTime);
+                    stringSetter(param.value);
+                }
+            };
+            setTime('morningStartTime', setStartMorningTime, setStartMorningTimeString);
+            setTime('morningEndTime', setEndMorningTime, setEndMorningTimeString);
+            setTime('eveningStartTime', setStartEveningTime, setStartEveningTimeString);
+            setTime('eveningEndTime', setEndEveningTime, setEndEveningTimeString);
+        } catch (error) {
+            console.error("Failed to fetch parameters:", error);
+        }
+    };
 
     const theme = createTheme({
         palette: {
@@ -371,6 +416,10 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
                                     setErrorMessage={setErrorMessage}
                                     editingDateType={editingDateType}
                                     setEditingDateType={setEditingDateType}
+                                    startMorningTimeString={startMorningTimeString}
+                                    endMorningTimeString={endMorningTimeString}
+                                    startEveningTimeString={startEveningTimeString}
+                                    endEveningTimeString={endEveningTimeString}
                                 />
                             </div>
                         </div>

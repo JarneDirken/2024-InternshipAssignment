@@ -8,6 +8,7 @@ async function main() {
     await createItem();
     await createRoleItem();
     await createRequestStatus();
+    await createParameters();
 }
 
 main()
@@ -51,7 +52,7 @@ async function createLocations() {
             create: { name }  // If it doesn't, a new location is created
         });
     }
-}
+};
 
 async function createItemStatus() {
     const itemStatusNames = [
@@ -70,7 +71,7 @@ async function createItemStatus() {
             create: { name }  // If it doesn't, a new location is created
         });
     }
-}
+};
 
 async function createRole() {
     const roles = [
@@ -87,7 +88,7 @@ async function createRole() {
             create: { name }  // If it doesn't, a new location is created
         });
     }
-}
+};
 
 async function createRoleItem(){
     const roleItem = [
@@ -289,7 +290,7 @@ async function createRoleItem(){
             }
         });
     }
-}
+};
 
 async function createItem() {
     const items = [
@@ -682,7 +683,7 @@ async function createItem() {
             }
         });
     }
-}
+};
 
 async function createRequestStatus() {
     const requestStatus = [
@@ -702,4 +703,36 @@ async function createRequestStatus() {
             create: { name }  // If it doesn't, a new location is created
         });
     }
-}
+};
+
+async function createParameters() {
+    const parameters = [
+        {
+            name: "morningStartTime",
+            value: "08:00",
+        },
+        {
+            name: "morningEndTime",
+            value: "09:00",
+        },
+        {
+            name: "eveningStartTime",
+            value: "17:00",
+        },
+        {
+            name: "eveningEndTime",
+            value: "18:00",
+        },
+    ];
+
+    for (const item of parameters) {
+        await prisma.parameter.upsert({
+            where: { name: item.name },
+            update: {},
+            create: {
+                name: item.name,
+                value: item.value,
+            }
+        });
+    }
+};

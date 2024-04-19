@@ -68,7 +68,20 @@ export async function GET(request: NextRequest) {
         }
     });
 
-    return new Response(JSON.stringify({itemRequests, totalCount, totalCountUrgent}), {
+    const totalCountAll = await prisma.itemRequest.count({
+        where: {
+            item: {
+                itemStatusId: {
+                    in: [1,3,4,5,6]
+                }
+            },
+            requestStatusId: {
+                in: [2,3,4,5,6,7]
+            }
+        }
+    });
+
+    return new Response(JSON.stringify({itemRequests, totalCount, totalCountUrgent, totalCountAll}), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',

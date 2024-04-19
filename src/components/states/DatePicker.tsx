@@ -1,3 +1,4 @@
+import dayjs, { Dayjs } from "dayjs";
 import React, { useEffect, useState } from "react";
 
 interface DatePickerProps {
@@ -9,9 +10,13 @@ interface DatePickerProps {
     setErrorMessage: (message: string | null) => void;
     editingDateType: 'borrow' | 'return' | null;  // Indicates which date is being edited
     setEditingDateType: (type: 'borrow' | 'return' | null) => void;
+    startMorningTimeString: string;
+    endMorningTimeString: string;
+    startEveningTimeString: string;
+    endEveningTimeString: string;
 }
 
-export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setReturnDate, onDateSelection, setErrorMessage, editingDateType, setEditingDateType }: DatePickerProps) {
+export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setReturnDate, onDateSelection, setErrorMessage, editingDateType, setEditingDateType, startMorningTimeString, endMorningTimeString, startEveningTimeString, endEveningTimeString }: DatePickerProps) {
     const currentDate = new Date();
     const currentMonth = String(currentDate.getMonth());
     const currentYear = currentDate.getFullYear(); // Get the current year as a number
@@ -57,6 +62,28 @@ export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setR
             setDatePickerState(returnDate, false);
         }
     }, [editingDateType]);
+
+    const formatTime = (time: string) => {
+        const [hour, minute] = time.split(':').map(Number);  // Convert strings to numbers
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour % 12 === 0 ? 12 : hour % 12;  // Convert to 12-hour format
+        return minute === 0 ? `${hour12}${period}` : `${hour12}:${minute}${period}`;
+    };
+
+    const handleDateFormat = () => {
+        if (startMorningTimeString && endMorningTimeString && startEveningTimeString && endEveningTimeString) {
+            const formattedMorningStart = formatTime(startMorningTimeString);
+            const formattedMorningEnd = formatTime(endMorningTimeString);
+            const formattedEveningStart = formatTime(startEveningTimeString);
+            const formattedEveningEnd = formatTime(endEveningTimeString);
+    
+            return (
+                <span>{`${formattedMorningStart}-${formattedMorningEnd} & ${formattedEveningStart}-${formattedEveningEnd}`}</span>
+            );
+        } else {
+            return <span>Loading...</span>;
+        }
+    };    
 
     const handleApplyDate = () => {
         let hourAdjusted = period === 'PM' ? (parseInt(hour) % 12 + 12) : parseInt(hour) % 12;
@@ -104,7 +131,6 @@ export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setR
         setEditingDateType(null);
         setErrorMessage(null);
     };
-    
 
     const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const newMonth = event.target.value;
@@ -289,7 +315,7 @@ export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setR
                 <div className={`flex justify-between items-center gap-x-2 p-3 ${((!returnDate || !borrowDate) || editingDateType) ? 'border-t border-gray-500' : 'border-none'}`}>
                     <div className="text-xs w-1/2 flex flex-col">
                         <span>Normal borrow times: </span>
-                        <span>8-9AM & 5-6PM</span>
+                        {handleDateFormat()}
                     </div>
                     <div>
                         {((!returnDate || !borrowDate) || editingDateType) && (

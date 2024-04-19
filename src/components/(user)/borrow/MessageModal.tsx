@@ -8,7 +8,7 @@ interface ModalCardProps {
     open: boolean;
     onClose: () => void;
     message: string;
-}
+};
 
 export default function MessageModal({ open, onClose, message }: ModalCardProps) {
     return (
@@ -37,4 +37,4 @@ export default function MessageModal({ open, onClose, message }: ModalCardProps)
             </Box>
         </MaterialUIModal>
     );
-}
+};

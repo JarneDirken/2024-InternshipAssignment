@@ -11,6 +11,7 @@ import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import DashboardHeader from "@/components/layout/dashboardheader";
 import DashboardFrame from "@/components/layout/dashboardframe";
 import DashboardContext from "@/components/layout/sidebarcontext";
@@ -74,6 +75,9 @@ export default function DashboardLayout({
                 </Link>
                 <SidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Locations" />
                 <SidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Users" />
+                <Link href="/parameter">
+                  <SidebarItem icon={<SettingsOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Parameters" active={pathname === "/parameter"} />
+                </Link>
               </>
             )}
           </Sidebar>
