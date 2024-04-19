@@ -1,3 +1,5 @@
+import { ParameterType } from "@/models/ParameterType";
+import dayjs, { Dayjs } from "dayjs";
 import React, { useEffect, useState } from "react";
 
 interface DatePickerProps {
@@ -46,6 +48,17 @@ export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setR
         setSelectedDay(day);
         setIsSettingBorrowDate(isBorrowDate);
     };
+
+    const [startMorningTime, setStartMorningTime] = useState<Dayjs | null>(null);
+    const [endMorningTime, setEndMorningTime] = useState<Dayjs | null>(null);
+    const [startEveningTime, setStartEveningTime] = useState<Dayjs | null>(null);
+    const [endEveningTime, setEndEveningTime] = useState<Dayjs | null>(null);
+    const [startMorningTimeString, setStartMorningTimeString] = useState('');
+    const [endMorningTimeString, setEndMorningTimeString] = useState('');
+    const [startEveningTimeString, setStartEveningTimeString] = useState('');
+    const [endEveningTimeString, setEndEveningTimeString] = useState('');
+    type DayjsSetterType = (value: Dayjs | null) => void;
+    type StringSetterType = (value: string) => void;
     
     useEffect(() => {
         setEdit(true);
@@ -57,6 +70,32 @@ export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setR
             setDatePickerState(returnDate, false);
         }
     }, [editingDateType]);
+
+    useEffect(() => {
+        getParameters();
+    }, []);
+
+    const formatTime = (time: string) => {
+        const [hour, minute] = time.split(':').map(Number);  // Convert strings to numbers
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour % 12 === 0 ? 12 : hour % 12;  // Convert to 12-hour format
+        return minute === 0 ? `${hour12}${period}` : `${hour12}:${minute}${period}`;
+    };
+
+    const handleDateFormat = () => {
+        if (startMorningTimeString && endMorningTimeString && startEveningTimeString && endEveningTimeString) {
+            const formattedMorningStart = formatTime(startMorningTimeString);
+            const formattedMorningEnd = formatTime(endMorningTimeString);
+            const formattedEveningStart = formatTime(startEveningTimeString);
+            const formattedEveningEnd = formatTime(endEveningTimeString);
+    
+            return (
+                <span>{`${formattedMorningStart}-${formattedMorningEnd} & ${formattedEveningStart}-${formattedEveningEnd}`}</span>
+            );
+        } else {
+            return <span>Loading...</span>;
+        }
+    };    
 
     const handleApplyDate = () => {
         let hourAdjusted = period === 'PM' ? (parseInt(hour) % 12 + 12) : parseInt(hour) % 12;
@@ -104,7 +143,6 @@ export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setR
         setEditingDateType(null);
         setErrorMessage(null);
     };
-    
 
     const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const newMonth = event.target.value;
@@ -200,6 +238,33 @@ export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setR
     const weekDaysHeader = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day, index) => (
         <span key={index} className="m-px w-10 block text-center text-sm text-gray-500">{day}</span>
     ));
+
+    async function getParameters() {
+        try {
+            const response = await fetch(`/api/admin/parameter`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data: ParameterType[] = await response.json();
+            
+            // Define setTime with explicit types for parameters
+            const setTime = (paramName: string, dayjsSetter: DayjsSetterType, stringSetter: React.Dispatch<React.SetStateAction<string>>) => {
+                const param = data.find(p => p.name === paramName);
+                if (param) {
+                    const [hour, minute] = param.value.split(':');
+                    const dayjsTime = dayjs().hour(parseInt(hour)).minute(parseInt(minute)).second(0);
+                    dayjsSetter(dayjsTime);
+                    stringSetter(param.value);
+                }
+            };
+            setTime('morningStartTime', setStartMorningTime, setStartMorningTimeString);
+            setTime('morningEndTime', setEndMorningTime, setEndMorningTimeString);
+            setTime('eveningStartTime', setStartEveningTime, setStartEveningTimeString);
+            setTime('eveningEndTime', setEndEveningTime, setEndEveningTimeString);
+        } catch (error) {
+            console.error("Failed to fetch parameters:", error);
+        }
+    };
     
     return (
         <div>
@@ -289,7 +354,7 @@ export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setR
                 <div className={`flex justify-between items-center gap-x-2 p-3 ${((!returnDate || !borrowDate) || editingDateType) ? 'border-t border-gray-500' : 'border-none'}`}>
                     <div className="text-xs w-1/2 flex flex-col">
                         <span>Normal borrow times: </span>
-                        <span>8-9AM & 5-6PM</span>
+                        {handleDateFormat()}
                     </div>
                     <div>
                         {((!returnDate || !borrowDate) || editingDateType) && (
