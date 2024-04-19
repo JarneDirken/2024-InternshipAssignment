@@ -4,7 +4,9 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Loading from "@/components/states/Loading";
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import Image from 'next/image';
-import GavelIcon from '@mui/icons-material/Gavel';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 
 interface BorrowCardProps {
     active: boolean;
@@ -16,7 +18,7 @@ interface BorrowCardProps {
     setRequestStatusId?: (value: number) => void;
     openMessageModal?: (value: boolean) => void;
     setMessage?: (value: string) => void;
-}
+};
 
 export default function ItemCard({ active, openModal, items, itemLoading, setApproved, setRejected, setRequestStatusId, openMessageModal, setMessage }: BorrowCardProps) {
     const cardContainerHeight = "calc(100vh - 25.6rem)";
@@ -89,14 +91,14 @@ export default function ItemCard({ active, openModal, items, itemLoading, setApp
             case 7:
                 return (
                     <div className="flex truncate items-center text-custom-green gap-1 text-sm sm:text-base">
-                        <AccessTimeIcon fontSize="small"/>
+                        <CheckCircleOutlineOutlinedIcon fontSize="small"/>
                         <span>Accepted</span>
                     </div>
                 );
             case 3:
                 return (
                     <div className="flex truncate items-center text-custom-red gap-1 text-sm sm:text-base">
-                        <AccessTimeIcon fontSize="small"/>
+                        <CancelOutlinedIcon fontSize="small"/>
                         <span>Rejected</span>
                     </div>
                 );
@@ -231,7 +233,7 @@ export default function ItemCard({ active, openModal, items, itemLoading, setApp
                                         </div>
                                         {item.approver && (
                                             <div className="flex items-center flex-wrap truncate">
-                                                <GavelIcon fontSize="medium"/>
+                                                <HandshakeOutlinedIcon fontSize="medium"/>
                                                 <span className="font-semibold flex-wrap text-sm sm:text-lg capitalize">{item.approver.firstName} {item.approver.lastName}</span>
                                             </div>
                                         )}
