@@ -93,11 +93,25 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
         }
     
         // Validate specific time slots using Dayjs objects
-        const startValid = isWithinTime(start, startMorningTimeString, endMorningTimeString) || isWithinTime(start, startEveningTimeString, endEveningTimeString);
-        const endValid = isWithinTime(end, startMorningTimeString, endMorningTimeString) || isWithinTime(end, startEveningTimeString, endEveningTimeString);
-    
-        // Set urgent based on validation of times
-        setIsUrgent(!(startValid && endValid));
+        const startMorningValid = isWithinTime(start, startMorningTimeString, endMorningTimeString);
+        const endMorningValid = isWithinTime(end, startMorningTimeString, endMorningTimeString);
+        const startEveningValid = isWithinTime(start, startEveningTimeString, endEveningTimeString);
+        const endEveningValid = isWithinTime(end, startEveningTimeString, endEveningTimeString);
+
+        // Same day check with specific conditions
+        if (start.isSame(end, 'day')) {
+            // Check that start is morning and end is evening for same-day return
+            if (startMorningValid && endEveningValid) {
+                setIsUrgent(false);  // Non-urgent for correct same-day timing
+            } else {
+                setIsUrgent(true);
+            }
+        } else {
+            // For different days, simply check if start and end times are valid
+            const startValid = startMorningValid || startEveningValid;
+            const endValid = endMorningValid || endEveningValid;
+            setIsUrgent(!(startValid && endValid));
+        }
     };
 
     const handleDateSelection = (type: 'borrow' | 'return', date: Date) => {
@@ -129,6 +143,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
         setIsUrgent(false);
         setFile(null);
         setEditingDateType(null);
+        setErrorMessage(null);
         onClose();
     };
 
