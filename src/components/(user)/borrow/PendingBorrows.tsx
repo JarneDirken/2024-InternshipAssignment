@@ -186,8 +186,8 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                         </div>
                                     </div>
                                 </div>
-                                {request.requestStatusId === 1 && request.item.itemStatusId === 2 && (
                                     <div className="flex flex-col items-center gap-1 w-1/12">
+                                    {request.requestStatusId === 1 && request.item.itemStatusId === 2 && (
                                         <Button 
                                             text="Cancel"
                                             textColor="custom-red"
@@ -195,18 +195,17 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                             paddingY="py-0"
                                             onClick={() => cancelPendingBorrow(request.id, request.itemId)}
                                         />
-                                    </div>
-                                )}
-                                {request.requestStatusId === 3 && request.item.itemStatusId === 1 && (
-                                    <div className="flex flex-col items-center gap-1 w-1/12">
+                                    )}
+                                    {request.requestStatusId === 3 && request.item.itemStatusId === 1 && (
                                         <Button 
                                             text="Message"
                                             paddingY="py-0"
                                             paddingX="px-2"
                                             onClick={() => openMessage(request.approveMessage)}
                                         />
+                                    )}
                                     </div>
-                                )}
+                                
                             </div>
                         ) : (
                             <div className="overflow-hidden">
@@ -257,26 +256,34 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                         </div>
                                     </div>
                                 </div>
-                                <hr />
-                                <div className="flex justify-center items-center p-2">
-                                    {request.requestStatusId === 1 && request.item.itemStatusId === 2 && (
-                                        <Button 
-                                            text="Cancel"
-                                            textColor="custom-red"
-                                            borderColor="custom-red" 
-                                            paddingY="py-0"
-                                            onClick={() => cancelPendingBorrow(request.id, request.itemId)}
-                                        />
+                                
+                                {request.requestStatusId === 1 && request.item.itemStatusId === 2 && (
+                                    <>
+                                        <hr />
+                                        <div className="flex justify-center items-center p-2">
+                                            <Button 
+                                                text="Cancel"
+                                                textColor="custom-red"
+                                                borderColor="custom-red" 
+                                                paddingY="py-0"
+                                                onClick={() => cancelPendingBorrow(request.id, request.itemId)}
+                                            />
+                                        </div>
+                                    </>
                                     )}
-                                     {request.requestStatusId === 3 && request.item.itemStatusId === 1 && (
-                                        <Button 
-                                            text="Message"
-                                            paddingY="py-0"
-                                            paddingX="px-2"
-                                            onClick={() => openMessage(request.approveMessage)}
-                                        />
-                                     )}
-                                </div>
+                                    {request.requestStatusId === 3 && request.item.itemStatusId === 1 && (
+                                        <>
+                                        <hr />
+                                            <div className="flex justify-center items-center p-2">
+                                                <Button 
+                                                    text="Message"
+                                                    paddingY="py-0"
+                                                    paddingX="px-2"
+                                                    onClick={() => openMessage(request.approveMessage)}
+                                                />
+                                            </div>
+                                        </>
+                                )}
                             </div>
                         )}
                     </div>

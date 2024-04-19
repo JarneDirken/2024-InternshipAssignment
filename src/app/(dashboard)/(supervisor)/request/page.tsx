@@ -11,6 +11,7 @@ import Loading from "@/components/states/Loading";
 import Modal from "@/components/(supervisor)/Modal";
 import { useRecoilValue } from "recoil";
 import { updateRequest } from "@/services/store";
+import MessageModal from "@/components/(user)/borrow/MessageModal";
 
 export default function History() {
     const { isAuthorized, loading } = useAuth(['Supervisor', 'Admin']);
@@ -18,12 +19,16 @@ export default function History() {
     const [active, setActive] = useState(true); // this is to toggle from list view to card view
     const [userId, setUserId] = useState<string | null>(null); // userID
     const auth = getAuth(app); // Get authentication
-    const [itemLoading, setItemLoading] = useState(true);
+    // Items
+    const [itemLoading, setItemLoading] = useState(true); // item loading
     const [item, setItem] = useState<ItemRequest>(); // to store one item
     const [normalBorrows, setNormalBorrows] = useState<ItemRequest[]>([]);
     const [urgentBorrows, setUrgentBorrows] = useState<ItemRequest[]>([]);
+    const [allRequests, setAllRequests] = useState<ItemRequest[]>([]);
     const [totalNormalBorrowsCount, setTotalNormalBorrowsCount] = useState(0);
     const [totalUrgentBorrowsCount, setUrgentBorrowsCount] = useState(0);
+    const [allRequestsCount, setAllRequestsCount] = useState(0);
+    // filters
     const [nameFilter, setNameFilter] = useState(''); // name filter
     const [borrowDateFilter, setBorrowDateFilter] = useState(''); // model filter
     const [returnDateFilter, setReturnDateFilter] = useState(''); // brand filter
@@ -32,6 +37,8 @@ export default function History() {
     const [approved, setApproved] = useState(false);
     const [requestStatusId, setRequestStatusId] = useState<number | null>(null);
     const requests = useRecoilValue(updateRequest);
+    const [isMessageModalOpen, setMessageModalOpen] = useState(false); // Message modal
+    const [message, setMessage] = useState("");
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -56,6 +63,9 @@ export default function History() {
     useEffect(() => {
         if(selectedTab === "urgentBorrows"){
             getUrgentBorrows();
+        }
+        if(selectedTab === "requestedBorrows"){
+            getAllRequests();
         }
     }, [selectedTab]);
 
@@ -108,6 +118,7 @@ export default function History() {
             setNormalBorrows(fetchedItems);
             setTotalNormalBorrowsCount(itemCount);
             setUrgentBorrowsCount(itemCountUrgent);
+            setAllRequestsCount(itemCountAll);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -145,11 +156,83 @@ export default function History() {
         }
     };
 
+    async function getAllRequests() {
+        setItemLoading(true);
+        const params: Record<string, string> = {
+            name: nameFilter,
+        };
+    
+        // Only add userId to the query if it is not null
+        if (userId !== null) {
+            params.userId = userId;
+        };
+    
+        const queryString = new URLSearchParams(params).toString();
+    
+        try {
+            const response = await fetch(`/api/supervisor/itemrequest?${queryString}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            const data = await response.json();
+            setAllRequests(data);
+
+        } catch (error) {
+            console.error("Failed to fetch items:", error);
+        } finally {
+            setItemLoading(false);
+        }
+    };
+
     const closeModal = () => {
         setModalOpen(false);
         setApproved(false);
         setRejected(false);
         setRequestStatusId(null);
+    };
+
+    const checkTab = () => {
+        switch(selectedTab) {
+            case "normalBorrows":
+                return (
+                    <ItemCard
+                        active={active}
+                        openModal={openModal}
+                        items={normalBorrows}
+                        itemLoading={itemLoading}
+                        setRejected={setRejected}
+                        setApproved={setApproved}
+                        setRequestStatusId={setRequestStatusId}
+                    />
+                );
+            case "urgentBorrows":
+                return (
+                    <ItemCard
+                        active={active}
+                        openModal={openModal}
+                        items={urgentBorrows}
+                        itemLoading={itemLoading}
+                        setRejected={setRejected}
+                        setApproved={setApproved}
+                        setRequestStatusId={setRequestStatusId}
+                    />
+                );
+            case "requestedBorrows":
+                return (
+                    <ItemCard
+                        active={active}
+                        openModal={openModal}
+                        items={allRequests}
+                        itemLoading={itemLoading}
+                        setRejected={setRejected}
+                        setApproved={setApproved}
+                        setRequestStatusId={setRequestStatusId}
+                        openMessageModal={setMessageModalOpen}
+                        setMessage={setMessage}
+                    />
+                );
+        }
     };
 
     if (loading || isAuthorized === null) { return <Loading/>; }
@@ -158,6 +241,11 @@ export default function History() {
 
     return (
         <div>
+            <MessageModal 
+                open={isMessageModalOpen}
+                onClose={() => setMessageModalOpen(false)}
+                message={message}
+            />
             <Modal 
                 open={isModalOpen}
                 onClose={closeModal}
@@ -204,28 +292,19 @@ export default function History() {
                             {totalUrgentBorrowsCount}
                         </div>
                     </div>
+                    <div className="relative">
+                        <div
+                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'requestedBorrows' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
+                            onClick={() => setSelectedTab('requestedBorrows')}
+                        >
+                            Requested Borrows
+                        </div>
+                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-0 transform translate-x-1/2 -translate-y-1/2 text-xs ${selectedTab === 'requestedBorrows' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
+                            {allRequestsCount}
+                        </div>
+                    </div>
                 </div>
-                {selectedTab === "normalBorrows" ? (
-                    <ItemCard
-                        active={active}
-                        openModal={openModal}
-                        items={normalBorrows}
-                        itemLoading={itemLoading}
-                        setRejected={setRejected}
-                        setApproved={setApproved}
-                        setRequestStatusId={setRequestStatusId}
-                    />
-                ) : (
-                    <ItemCard
-                        active={active}
-                        openModal={openModal}
-                        items={urgentBorrows}
-                        itemLoading={itemLoading}
-                        setRejected={setRejected}
-                        setApproved={setApproved}
-                        setRequestStatusId={setRequestStatusId}
-                    />
-                )}
+                {checkTab()}
             </div>
         </div>
     );
