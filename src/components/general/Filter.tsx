@@ -18,6 +18,7 @@ import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
 import React from "react";
 import DateRangePicker from "@/components/states/DateRangePicker";
+import FormControl from '@mui/material/FormControl';
 import SwapVertRoundedIcon from '@mui/icons-material/SwapVertRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
@@ -27,6 +28,7 @@ interface Filter {
     label: string;
     state: [string, Dispatch<SetStateAction<string>>];
     inputType: 'text' | 'dateRange' | 'multipleSelect';
+    options?: string[];
 }
 
 interface FiltersProps {
@@ -41,10 +43,9 @@ interface FiltersProps {
     openModal: (id: number) => void;
     sortOptions: string[];
     isCardView?: boolean;
-    names?: string[];
 }
 
-export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, openModal, sortOptions, isCardView, names }: FiltersProps) {
+export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, openModal, sortOptions, isCardView }: FiltersProps) {
     const prevWidthRef = useRef<number | null>(null);
     const lastActiveRef = useRef<boolean | null>(null);
     const [sortBy, setSortBy] = useState('');
@@ -225,10 +226,10 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                         setErrorMessage={setErrorMessage}
                                     />
                                 )}
-                                {filter.inputType === 'multipleSelect' && names && (
+                                {filter.inputType === 'multipleSelect' && (
                                     <MultipleSelectCheckmarks
                                         label={filter.label}
-                                        options={names}
+                                        options={filter.options || []} // Pass options from the filter
                                         selected={Array.isArray(filter.state[0]) ? filter.state[0] : [filter.state[0]]}
                                         onChange={(selected) => handleFilterChange(filter.label, selected.join(','))}
                                     />
@@ -276,50 +277,107 @@ interface MultipleSelectCheckmarksProps {
 }
 
 function MultipleSelectCheckmarks({ label, options, selected, onChange }: MultipleSelectCheckmarksProps) {
-    const [option, setOption] = useState<string[]>(selected);
+    const [option, setOption] = useState<string[]>([]);
 
-    const handleChange = (event: SelectChangeEvent<string[]>) => {
-        const value = event.target.value;
-        setOption(Array.isArray(value) ? value : [value]); // Ensure value is always an array
-    };
-
+    const handleChange = (event: SelectChangeEvent<typeof option>) => {
+        const {
+          target: { value },
+        } = event;
+        setOption(
+          // On autofill we get a stringified value.
+          typeof value === 'string' ? value.split(',') : value,
+        );
+      };
 
     useEffect(() => {
         onChange(option);
     }, [option, onChange]);
 
-    const ITEM_HEIGHT = 48;
-    const ITEM_PADDING_TOP = 8;
-
-    const MenuProps = {
-        PaperProps: {
-          style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-            width: 250,
-          },
+    const theme = createTheme({
+        components: {
+            MuiOutlinedInput: {
+                styleOverrides: {
+                    root: {
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'orange',
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'orange',
+                        },
+                    },
+                },
+            },
+            MuiInputLabel: {
+                styleOverrides: {
+                    root: {
+                        '&.Mui-focused': {
+                            color: 'orange',
+                        },
+                    },
+                },
+            },
+            MuiCheckbox: {
+                styleOverrides: {
+                    root: {
+                        '&.Mui-checked': {
+                            color: '#FFA500', // Set checkbox color to orange when checked
+                        },
+                    },
+                },
+            },
+            MuiMenuItem: {
+                styleOverrides: {
+                    root: {
+                        '&.Mui-selected': {
+                            backgroundColor: '#FFF7E0', // Change background color to a slightly darker orange when selected
+                        },
+                        '&.Mui-selected:hover': {
+                            backgroundColor: '#FFE4B5', // Change background color to a slightly darker orange when selected
+                        },
+                        '&.Mui-selected.Mui-focusVisible': {
+                            backgroundColor: '#FFE4B5', // Change background color to a slightly darker orange when selected
+                        },
+                    },
+                },
+            },
         },
-      };
+    });
 
     return (
-        <div>
-                <InputLabel id={`multiple-select-label-${label}`}>{label}</InputLabel>
-                <Select
-                    labelId={`multiple-select-label-${label}`}
-                    id={`multiple-select-${label}`}
-                    multiple
-                    value={option}
-                    onChange={handleChange}
-                    input={<OutlinedInput label={label} />}
-                    renderValue={(selected) => selected.join(', ')}
-                    MenuProps={MenuProps}
-                >
-                    {options.map((name) => (
-                        <MenuItem key={name} value={name}>
-                            <Checkbox checked={option.indexOf(name) > -1} />
-                            <ListItemText primary={name} />
-                        </MenuItem>
-                    ))}
-                </Select>
-        </div>
+        
+            <div>
+                <ThemeProvider theme={theme}>
+                    <FormControl sx={{ width: '100%' }}>
+                        <InputLabel id={`multiple-select-label-${label}`} shrink>{label}</InputLabel>
+                        <Select
+                            labelId={`multiple-select-label-${label}`}
+                            id={`multiple-select-${label}`}
+                            multiple
+                            displayEmpty
+                            size="small"
+                            value={option}
+                            onChange={handleChange}
+                            input={<OutlinedInput label={label} />}
+                            renderValue={(selected) => {
+                                if (selected.length === 0) {
+                                    return 'Select';
+                                } else {
+                                    return selected.join(', '); // No need to replace leading comma and space
+                                }
+                            }}
+                            style={{ color: option.length > 0 ? 'black' : '#b0b0b0', fontWeight: 'normal' }}
+                        >
+                            {options.map((name) => (
+                                <MenuItem 
+                                    key={name} 
+                                    value={name}>
+                                    <Checkbox checked={option.indexOf(name) > -1} />
+                                    <ListItemText primary={name} />
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </ThemeProvider>
+            </div>
     );
 }

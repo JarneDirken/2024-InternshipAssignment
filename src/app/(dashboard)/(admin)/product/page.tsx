@@ -10,6 +10,7 @@ interface Filter {
     label: string;
     state: [string, React.Dispatch<React.SetStateAction<string>>];
     inputType: 'text' | 'dateRange' | 'multipleSelect';
+    options?: string[];
 }
 
 export default function Product() {
@@ -29,7 +30,7 @@ export default function Product() {
         { label: 'Brand', state: [brand, setBrand], inputType: 'text' },
         { label: 'Location', state: [location, setLocation], inputType: 'text' },
         { label: 'Year', state: [year, setYear], inputType: 'text' },
-        { label: 'Availability?', state: [availability, setAvailability], inputType: 'multipleSelect' }
+        { label: 'Availability', state: [availability, setAvailability], inputType: 'multipleSelect', options: ['Active', 'Inactive']}
     ];
 
     const [isModalOpen, setModalOpen] = useState(false);
