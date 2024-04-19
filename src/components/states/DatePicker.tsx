@@ -1,4 +1,3 @@
-import { ParameterType } from "@/models/ParameterType";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useEffect, useState } from "react";
 
@@ -11,9 +10,13 @@ interface DatePickerProps {
     setErrorMessage: (message: string | null) => void;
     editingDateType: 'borrow' | 'return' | null;  // Indicates which date is being edited
     setEditingDateType: (type: 'borrow' | 'return' | null) => void;
+    startMorningTimeString: string;
+    endMorningTimeString: string;
+    startEveningTimeString: string;
+    endEveningTimeString: string;
 }
 
-export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setReturnDate, onDateSelection, setErrorMessage, editingDateType, setEditingDateType }: DatePickerProps) {
+export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setReturnDate, onDateSelection, setErrorMessage, editingDateType, setEditingDateType, startMorningTimeString, endMorningTimeString, startEveningTimeString, endEveningTimeString }: DatePickerProps) {
     const currentDate = new Date();
     const currentMonth = String(currentDate.getMonth());
     const currentYear = currentDate.getFullYear(); // Get the current year as a number
@@ -48,17 +51,6 @@ export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setR
         setSelectedDay(day);
         setIsSettingBorrowDate(isBorrowDate);
     };
-
-    const [startMorningTime, setStartMorningTime] = useState<Dayjs | null>(null);
-    const [endMorningTime, setEndMorningTime] = useState<Dayjs | null>(null);
-    const [startEveningTime, setStartEveningTime] = useState<Dayjs | null>(null);
-    const [endEveningTime, setEndEveningTime] = useState<Dayjs | null>(null);
-    const [startMorningTimeString, setStartMorningTimeString] = useState('');
-    const [endMorningTimeString, setEndMorningTimeString] = useState('');
-    const [startEveningTimeString, setStartEveningTimeString] = useState('');
-    const [endEveningTimeString, setEndEveningTimeString] = useState('');
-    type DayjsSetterType = (value: Dayjs | null) => void;
-    type StringSetterType = (value: string) => void;
     
     useEffect(() => {
         setEdit(true);
@@ -70,10 +62,6 @@ export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setR
             setDatePickerState(returnDate, false);
         }
     }, [editingDateType]);
-
-    useEffect(() => {
-        getParameters();
-    }, []);
 
     const formatTime = (time: string) => {
         const [hour, minute] = time.split(':').map(Number);  // Convert strings to numbers
@@ -238,33 +226,6 @@ export default function DatePicker({ borrowDate, returnDate, setBorrowDate, setR
     const weekDaysHeader = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day, index) => (
         <span key={index} className="m-px w-10 block text-center text-sm text-gray-500">{day}</span>
     ));
-
-    async function getParameters() {
-        try {
-            const response = await fetch(`/api/admin/parameter`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            const data: ParameterType[] = await response.json();
-            
-            // Define setTime with explicit types for parameters
-            const setTime = (paramName: string, dayjsSetter: DayjsSetterType, stringSetter: React.Dispatch<React.SetStateAction<string>>) => {
-                const param = data.find(p => p.name === paramName);
-                if (param) {
-                    const [hour, minute] = param.value.split(':');
-                    const dayjsTime = dayjs().hour(parseInt(hour)).minute(parseInt(minute)).second(0);
-                    dayjsSetter(dayjsTime);
-                    stringSetter(param.value);
-                }
-            };
-            setTime('morningStartTime', setStartMorningTime, setStartMorningTimeString);
-            setTime('morningEndTime', setEndMorningTime, setEndMorningTimeString);
-            setTime('eveningStartTime', setStartEveningTime, setStartEveningTimeString);
-            setTime('eveningEndTime', setEndEveningTime, setEndEveningTimeString);
-        } catch (error) {
-            console.error("Failed to fetch parameters:", error);
-        }
-    };
     
     return (
         <div>
