@@ -23,6 +23,7 @@ import SwapVertRoundedIcon from '@mui/icons-material/SwapVertRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
 import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
+import { Label } from "@mui/icons-material";
 
 interface Filter {
     label: string;
@@ -218,12 +219,13 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                     />
                                 )}
                                 {filter.inputType === 'dateRange' && (
-                                    <DateRangePicker 
+                                    <DateRangePickerWrapper
                                         borrowDate={borrowDate}
                                         returnDate={returnDate}
                                         setBorrowDate={setBorrowDate}
                                         setReturnDate={setReturnDate}
                                         setErrorMessage={setErrorMessage}
+                                        label={filter.label}
                                     />
                                 )}
                                 {filter.inputType === 'multipleSelect' && (
@@ -266,6 +268,58 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                 </div>
             </div>
         </>
+    );
+}
+
+interface DateRangePickerWrapperProps {
+    label: string;
+    borrowDate: Date | null;
+    returnDate: Date | null;
+    setBorrowDate: (date: Date | null) => void;
+    setReturnDate: (date: Date | null) => void;
+    setErrorMessage: (message: string | null) => void;
+}
+
+function DateRangePickerWrapper({ label, borrowDate, returnDate, setBorrowDate, setReturnDate, setErrorMessage  }: DateRangePickerWrapperProps) {
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
+
+    const handleDayClick = () => {
+        // Close the picker after selecting the end date
+        setIsPickerOpen(false);
+    };
+
+    return (
+        <div>
+            <TextField
+                label={label}
+                value={
+                    borrowDate && returnDate
+                    ? `${borrowDate.toLocaleDateString()} - ${returnDate.toLocaleDateString()}`
+                    : borrowDate
+                    ? `${borrowDate.toLocaleDateString()} - `
+                    : ''
+                }
+                size="small"
+                sx={{ width: '100%' }}
+                onClick={() => setIsPickerOpen(true)}
+                onFocus={() => setIsPickerOpen(true)}
+                InputProps={{
+                    readOnly: true,
+                }}
+            />
+            {isPickerOpen && (
+                <div>
+                    <DateRangePicker
+                        borrowDate={borrowDate}
+                        returnDate={returnDate}
+                        setBorrowDate={setBorrowDate}
+                        setReturnDate={setReturnDate}
+                        setErrorMessage={setErrorMessage}
+                        handleDayClick={handleDayClick} // Pass handleDayClick to DateRangePicker
+                    />
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -320,7 +374,7 @@ function MultipleSelectCheckmarks({ label, options, selected, onChange }: Multip
                 styleOverrides: {
                     root: {
                         '&.Mui-checked': {
-                            color: '#FFA500', // Set checkbox color to orange when checked
+                            color: 'orange', // Set checkbox color to orange when checked
                         },
                     },
                 },

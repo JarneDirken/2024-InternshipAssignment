@@ -30,7 +30,8 @@ export default function Product() {
         { label: 'Brand', state: [brand, setBrand], inputType: 'text' },
         { label: 'Location', state: [location, setLocation], inputType: 'text' },
         { label: 'Year', state: [year, setYear], inputType: 'text' },
-        { label: 'Availability', state: [availability, setAvailability], inputType: 'multipleSelect', options: ['Active', 'Inactive']}
+        { label: 'Availability', state: [availability, setAvailability], inputType: 'multipleSelect', options: ['Active', 'Inactive']},
+        { label: 'Borrow Date', state: [availability, setAvailability], inputType: 'dateRange'}
     ];
 
     const [isModalOpen, setModalOpen] = useState(false);

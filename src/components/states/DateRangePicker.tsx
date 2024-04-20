@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface DatePickerProps {
-    borrowDate: Date | null;
-    returnDate: Date | null;
-    setBorrowDate: (date: Date) => void;
-    setReturnDate: (date: Date) => void;
+    setBorrowDate: (date: Date | null) => void;
+    setReturnDate: (date: Date | null) => void;
     setErrorMessage: (message: string | null) => void;
+    handleDayClick: () => void;
 }
 
-export default function DateRangePicker({ borrowDate, returnDate, setBorrowDate, setReturnDate, setErrorMessage }: DatePickerProps) {
+export default function DateRangePicker({ setBorrowDate, setReturnDate, setErrorMessage, handleDayClick }: DatePickerProps) {
     const currentDate = new Date();
     const currentMonth = String(currentDate.getMonth());
     const currentYear = currentDate.getFullYear(); // Get the current year as a number
@@ -17,28 +16,52 @@ export default function DateRangePicker({ borrowDate, returnDate, setBorrowDate,
     const [month, setMonth] = useState(currentMonth);
     const [year, setYear] = useState(currentYear.toString()); // Set initial state as string
     const [selectedDay, setSelectedDay] = useState(currentDay);
+    const datePickerRef = useRef<HTMLDivElement>(null);
 
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
-    const handleDayClick = (day: number) => {
+
+    const handleEndDateSelection = (day: number) => {
         const selectedDate = new Date(parseInt(year), parseInt(month), day);
+    
+        // Check if this is the first date being selected or if resetting the start date
         if (!selectedStartDate || (selectedEndDate && selectedStartDate)) {
-            setSelectedStartDate(selectedDate);
-            setSelectedEndDate(null);
-            setBorrowDate(selectedDate);
-            setErrorMessage(null);
-        } else if (selectedStartDate && selectedDate < selectedStartDate) {
+            setSelectedStartDate(selectedDate);  // Set the new start date
+            setSelectedEndDate(null);            // Reset the end date
+            setBorrowDate(selectedDate);         // Update borrow date in parent state
+            setReturnDate(null);                 // Clear return date in parent state
+            setErrorMessage(null);               // Clear any error messages
+        } 
+        else if (selectedStartDate && selectedDate < selectedStartDate) {
+            // If selected date is before the start date, set an error
             setErrorMessage("Return date must be after the borrow date.");
-        } else {
-            setSelectedEndDate(selectedDate);
-            setReturnDate(selectedDate);
-            setErrorMessage(null);
+        } 
+        else {
+            // Otherwise, it's a valid end date
+            setSelectedEndDate(selectedDate);   // Set the new end date
+            setReturnDate(selectedDate);        // Update return date in parent state
+            setErrorMessage(null);              // Clear any error messages
+            handleDayClick();                   // Close the picker
         }
     };
 
     useEffect(() => {
         console.log(selectedStartDate, selectedEndDate)
     }, [selectedStartDate, selectedEndDate]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
+                handleDayClick();
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [handleDayClick]);
 
     const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const newMonth = event.target.value;
@@ -127,7 +150,7 @@ export default function DateRangePicker({ borrowDate, returnDate, setBorrowDate,
                 key={d}
                 type="button"
                 className={`m-px w-10 p-2 block text-center text-sm rounded-full ${isStart || isEnd ? "bg-orange-500 text-white" : isInRange ? "bg-orange-200" : "text-gray-800 hover:text-orange-500"}`}
-                onClick={() => handleDayClick(d)}
+                onClick={() => handleEndDateSelection(d)}
             >
                 {d}
             </button>
@@ -140,7 +163,7 @@ export default function DateRangePicker({ borrowDate, returnDate, setBorrowDate,
     ));
     
     return (
-        <div>
+        <div ref={datePickerRef}>
             <div id="with-time-tab-preview-datepicker" className="w-80 flex flex-col bg-white border shadow-lg rounded-xl overflow-hidden">
                 <div className="p-3">
                     <div className="space-y-0.5">
