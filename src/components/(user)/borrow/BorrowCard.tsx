@@ -142,20 +142,25 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                         {active ? (
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
                                 <div className="flex flex-row items-center w-full">
-                                    <div className="w-1/12 mr-2">
-                                    {!item.image ? (
+                                    <div className="mr-2 w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
+                                        {!item.image ? (
                                             <Image 
                                                 src="/assets/images/defaultImage.jpg"
                                                 width={72}
                                                 height={100}
+                                                style={{ width: 'auto', height: 'auto' }} 
                                                 alt="Default iamge"
+                                                loading="lazy"
                                           />
                                         ) : (
-                                            <img 
-                                                src={item.image}
-                                                alt={item.name} 
-                                                style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
-                                            />
+                                                <Image 
+                                                    src={item.image}
+                                                    alt={item.name}
+                                                    style={{ width: '100px', height: 'auto' }} 
+                                                    width={100}
+                                                    height={72}
+                                                    loading="lazy"
+                                                />
                                         )}
                                     </div>
                                     <div className="flex flex-col w-1/4 mr-2">
@@ -203,19 +208,22 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                 </div>
                                 <hr />
                                 <div className="flex items-center p-4 max-w-xs w-full">
-                                    <div className="w-1/3 flex justify-center mr-2">
+                                <div className="mr-2 w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
                                     {!item.image ? (
                                             <Image 
                                                 src="/assets/images/defaultImage.jpg"
                                                 width={72}
                                                 height={100}
                                                 alt="Default iamge"
+                                                loading="lazy"
                                           />
                                         ) : (
-                                            <img 
+                                            <Image 
                                                 src={item.image}
                                                 alt={item.name} 
-                                                style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                                width={100}
+                                                height={72}
+                                                loading="lazy"
                                             />
                                         )}
                                     </div>

@@ -126,6 +126,7 @@ export default function DashboardHeader() {
                                 
                 <Image src={'/assets/images/logo.png'} 
                         className="overflow-hidden absolute transition-all right-9 top-6"
+                        style={{ width: '90px', height: 'auto' }}
                         alt="Logo"
                         width={90}
                         height={90}

@@ -42,6 +42,7 @@ export default function Header(){
       <div className="ml-4 z-20">
         <Link href="/">
             <Image 
+              style={{ width: '78.38px', height: 'auto' }}
               src="/assets/images/logo.png"
               width={78.38}
               height={78.38}

@@ -204,6 +204,7 @@ export default function History() {
                         setRejected={setRejected}
                         setApproved={setApproved}
                         setRequestStatusId={setRequestStatusId}
+                        selectedTab={selectedTab}
                     />
                 );
             case "urgentBorrows":
@@ -216,6 +217,7 @@ export default function History() {
                         setRejected={setRejected}
                         setApproved={setApproved}
                         setRequestStatusId={setRequestStatusId}
+                        selectedTab={selectedTab}
                     />
                 );
             case "requestedBorrows":

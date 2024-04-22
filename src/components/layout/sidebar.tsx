@@ -21,6 +21,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                 <div className="p-4 pb-2 flex justify-between items-center">
                     <Image src={'/assets/images/logo.png'} 
                         className={`overflow-hidden transition-all mx-auto`}
+                        style={{ width: expanded ? '128px' : '0px', height: 'auto' }}  // Adjust width dynamically, height auto
                         height={expanded ? 128 : 0}
                         width={expanded ? 128 : 0}
                         alt="Logo"
