@@ -89,7 +89,7 @@ export default function DashboardHeader() {
             <div className="hamburger sm:hidden z-20 cursor-pointer ml-8" onClick={() => setIsOpen(!isOpen)}>
                 {isOpen ? <CloseIcon fontSize="large" /> : <MenuIcon fontSize="large" />}
             </div>
-            <div className='flex items-center mr-10 sm:mr-16 w-1/5 justify-end'>
+            <div className='flex items-center mr-10 sm:mr-16 w-full sm:w-1/5 justify-end'>
                 <Tooltip title="Notifciations" arrow>
                     <NotificationsOutlinedIcon className="text-4xl cursor-pointer" />
                 </Tooltip>

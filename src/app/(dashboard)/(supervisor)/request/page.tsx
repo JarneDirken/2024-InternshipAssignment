@@ -6,9 +6,9 @@ import { getAuth } from 'firebase/auth';
 import app from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
 import Filters from "@/components/(user)/history/Filter";
-import ItemCard from "@/components/(supervisor)/ItemCard";
+import ItemCard from "@/components/(supervisor)/requests/ItemCard";
 import Loading from "@/components/states/Loading";
-import Modal from "@/components/(supervisor)/Modal";
+import Modal from "@/components/(supervisor)/requests/Modal";
 import { useRecoilValue } from "recoil";
 import { updateRequest } from "@/services/store";
 import MessageModal from "@/components/(user)/borrow/MessageModal";
@@ -190,6 +190,7 @@ export default function History() {
         setApproved(false);
         setRejected(false);
         setRequestStatusId(null);
+        setMessage("");
     };
 
     const checkTab = () => {
