@@ -38,7 +38,6 @@ export default function Modal({ open, onClose, item, userId, handover, receive }
         const data = {
             requestId: item.id,
             itemId: item.item.id,
-            approverId: userId,
         };
 
         const response = await fetch(`/api/supervisor/pendingborrows/`, {
@@ -51,6 +50,7 @@ export default function Modal({ open, onClose, item, userId, handover, receive }
 
         if (response.ok) {
             handleSuccess();
+            enqueueSnackbar('Item succesfully handed over', { variant: 'success' })
         } else {
             console.error('Failed to update item request');
         }
@@ -61,14 +61,9 @@ export default function Modal({ open, onClose, item, userId, handover, receive }
         const data = {
             requestId: item.id,
             itemId: item.item.id,
-            approverId: userId,
-            approveMessage: message,
-            decisionDate: new Date().toISOString(),
-            borrowDate: item.startBorrowDate,
-            returnDate: item.endBorrowDate
         };
 
-        const response = await fetch(`/api/supervisor/itemrequest/`, {
+        const response = await fetch(`/api/supervisor/pendingreturns/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -78,6 +73,7 @@ export default function Modal({ open, onClose, item, userId, handover, receive }
 
         if (response.ok) {
             handleSuccess();
+            enqueueSnackbar('Item succesfully received', { variant: 'success' })
         } else {
             console.error('Failed to update item request');
         }
@@ -113,7 +109,6 @@ export default function Modal({ open, onClose, item, userId, handover, receive }
     const handleSuccess = () => {
         onClose();
         setRequest(!requests);
-        enqueueSnackbar('Item succesfully handed over', { variant: 'success' })
         setMessage("");
     };
 

@@ -84,7 +84,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                     <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
-                                <div className="flex flex-row items-end w-5/6">
+                                <div className="flex flex-row items-center w-5/6">
                                 <div className="mr-2 flex w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
                                         {!item.item.image ? (
                                             <Image 

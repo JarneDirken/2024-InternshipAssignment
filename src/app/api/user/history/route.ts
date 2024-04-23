@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
                 name: { contains: nameFilter, mode: 'insensitive' },
             },
             requestStatusId: {
-                in: [5, 6]
+                in: [6, 7]
             }
         },
         include: { 
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
         where: {
             borrowerId: uid,
             requestStatusId: {
-                in: [5, 6]
+                in: [6, 7]
             }
         }
     });

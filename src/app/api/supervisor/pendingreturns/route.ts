@@ -1,4 +1,5 @@
 import prisma from "@/services/db";
+import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -57,3 +58,23 @@ export async function GET(request: NextRequest) {
         },
     });
 }
+
+export async function PUT(req: NextApiRequest) {
+    const { data } = await new Response(req.body).json();
+
+    const updateItemRequest = await prisma.itemRequest.update({
+        where: {
+            id: data.requestId,
+        },
+        data: {
+            requestStatusId: 6
+        },
+    });    
+
+    return new Response(JSON.stringify(updateItemRequest), {
+        status: 200,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+};
