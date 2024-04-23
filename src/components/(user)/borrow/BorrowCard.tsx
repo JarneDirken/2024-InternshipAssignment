@@ -142,13 +142,12 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                         {active ? (
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
                                 <div className="flex flex-row items-center w-full">
-                                    <div className="mr-2 w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
+                                    <div className="mr-2 flex w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
                                         {!item.image ? (
                                             <Image 
                                                 src="/assets/images/defaultImage.jpg"
                                                 width={72}
                                                 height={100}
-                                                style={{ width: 'auto', height: 'auto' }} 
                                                 alt="Default iamge"
                                                 loading="lazy"
                                           />
@@ -156,7 +155,6 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                                 <Image 
                                                     src={item.image}
                                                     alt={item.name}
-                                                    style={{ width: '100px', height: 'auto' }} 
                                                     width={100}
                                                     height={72}
                                                     loading="lazy"

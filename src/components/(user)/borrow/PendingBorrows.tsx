@@ -143,13 +143,13 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                         {active ? (
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
                                 <div className="flex flex-row items-center w-full">
-                                <div className="mr-2 w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
+                                <div className="mr-2 flex w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
                                         {!request.item.image ? (
                                             <Image 
                                                 src="/assets/images/defaultImage.jpg"
                                                 width={72}
                                                 height={100}
-                                                style={{ width: 'auto', height: 'auto' }} 
+                                                style={{height: 'auto' }}
                                                 alt="Default iamge"
                                                 loading="lazy"
                                           />
@@ -157,7 +157,6 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                                 <Image 
                                                     src={request.item.image}
                                                     alt={request.item.name}
-                                                    style={{ width: '100px', height: 'auto' }} 
                                                     width={100}
                                                     height={72}
                                                     loading="lazy"

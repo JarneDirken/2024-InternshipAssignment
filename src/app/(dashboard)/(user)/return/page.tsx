@@ -55,10 +55,6 @@ export default function Return() {
         }
     };
 
-    const openModal = () => {
-
-    }
-
     async function getItems() {
         setItemLoading(true);
         const params: Record<string, string> = {
@@ -165,7 +161,6 @@ export default function Return() {
                 </div>
                 <ItemCard 
                     active={active}
-                    openModal={openModal}
                     items={items}
                     calculateReturnDate={calculateDaysRemaining}
                     itemLoading={itemLoading}

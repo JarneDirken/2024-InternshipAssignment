@@ -270,10 +270,10 @@ export default function ItemCard({ active, openModal, items, itemLoading, setApp
                                 <div className="flex flex-col p-4 w-full">
                                     <div className="flex">
                                         <div className="mr-2 w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
-                                            {!item.item.image ? (
+                                        {!item.item.image ? (
                                                 <Image 
                                                     src="/assets/images/defaultImage.jpg"
-                                                    style={{ width: 'auto', height: 'auto' }} 
+                                                    style={{ width: '100%', height: 'auto' }}
                                                     width={72}
                                                     height={100}
                                                     alt="Default iamge"
@@ -282,7 +282,8 @@ export default function ItemCard({ active, openModal, items, itemLoading, setApp
                                             ) : (
                                                 <Image 
                                                     src={item.item.image}
-                                                    alt={item.item.name} 
+                                                    alt={item.item.name}
+                                                    style={{ width: '100%', height: 'auto' }}
                                                     width={100}
                                                     height={72}
                                                     loading="lazy"
