@@ -23,6 +23,7 @@ export default function Product() {
     const [location, setLocation] = useState<string>('');
     const [year, setYear] = useState<string>('');
     const [availability, setAvailability] = useState<string>('');
+    const [borrowDate, setBorrowDate] = useState<string>('');
 
     const filters: Filter[] = [
         { label: 'Name', state: [name, setName], inputType: 'text'},
@@ -31,7 +32,7 @@ export default function Product() {
         { label: 'Location', state: [location, setLocation], inputType: 'text' },
         { label: 'Year', state: [year, setYear], inputType: 'text' },
         { label: 'Availability', state: [availability, setAvailability], inputType: 'multipleSelect', options: ['Active', 'Inactive']},
-        { label: 'Borrow Date', state: [availability, setAvailability], inputType: 'dateRange'}
+        { label: 'Borrow Date', state: [borrowDate, setBorrowDate], inputType: 'dateRange'}
     ];
 
     const [isModalOpen, setModalOpen] = useState(false);
@@ -82,8 +83,11 @@ export default function Product() {
             case 'year':
                 setYear(value);
                 break;
-            case 'year':
-                setYear(value);
+            case 'availability':
+                setAvailability(value);
+                break;
+            case 'borrowdate':
+                setBorrowDate(value);
                 break;
             default:
                 break;

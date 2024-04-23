@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 
 interface DatePickerProps {
+    borrowDate: Date | null;
+    returnDate: Date | null;
     setBorrowDate: (date: Date | null) => void;
     setReturnDate: (date: Date | null) => void;
     setErrorMessage: (message: string | null) => void;
@@ -37,7 +39,6 @@ export default function DateRangePicker({ setBorrowDate, setReturnDate, setError
             setErrorMessage("Return date must be after the borrow date.");
         } 
         else {
-            // Otherwise, it's a valid end date
             setSelectedEndDate(selectedDate);   // Set the new end date
             setReturnDate(selectedDate);        // Update return date in parent state
             setErrorMessage(null);              // Clear any error messages
@@ -141,7 +142,6 @@ export default function DateRangePicker({ setBorrowDate, setReturnDate, setError
         days.push(<div key={`empty-${i}`} className="m-px w-10 block text-center text-sm text-gray-500">&nbsp;</div>);
     }
     for (let d = 1; d <= daysInMonth; d++) {
-        const dateBeingRendered = new Date(parseInt(year), parseInt(month), d);
         const isInRange = isDateInRange(d);
         const isStart = isStartDate(d);
         const isEnd = isEndDate(d);

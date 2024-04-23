@@ -10,6 +10,8 @@ import Tooltip from "@mui/material/Tooltip";
 import ClearIcon from '@mui/icons-material/Clear';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 import Menu from '@mui/material/Menu';
 import InputLabel from '@mui/material/InputLabel';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
@@ -112,9 +114,18 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
         filters.find(filter => filter.label === label)?.state[1](value || '');
     };
 
+    const [resetKey, setResetKey] = useState(0);
+
     const handleReset = (label: string) => {
         const filter = filters.find(filter => filter.label === label);
         if (filter) {
+            if (filter.inputType === 'dateRange') {
+                // Special handling for date range resets
+                setBorrowDate(null);
+                setReturnDate(null);
+                setResetKey(oldKey => oldKey + 1);
+            }
+            // Reset the filter state
             filter.state[1]('');
             onFilterChange(label, '');
         }
@@ -220,12 +231,14 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                 )}
                                 {filter.inputType === 'dateRange' && (
                                     <DateRangePickerWrapper
+                                        key={resetKey}
                                         borrowDate={borrowDate}
                                         returnDate={returnDate}
                                         setBorrowDate={setBorrowDate}
                                         setReturnDate={setReturnDate}
                                         setErrorMessage={setErrorMessage}
                                         label={filter.label}
+                                        onChange={(formattedDateRange) => handleFilterChange(filter.label, formattedDateRange)}
                                     />
                                 )}
                                 {filter.inputType === 'multipleSelect' && (
@@ -233,15 +246,25 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                         label={filter.label}
                                         options={filter.options || []} // Pass options from the filter
                                         selected={Array.isArray(filter.state[0]) ? filter.state[0] : [filter.state[0]]}
-                                        onChange={(selected) => handleFilterChange(filter.label, selected.join(','))}
+                                        onChange={(selected) => handleFilterChange(filter.label, selected.join(', '))}
                                     />
                                 )}
                             </div>
                         ))}
                         <div>
-                        <Button onClick={handleSortClick} startIcon={<SwapVertRoundedIcon />} endIcon={<KeyboardArrowRightRoundedIcon />} className="" >
-                            Sort by {sortBy ? sortBy : 'Select'} {sortDirection === 'asc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
-                        </Button>
+                            <Button 
+                                onClick={handleSortClick} 
+                                startIcon={<SwapVertRoundedIcon />} 
+                                endIcon={<KeyboardArrowRightRoundedIcon />} 
+                                sx={{
+                                    fontSize: { xs: '0.8rem', sm: '1rem' }, // Smaller font on extra-small screens
+                                    '& .MuiButton-startIcon, & .MuiButton-endIcon': {
+                                        fontSize: { xs: '18px', sm: '24px' } // Adjust icon sizes as well
+                                    }
+                                }} 
+                            >
+                                Sort by {sortBy ? sortBy : 'Select'} {sortDirection === 'asc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
+                            </Button>
                             <Menu
                                 anchorEl={anchorEl}
                                 open={Boolean(anchorEl)}
@@ -278,18 +301,37 @@ interface DateRangePickerWrapperProps {
     setBorrowDate: (date: Date | null) => void;
     setReturnDate: (date: Date | null) => void;
     setErrorMessage: (message: string | null) => void;
+    onChange: (value: string) => void;
 }
 
-function DateRangePickerWrapper({ label, borrowDate, returnDate, setBorrowDate, setReturnDate, setErrorMessage  }: DateRangePickerWrapperProps) {
+function DateRangePickerWrapper({ label, borrowDate, returnDate, setBorrowDate, setReturnDate, setErrorMessage, onChange }: DateRangePickerWrapperProps) {
     const [isPickerOpen, setIsPickerOpen] = useState(false);
+    const [resetKey, setResetKey] = useState(0);
+
+    useEffect(() => {
+        // Update the input field whenever dates change
+        const formattedDateRange = borrowDate && returnDate
+            ? `${borrowDate.toLocaleDateString()} - ${returnDate.toLocaleDateString()}`
+            : borrowDate
+            ? `${borrowDate.toLocaleDateString()} - `
+            : '';
+        onChange(formattedDateRange);
+    }, [borrowDate, returnDate, onChange]);
 
     const handleDayClick = () => {
         // Close the picker after selecting the end date
         setIsPickerOpen(false);
     };
 
+    const handleClearDates = () => {
+        setBorrowDate(null);
+        setReturnDate(null);
+        setErrorMessage(null);
+        setResetKey(prev => prev + 1);
+    };
+
     return (
-        <div>
+        <div style={{ position: 'relative', width: '100%' }}>
             <TextField
                 label={label}
                 value={
@@ -299,26 +341,39 @@ function DateRangePickerWrapper({ label, borrowDate, returnDate, setBorrowDate, 
                     ? `${borrowDate.toLocaleDateString()} - `
                     : ''
                 }
+                placeholder="Select Dates"
                 size="small"
                 sx={{ width: '100%' }}
                 onClick={() => setIsPickerOpen(true)}
                 onFocus={() => setIsPickerOpen(true)}
+                InputLabelProps={{
+                    shrink: true,  // Make label float at all times
+                }}
                 InputProps={{
                     readOnly: true,
+                    endAdornment: (
+                        (borrowDate || returnDate) && (
+                            <IconButton
+                                onClick={handleClearDates}
+                                edge="end"
+                            >
+                                <CloseIcon />
+                            </IconButton>
+                        )
+                    ),
                 }}
             />
-            {isPickerOpen && (
-                <div>
-                    <DateRangePicker
-                        borrowDate={borrowDate}
-                        returnDate={returnDate}
-                        setBorrowDate={setBorrowDate}
-                        setReturnDate={setReturnDate}
-                        setErrorMessage={setErrorMessage}
-                        handleDayClick={handleDayClick} // Pass handleDayClick to DateRangePicker
-                    />
-                </div>
-            )}
+            <div style={{ position: 'absolute', zIndex: 1000, display: isPickerOpen ? 'block' : 'none' }}>
+                <DateRangePicker
+                    key={resetKey}
+                    borrowDate={borrowDate}
+                    returnDate={returnDate}
+                    setBorrowDate={setBorrowDate}
+                    setReturnDate={setReturnDate}
+                    setErrorMessage={setErrorMessage}
+                    handleDayClick={handleDayClick}
+                />
+            </div>
         </div>
     );
 }
@@ -402,7 +457,7 @@ function MultipleSelectCheckmarks({ label, options, selected, onChange }: Multip
             <div>
                 <ThemeProvider theme={theme}>
                     <FormControl sx={{ width: '100%' }}>
-                        <InputLabel id={`multiple-select-label-${label}`} shrink>{label}</InputLabel>
+                        <InputLabel id={`multiple-select-label-${label}`} shrink={true}>{label}</InputLabel>
                         <Select
                             labelId={`multiple-select-label-${label}`}
                             id={`multiple-select-${label}`}
