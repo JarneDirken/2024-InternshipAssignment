@@ -80,15 +80,24 @@ function groupItems(items: Item[]): GroupedItem[] {
     const grouped: Record<string, GroupedItem> = {};
 
     items.forEach(item => {
-        const key = `${item.name}-${item.model}-${item.brand}-${item.locationId}-${item.itemStatusId}`;
+        const key = `${item.name}-${item.model}-${item.brand}-${item.locationId}`;
 
         if (!grouped[key]) {
             // Initialize a new grouped item with an items array containing the current item
-            grouped[key] = { ...item, count: 1, items: [item] };
+            grouped[key] = { ...item, availableCount: 0, borrowedCount: 0, items: [item] };
+            if (item.itemStatusId === 1) {
+                grouped[key].availableCount = 1;
+            } else {
+                grouped[key].borrowedCount = 1;
+            }
         } else {
-            // Increment count and add current item to the items array
-            grouped[key].count++;
+            // Add current item to the items array and update counts
             grouped[key].items.push(item);
+            if (item.itemStatusId === 1) {
+                grouped[key].availableCount++;
+            } else {
+                grouped[key].borrowedCount++;
+            }
         }
     });
 

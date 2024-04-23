@@ -1,11 +1,14 @@
-import prisma from '@/services/db';
-import { NextApiRequest } from 'next';
-import { NextRequest } from 'next/server';
+import prisma from "@/services/db";
+import { NextApiRequest } from "next";
+import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const uid = searchParams.get("userId") || '';
     const nameFilter = searchParams.get('name') || '';
+    const modelFilter = searchParams.get('model') || '';
+    const brandFilter = searchParams.get('brand') || '';
+    const locationFilter = searchParams.get('location') || '';
 
     const user = await prisma.user.findUnique({
         where: {
@@ -24,44 +27,49 @@ export async function GET(request: NextRequest) {
 
     const itemRequests = await prisma.itemRequest.findMany({
         where: {
-            borrowerId: uid,
             item: {
                 name: { contains: nameFilter, mode: 'insensitive' },
-                itemStatusId: {
-                    in: [3,4]
-                },
+                itemStatusId: 3,
             },
-            requestStatusId: {
-                in: [4,5]
-            },
+            requestStatusId: 2,
         },
         include: { 
             item: {
                 include: {
                     location: true
                 }
+            },
+            borrower: {
+
+            },
+            approver: {
+
             }
         },
         orderBy: {
-            endBorrowDate: "desc"
-        }
-    });
-    
-    const totalCount = await prisma.itemRequest.count({
-        where: {
-            borrowerId: uid,
-            requestStatusId: {
-                in: [4,5]
-            },
-            item: {
-                itemStatusId: {
-                    in: [3,4]
-                },
-            }
+            requestDate: "desc"
         }
     });
 
-    return new Response(JSON.stringify({ itemRequests, totalCount }), {
+    const totalCount = await prisma.itemRequest.count({
+        where: {
+            requestStatusId: 2,
+        }
+    });
+
+    const totalCountReturns = await prisma.itemRequest.count({
+        where: {
+            requestStatusId: 5,
+        }
+    });
+
+    const totalCountCheckItem = await prisma.itemRequest.count({
+        where: {
+            requestStatusId: 6,
+        }
+    });
+
+    return new Response(JSON.stringify({itemRequests, totalCount, totalCountReturns, totalCountCheckItem}), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',
@@ -77,20 +85,11 @@ export async function PUT(req: NextApiRequest) {
             id: data.requestId,
         },
         data: {
-            requestStatusId: 5
+            requestStatusId: 4
         },
-    });
+    });    
 
-    const updateItem = await prisma.item.update({
-        where: {
-            id: data.itemId,
-        },
-        data: {
-            itemStatusId: 4,
-        }
-    })
-
-    return new Response(JSON.stringify({updateItemRequest, updateItem}), {
+    return new Response(JSON.stringify(updateItemRequest), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',

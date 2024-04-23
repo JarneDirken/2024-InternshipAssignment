@@ -51,19 +51,19 @@ export default function Profile() {
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     function capitalizeFirstLetter(string: string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
-    }
+    };
 
     if (loading) {
         return ( <Loading /> );
-    }
+    };
 
     if (!profile) {
         return <div>No profile data found.</div>;
-    }
+    };
 
     async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
         const file = event.target.files?.[0];
@@ -96,7 +96,7 @@ export default function Profile() {
                 console.error('Error uploading file:', error);
             });
         }
-    }
+    };
 
     async function RemovePhoto() {
         if (!profile || !profile.firebaseUid || !profile.profilePic) {
@@ -130,7 +130,7 @@ export default function Profile() {
         } catch (error) {
             console.error('Error deleting file:', error);
         }
-    }
+    };
 
     const theme = createTheme({
         components: {
@@ -160,7 +160,7 @@ export default function Profile() {
 
     function handleEditButton(){
         setEdit(!edit);
-    }
+    };
 
     async function handleSaveButton(){
         const updatedData = {
@@ -241,7 +241,7 @@ export default function Profile() {
                         <ThemeProvider theme={theme}>
                             <div className='grid sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4'>
                                 { !edit ? (
-                                        <div className='flex flex-col'>
+                                        <div className='flex flex-col truncate'>
                                             <span className='text-gray-500 font-medium'>First name</span>
                                             {profile.firstName}
                                         </div>
@@ -258,7 +258,7 @@ export default function Profile() {
                                         />
                                 )}
                                 { !edit ? (
-                                        <div className='flex flex-col'>
+                                        <div className='flex flex-col truncate'>
                                             <span className='text-gray-500 font-medium'>Last name</span>
                                             {profile.lastName}
                                         </div>
@@ -275,13 +275,13 @@ export default function Profile() {
                                         />
                                 )}
                                 <div className='flex flex-col truncate'>
-                                    <span className='text-gray-500 font-medium'>Email</span>
+                                    <span className='text-gray-500 font-medium truncate'>Email</span>
                                     {profile.email}
                                 </div>
                             </div>
                             <div className='grid sm:grid-cols-2 md:grid-cols-3 gap-4'>
                             { !edit ? (
-                                        <div className='flex flex-col'>
+                                        <div className='flex flex-col truncate'>
                                             <span className='text-gray-500 font-medium'>Tel</span>
                                             {profile.tel}
                                         </div>
@@ -298,7 +298,7 @@ export default function Profile() {
                                         />
                                 )}
                                 { !edit ? (
-                                        <div className='flex flex-col'>
+                                        <div className='flex flex-col truncate'>
                                             <span className='text-gray-500 font-medium'>Student number</span>
                                             {profile.studentCode}
                                         </div>

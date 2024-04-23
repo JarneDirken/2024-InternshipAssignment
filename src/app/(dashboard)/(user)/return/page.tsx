@@ -9,6 +9,8 @@ import { ItemRequest } from "@/models/ItemRequest";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ItemCard from "@/components/(user)/ItemCard";
 import Loading from "@/components/states/Loading";
+import { useRecoilState } from "recoil";
+import { updateRequest } from "@/services/store";
 
 export default function Return() {
     const { isAuthorized, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
@@ -21,6 +23,7 @@ export default function Return() {
     const [nameFilter, setNameFilter] = useState(''); // name filter
     const [borrowDateFilter, setBorrowDateFilter] = useState(''); // model filter
     const [returnDateFilter, setReturnDateFilter] = useState(''); // brand filter
+    const [requests, setRequest] = useRecoilState(updateRequest);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -37,7 +40,7 @@ export default function Return() {
         if(userId) {
             getItems();
         }
-    }, [userId]);
+    }, [userId, requests]);
 
     const handleFilterChange = (filterType: string, value: string) => {
         switch (filterType) {
@@ -54,10 +57,6 @@ export default function Return() {
                 break;
         }
     };
-
-    const openModal = () => {
-
-    }
 
     async function getItems() {
         setItemLoading(true);
@@ -165,7 +164,6 @@ export default function Return() {
                 </div>
                 <ItemCard 
                     active={active}
-                    openModal={openModal}
                     items={items}
                     calculateReturnDate={calculateDaysRemaining}
                     itemLoading={itemLoading}

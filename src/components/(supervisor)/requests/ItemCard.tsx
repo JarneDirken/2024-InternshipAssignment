@@ -7,6 +7,7 @@ import Image from 'next/image';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 interface BorrowCardProps {
     active: boolean;
@@ -18,11 +19,12 @@ interface BorrowCardProps {
     setRequestStatusId?: (value: number) => void;
     openMessageModal?: (value: boolean) => void;
     setMessage?: (value: string) => void;
+    selectedTab?: string;
 };
 
-export default function ItemCard({ active, openModal, items, itemLoading, setApproved, setRejected, setRequestStatusId, openMessageModal, setMessage }: BorrowCardProps) {
+export default function ItemCard({ active, openModal, items, itemLoading, setApproved, setRejected, setRequestStatusId, openMessageModal, setMessage, selectedTab }: BorrowCardProps) {
     const cardContainerHeight = "calc(100vh - 25.6rem)";
-    const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll w-full overflow-x-hidden";
+    const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
 
     if (itemLoading) { return (<Loading />); };
@@ -120,21 +122,26 @@ export default function ItemCard({ active, openModal, items, itemLoading, setApp
                         {active ? (
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
                                 <div className="flex flex-row items-end w-5/6">
-                                    <div className="w-1/12 mr-2">
+                                    <div className="mr-2 w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
                                         {!item.item.image ? (
-                                            <Image 
-                                                src="/assets/images/defaultImage.jpg"
-                                                width={72}
-                                                height={100}
-                                                alt="Default iamge"
-                                          />
-                                        ) : (
-                                            <img 
-                                                src={item.item.image}
-                                                alt={item.item.name} 
-                                                style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                                <Image 
+                                                    src="/assets/images/defaultImage.jpg"
+                                                    style={{ width: 'auto', height: 'auto'}}
+                                                    width={72}
+                                                    height={100}
+                                                    alt="Default iamge"
+                                                    loading="lazy"
                                             />
-                                        )}
+                                            ) : (
+                                                <Image 
+                                                    src={item.item.image}
+                                                    alt={item.item.name}
+                                                    style={{ width: 'auto', height: 'auto' }} 
+                                                    width={100}
+                                                    height={72}
+                                                    loading="lazy"
+                                                />
+                                            )}
                                     </div>
                                     <div className="flex flex-col w-1/3">
                                         <div className="truncate">
@@ -214,17 +221,29 @@ export default function ItemCard({ active, openModal, items, itemLoading, setApp
                                         />
                                     </div>
                                 )}
-                                {item.requestStatusId === 3 && (
-                                    <Button 
-                                        text="Message"
-                                        paddingY="py-0"
-                                        paddingX="px-2"
-                                        onClick={() => openMessage(item.approveMessage)}
-                                    />
-                                )}
+                                <div className="flex flex-col items-center justify-center gap-2">
+                                    {(item.isUrgent && selectedTab !== "urgentBorrows" && selectedTab !== "normalBorrows") && (
+                                        <div className="truncate">
+                                            <a href={item.file} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                                                <div className="flex items-center text-custom-blue underline cursor-pointer">
+                                                    <WarningAmberIcon fontSize="small"/>
+                                                    <span>Document</span>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    )}
+                                    {((item.requestStatusId === 3 && item.approveMessage) || (item.requestStatusId === 2 && item.approveMessage)) && (
+                                        <Button 
+                                            text="Message"
+                                            paddingY="py-0"
+                                            paddingX="px-2"
+                                            onClick={() => openMessage(item.approveMessage)}
+                                        />
+                                    )}
+                                </div>
                             </div>
                         ) : (
-                            <div className="overflow-hidden w-full">
+                            <div className="overflow-hidden">
                                 <div className="p-2 flex items-center flex-wrap">
                                     <div className="flex w-1/2 flex-col items-start truncate">
                                         <div className="flex items-center flex-wrap truncate">
@@ -247,21 +266,26 @@ export default function ItemCard({ active, openModal, items, itemLoading, setApp
                                     </div>
                                 </div>
                                 <hr />
-                                <div className="flex flex-col items-center p-4 max-w-xs w-full">
+                                <div className="flex flex-col p-4 w-full">
                                     <div className="flex">
-                                        <div className="w-1/3 flex justify-center mr-2">
-                                            {!item.item.image ? (
+                                        <div className="mr-2 w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
+                                        {!item.item.image ? (
                                                 <Image 
                                                     src="/assets/images/defaultImage.jpg"
+                                                    style={{ width: '100%', height: 'auto' }}
                                                     width={72}
                                                     height={100}
                                                     alt="Default iamge"
+                                                    loading="lazy"
                                             />
                                             ) : (
-                                                <img 
+                                                <Image 
                                                     src={item.item.image}
-                                                    alt={item.item.name} 
-                                                    style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                                    alt={item.item.name}
+                                                    style={{ width: '100%', height: 'auto' }}
+                                                    width={100}
+                                                    height={72}
+                                                    loading="lazy"
                                                 />
                                             )}
                                         </div>
@@ -282,12 +306,12 @@ export default function ItemCard({ active, openModal, items, itemLoading, setApp
                                     </div>
                                     <div className="flex gap-0 w-full">
                                     {item.decisionDate ? (
-                                            <div className="flex flex-col items-start w-2/3 text-sm sm:text-base pl-2 truncate">
+                                            <div className="flex flex-col items-start w-1/3 text-sm sm:text-base pl-2 truncate">
                                                 <span className="text-gray-400">{item.requestStatusId===3 ? <span>Reject</span> : <span>Approve</span>}&nbsp;date</span>
                                                 <span>{formatDate(item.decisionDate)}</span>
                                             </div>
                                         ) : (
-                                            <div className="flex flex-col items-start w-2/3 text-sm sm:text-base pl-2 truncate">
+                                            <div className="flex flex-col items-start w-1/3 text-sm sm:text-base pl-2 truncate">
                                                 <span className="text-gray-400">Year</span>
                                                 <span>{formatDateYear(item.item.yearBought)}</span>
                                             </div>
@@ -298,7 +322,7 @@ export default function ItemCard({ active, openModal, items, itemLoading, setApp
                                         </div>
                                     </div>
                                 </div>
-                                {!item.approver || item.requestStatusId === 3 && (
+                                {((!item.approver || item.requestStatusId === 3) || item.isUrgent) && (
                                     <hr />
                                 )}
                                 <div className="flex justify-center items-center p-2 gap-6">
@@ -322,14 +346,26 @@ export default function ItemCard({ active, openModal, items, itemLoading, setApp
                                         />
                                     </>
                                 )}
-                                {item.requestStatusId === 3 && (
-                                    <Button 
-                                        text="Message"
-                                        paddingY="py-0"
-                                        paddingX="px-2"
-                                        onClick={() => openMessage(item.approveMessage)}
-                                    />
-                                )}
+                                <div className="flex items-center justify-center gap-2">
+                                {(item.isUrgent && selectedTab !== "urgentBorrows" && selectedTab !== "normalBorrows") && (
+                                        <div className="truncate">
+                                            <a href={item.file} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                                                <div className="flex items-center text-custom-blue underline cursor-pointer">
+                                                    <WarningAmberIcon fontSize="small"/>
+                                                    <span>Document</span>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    )}
+                                    {((item.requestStatusId === 3 && item.approveMessage) || (item.requestStatusId === 2 && item.approveMessage)) && (
+                                        <Button 
+                                            text="Message"
+                                            paddingY="py-0"
+                                            paddingX="px-2"
+                                            onClick={() => openMessage(item.approveMessage)}
+                                        />
+                                    )}
+                                </div>
                                 </div>
                             </div>
                         )}

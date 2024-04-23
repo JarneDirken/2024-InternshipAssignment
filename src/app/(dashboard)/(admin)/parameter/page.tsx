@@ -11,6 +11,7 @@ import Unauthorized from '../../(error)/unauthorized/page';
 import { ParameterType } from '@/models/ParameterType';
 import Button from '@/components/states/Button';
 import { useSnackbar } from 'notistack';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 
 export default function Parameter() {
     const { isAuthorized, loading } = useAuth(['Admin']);
@@ -146,39 +147,45 @@ export default function Parameter() {
     if (!isAuthorized) { return <Unauthorized />; }
 
     return (
-        <div>
-            <ThemeProvider theme={theme}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <TimePicker
-                        label="Start Morning Time"
-                        value={startMorningTime}
-                        onChange={handleTimeChange(setStartMorningTime, setStartMorningTimeString)}
-                        views={['hours', 'minutes']}
-                    />
-                    <TimePicker
-                        label="End Morning Time"
-                        value={endMorningTime}
-                        onChange={handleTimeChange(setEndMorningTime, setEndMorningTimeString)}
-                        views={['hours', 'minutes']}
-                    />
-                    <TimePicker
-                        label="Start Evening Time"
-                        value={startEveningTime}
-                        onChange={handleTimeChange(setStartEveningTime, setStartEveningTimeString)}
-                        views={['hours', 'minutes']}
-                    />
-                    <TimePicker
-                        label="End Evening Time"
-                        value={endEveningTime}
-                        onChange={handleTimeChange(setEndEveningTime, setEndEveningTimeString)}
-                        views={['hours', 'minutes']}
-                    />
-                </LocalizationProvider>
-            </ThemeProvider>
-            <Button 
-                text='Save'
-                onClick={updateParameters}
-            />
+        <div className="rounded-xl bg-white w-full p-4" style={{ height: 'calc(100vh - 129px)' }}>
+            <div className='mb-4 flex items-center gap-3'>
+                <SettingsOutlinedIcon fontSize="large" />
+                <h1 className="font-semibold text-2xl">Parameters</h1>
+            </div>
+            <div className='flex gap-4 flex-wrap'>
+                <ThemeProvider theme={theme}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <TimePicker
+                            label="Start Morning Time"
+                            value={startMorningTime}
+                            onChange={handleTimeChange(setStartMorningTime, setStartMorningTimeString)}
+                            views={['hours', 'minutes']}
+                        />
+                        <TimePicker
+                            label="End Morning Time"
+                            value={endMorningTime}
+                            onChange={handleTimeChange(setEndMorningTime, setEndMorningTimeString)}
+                            views={['hours', 'minutes']}
+                        />
+                        <TimePicker
+                            label="Start Evening Time"
+                            value={startEveningTime}
+                            onChange={handleTimeChange(setStartEveningTime, setStartEveningTimeString)}
+                            views={['hours', 'minutes']}
+                        />
+                        <TimePicker
+                            label="End Evening Time"
+                            value={endEveningTime}
+                            onChange={handleTimeChange(setEndEveningTime, setEndEveningTimeString)}
+                            views={['hours', 'minutes']}
+                        />
+                    </LocalizationProvider>
+                </ThemeProvider>
+                <Button 
+                    text='Save'
+                    onClick={updateParameters}
+                />
+            </div>
         </div>
     );
 }

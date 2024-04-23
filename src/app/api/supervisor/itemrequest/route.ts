@@ -21,7 +21,9 @@ export async function PUT(req: NextApiRequest) {
                 }
             },
             decisionDate: data.decisionDate,
-            approveMessage: data.approveMessage
+            approveMessage: data.approveMessage,
+            borrowDate: data.borrowDate,
+            returnDate: data.returnDate,
         },
     });    
 

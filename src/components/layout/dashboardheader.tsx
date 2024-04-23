@@ -89,14 +89,14 @@ export default function DashboardHeader() {
             <div className="hamburger sm:hidden z-20 cursor-pointer ml-8" onClick={() => setIsOpen(!isOpen)}>
                 {isOpen ? <CloseIcon fontSize="large" /> : <MenuIcon fontSize="large" />}
             </div>
-            <div className='flex items-center mr-10 sm:mr-16'>
+            <div className='flex items-center mr-10 sm:mr-16 w-full sm:w-1/5 justify-end'>
                 <Tooltip title="Notifciations" arrow>
                     <NotificationsOutlinedIcon className="text-4xl cursor-pointer" />
                 </Tooltip>
                 {!profile ? (
                     <Loading />
                 ) : (
-                    <div className='flex items-center ml-6'>
+                    <div className='flex items-center ml-6 justify-end truncate'>
                         <Tooltip title="Account info" arrow>
                             <Link href="/profile">
                                 <Avatar sx={{ width: 40, height: 40 }}>
@@ -110,7 +110,7 @@ export default function DashboardHeader() {
                                 </Avatar>
                             </Link>
                         </Tooltip>
-                        <div className="hidden sm:block ml-2">
+                        <div className="hidden sm:block ml-2 truncate">
                             <p className="font-semibold">
                                 {capitalizeFirstLetter(profile?.firstName)} {capitalizeFirstLetter(profile?.lastName)}
                             </p>
@@ -126,6 +126,7 @@ export default function DashboardHeader() {
                                 
                 <Image src={'/assets/images/logo.png'} 
                         className="overflow-hidden absolute transition-all right-9 top-6"
+                        style={{ width: '90px', height: 'auto' }}
                         alt="Logo"
                         width={90}
                         height={90}

@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { ItemRequest } from "@/models/ItemRequest";
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 interface PendingBorrowProps {
     active: boolean;
@@ -142,23 +143,37 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                         {active ? (
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
                                 <div className="flex flex-row items-center w-full">
-                                    <div className="w-1/12 mr-2">
-                                    {!request.item.image ? (
+                                <div className="mr-2 flex w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
+                                        {!request.item.image ? (
                                             <Image 
                                                 src="/assets/images/defaultImage.jpg"
                                                 width={72}
                                                 height={100}
+                                                style={{height: 'auto' }}
                                                 alt="Default iamge"
+                                                loading="lazy"
                                           />
                                         ) : (
-                                            <img 
-                                                src={request.item.image}
-                                                alt={request.item.name} 
-                                                style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
-                                            />
+                                                <Image 
+                                                    src={request.item.image}
+                                                    alt={request.item.name}
+                                                    width={100}
+                                                    height={72}
+                                                    loading="lazy"
+                                                />
                                         )}
                                     </div>
                                     <div className="flex flex-col w-1/4">
+                                        {request.isUrgent && (
+                                            <div className="truncate">
+                                                <a href={request.file} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                                                    <div className="flex items-center text-custom-blue underline cursor-pointer">
+                                                        <WarningAmberIcon fontSize="small"/>
+                                                        <span>Document</span>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        )}
                                         <div className="truncate">
                                             <span className="font-semibold">Name:&nbsp;</span>
                                             <span>{request.item.name}</span>
@@ -196,7 +211,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                             onClick={() => cancelPendingBorrow(request.id, request.itemId)}
                                         />
                                     )}
-                                    {request.requestStatusId === 3 && request.item.itemStatusId === 1 && (
+                                    {((request.requestStatusId === 3 && request.approveMessage) || (request.requestStatusId === 2 && request.approveMessage)) && (
                                         <Button 
                                             text="Message"
                                             paddingY="py-0"
@@ -223,19 +238,24 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                 </div>
                                 <hr />
                                 <div className="flex items-center p-4">
-                                    <div className="w-1/3 flex justify-center mr-2">
+                                    <div className="mr-2 w-[100px] h-[72px] justify-center items-center overflow-hidden">
                                     {!request.item.image ? (
                                             <Image 
                                                 src="/assets/images/defaultImage.jpg"
                                                 width={72}
                                                 height={100}
+                                                style={{ width: 'auto', height: 'auto' }} 
                                                 alt="Default iamge"
+                                                loading="lazy"
                                           />
                                         ) : (
-                                            <img 
+                                            <Image 
                                                 src={request.item.image}
                                                 alt={request.item.name} 
-                                                style={{ width: '100px', height: '72px', objectFit: 'cover' }} 
+                                                style={{ width: 'auto', height: 'auto' }} 
+                                                width={100}
+                                                height={72}
+                                                loading="lazy"
                                             />
                                         )}
                                     </div>
@@ -254,9 +274,18 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                             <span className="text-gray-400">Location</span>
                                             <span>{request.item.location.name}</span>
                                         </div>
+                                        {request.isUrgent && (
+                                        <div className="truncate flex flex-col items-start w-full text-sm sm:text-base">
+                                            <a href={request.file} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                                                    <div className="flex items-center text-custom-blue underline cursor-pointer">
+                                                        <WarningAmberIcon fontSize="small"/>
+                                                        <span>Document</span>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                                
                                 {request.requestStatusId === 1 && request.item.itemStatusId === 2 && (
                                     <>
                                         <hr />
@@ -271,7 +300,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                                         </div>
                                     </>
                                     )}
-                                    {request.requestStatusId === 3 && request.item.itemStatusId === 1 && (
+                                    {((request.requestStatusId === 3 && request.approveMessage) || (request.requestStatusId === 2 && request.approveMessage)) && (
                                         <>
                                         <hr />
                                             <div className="flex justify-center items-center p-2">

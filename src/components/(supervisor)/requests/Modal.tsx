@@ -37,7 +37,6 @@ export default function Modal({ open, onClose, item, userId, rejected, setReject
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
     const [requests, setRequest] = useRecoilState(updateRequest);
 
-
     async function requestItem() {
         if (!item) { console.error("error"); return; }
         const data = {
@@ -46,7 +45,9 @@ export default function Modal({ open, onClose, item, userId, rejected, setReject
             requestStatusId: requestStatusId,
             approverId: userId,
             approveMessage: message,
-            decisionDate: new Date().toISOString()
+            decisionDate: new Date().toISOString(),
+            borrowDate: item.startBorrowDate,
+            returnDate: item.endBorrowDate
         };
 
         const response = await fetch(`/api/supervisor/itemrequest/`, {
@@ -95,6 +96,7 @@ export default function Modal({ open, onClose, item, userId, rejected, setReject
         setRejected!(false);
         setApproved!(false);
         setRequest(!requests);
+        setMessage("");
     };
 
     const rejectedButton = () => {
