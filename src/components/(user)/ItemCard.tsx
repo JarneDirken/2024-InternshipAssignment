@@ -29,7 +29,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                 No items found.
             </div>
         );
-    }
+    };
 
     const formatDate = (date?: Date | string) => {
         if (!date) {
