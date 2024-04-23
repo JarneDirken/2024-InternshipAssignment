@@ -27,7 +27,6 @@ export default function History() {
     const [allRequests, setAllRequests] = useState<ItemRequest[]>([]);
     const [totalNormalBorrowsCount, setTotalNormalBorrowsCount] = useState(0);
     const [totalUrgentBorrowsCount, setUrgentBorrowsCount] = useState(0);
-    const [allRequestsCount, setAllRequestsCount] = useState(0);
     // filters
     const [nameFilter, setNameFilter] = useState(''); // name filter
     const [borrowDateFilter, setBorrowDateFilter] = useState(''); // model filter
@@ -118,7 +117,6 @@ export default function History() {
             setNormalBorrows(fetchedItems);
             setTotalNormalBorrowsCount(itemCount);
             setUrgentBorrowsCount(itemCountUrgent);
-            setAllRequestsCount(itemCountAll);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -301,9 +299,6 @@ export default function History() {
                             onClick={() => setSelectedTab('requestedBorrows')}
                         >
                             Requested Borrows
-                        </div>
-                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-0 transform translate-x-1/2 -translate-y-1/2 text-xs ${selectedTab === 'requestedBorrows' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
-                            {allRequestsCount}
                         </div>
                     </div>
                 </div>
