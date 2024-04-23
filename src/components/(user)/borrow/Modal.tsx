@@ -105,12 +105,6 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
         const startEveningValid = isWithinTime(start, startEveningTimeString, endEveningTimeString);
         const endEveningValid = isWithinTime(end, startEveningTimeString, endEveningTimeString);
 
-        // Check evening validity for both start and end times
-        if (!startEveningValid || !endEveningValid) {
-            setErrorMessage("Can't return between these hours");
-            return;  // Exit the function early as the condition fails
-        }
-
         // Same day check with specific conditions
         if (start.isSame(end, 'day')) {
             // Check that start is morning and end is evening for same-day return

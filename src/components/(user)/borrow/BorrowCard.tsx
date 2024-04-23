@@ -110,15 +110,11 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                     />
                 );
             case 2:
-                return <span>Pending borrow</span>;
             case 3:
-                return <span>Being Borrowed</span>;
             case 4:
-                return <span>Pending return</span>;
             case 5:
-                return <span>Reparation</span>;
             case 6:
-                return <span>Broken</span>;
+                return <span>Borrowed</span>;
             default:
                 return null;
         }
@@ -174,8 +170,8 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                     <div className="flex flex-col w-3/4">
                                         <div className="flex gap-8 items-center">
                                         <div className="truncate flex items-center">
-                                                <span className="font-semibold">Amount:&nbsp;</span>
-                                                <span>{item.count}</span>
+                                                <span className="font-semibold">Available:&nbsp;</span>
+                                                <span>{item.availableCount}</span>
                                             </div>
                                             <div className="truncate">
                                                 <span className="font-semibold">Brand:&nbsp;</span>
@@ -200,8 +196,8 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                         <span className="text-sm font-semibold truncate sm:text-lg">{item.name}</span>
                                     </div>
                                     <div className="truncate flex items-center p-2 text-sm sm:text-base">
-                                        <span className="font-semibold">Amount:&nbsp;</span>
-                                        <span>{item.count}</span>
+                                        <span className="font-semibold">Available:&nbsp;</span>
+                                        <span>{item.availableCount}</span>
                                     </div>
                                 </div>
                                 <hr />
