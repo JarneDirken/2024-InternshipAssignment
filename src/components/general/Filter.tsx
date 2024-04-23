@@ -10,6 +10,8 @@ import Tooltip from "@mui/material/Tooltip";
 import ClearIcon from '@mui/icons-material/Clear';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 import Menu from '@mui/material/Menu';
 import InputLabel from '@mui/material/InputLabel';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
@@ -17,16 +19,19 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Checkbox from '@mui/material/Checkbox';
 import ListItemText from '@mui/material/ListItemText';
 import React from "react";
-import { DateRangePicker } from "@nextui-org/react";
+import DateRangePicker from "@/components/states/DateRangePicker";
+import FormControl from '@mui/material/FormControl';
 import SwapVertRoundedIcon from '@mui/icons-material/SwapVertRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
 import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
+import { Label } from "@mui/icons-material";
 
 interface Filter {
     label: string;
     state: [string, Dispatch<SetStateAction<string>>];
     inputType: 'text' | 'dateRange' | 'multipleSelect';
+    options?: string[];
 }
 
 interface FiltersProps {
@@ -39,17 +44,20 @@ interface FiltersProps {
     filters: Filter[];
     items: Item[];
     openModal: (id: number) => void;
-    userId: string | null;
     sortOptions: string[];
-    isCardView: boolean;
+    isCardView?: boolean;
 }
 
-export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, openModal, userId, sortOptions, isCardView }: FiltersProps) {
+export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, openModal, sortOptions, isCardView }: FiltersProps) {
     const prevWidthRef = useRef<number | null>(null);
     const lastActiveRef = useRef<boolean | null>(null);
     const [sortBy, setSortBy] = useState('');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+    const [borrowDate, setBorrowDate] = useState<Date | null>(null); // borrow date
+    const [returnDate, setReturnDate] = useState<Date | null>(null); // return date
+    const [errorMessage, setErrorMessage] = useState<String | null>(null); // error message with dates
 
     useLayoutEffect(() => {
         const handleResize = () => {
@@ -106,9 +114,18 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
         filters.find(filter => filter.label === label)?.state[1](value || '');
     };
 
+    const [resetKey, setResetKey] = useState(0);
+
     const handleReset = (label: string) => {
         const filter = filters.find(filter => filter.label === label);
         if (filter) {
+            if (filter.inputType === 'dateRange') {
+                // Special handling for date range resets
+                setBorrowDate(null);
+                setReturnDate(null);
+                setResetKey(oldKey => oldKey + 1);
+            }
+            // Reset the filter state
             filter.state[1]('');
             onFilterChange(label, '');
         }
@@ -213,25 +230,41 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                     />
                                 )}
                                 {filter.inputType === 'dateRange' && (
-                                    <DateRangePicker
+                                    <DateRangePickerWrapper
+                                        key={resetKey}
+                                        borrowDate={borrowDate}
+                                        returnDate={returnDate}
+                                        setBorrowDate={setBorrowDate}
+                                        setReturnDate={setReturnDate}
+                                        setErrorMessage={setErrorMessage}
                                         label={filter.label}
-                                        className="max-w-xs"
+                                        onChange={(formattedDateRange) => handleFilterChange(filter.label, formattedDateRange)}
                                     />
                                 )}
                                 {filter.inputType === 'multipleSelect' && (
                                     <MultipleSelectCheckmarks
                                         label={filter.label}
-                                        options={names}
-                                        selected={filter.state[0]}
-                                        onChange={(selected) => handleFilterChange(filter.label, selected.join(','))}
+                                        options={filter.options || []} // Pass options from the filter
+                                        selected={Array.isArray(filter.state[0]) ? filter.state[0] : [filter.state[0]]}
+                                        onChange={(selected) => handleFilterChange(filter.label, selected.join(', '))}
                                     />
                                 )}
                             </div>
                         ))}
                         <div>
-                        <Button onClick={handleSortClick} startIcon={<SwapVertRoundedIcon />} endIcon={<KeyboardArrowRightRoundedIcon />} className="" >
-                            Sort by {sortBy ? sortBy : 'Select'} {sortDirection === 'asc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
-                        </Button>
+                            <Button 
+                                onClick={handleSortClick} 
+                                startIcon={<SwapVertRoundedIcon />} 
+                                endIcon={<KeyboardArrowRightRoundedIcon />} 
+                                sx={{
+                                    fontSize: { xs: '0.8rem', sm: '1rem' }, // Smaller font on extra-small screens
+                                    '& .MuiButton-startIcon, & .MuiButton-endIcon': {
+                                        fontSize: { xs: '18px', sm: '24px' } // Adjust icon sizes as well
+                                    }
+                                }} 
+                            >
+                                Sort by {sortBy ? sortBy : 'Select'} {sortDirection === 'asc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
+                            </Button>
                             <Menu
                                 anchorEl={anchorEl}
                                 open={Boolean(anchorEl)}
@@ -261,55 +294,199 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
     );
 }
 
-function MultipleSelectCheckmarks({ label, options, selected, onChange }: { label: string; options: string[]; selected: string; onChange: (selected: string[]) => void }) {
-    const [personName, setPersonName] = useState<string[]>(selected.split(','));
+interface DateRangePickerWrapperProps {
+    label: string;
+    borrowDate: Date | null;
+    returnDate: Date | null;
+    setBorrowDate: (date: Date | null) => void;
+    setReturnDate: (date: Date | null) => void;
+    setErrorMessage: (message: string | null) => void;
+    onChange: (value: string) => void;
+}
 
-    const handleChange = (event: SelectChangeEvent<typeof personName>) => {
-        const {
-            target: { value },
-        } = event;
-        setPersonName(
-            // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',') : value,
-        );
+function DateRangePickerWrapper({ label, borrowDate, returnDate, setBorrowDate, setReturnDate, setErrorMessage, onChange }: DateRangePickerWrapperProps) {
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
+    const [resetKey, setResetKey] = useState(0);
+
+    useEffect(() => {
+        // Update the input field whenever dates change
+        const formattedDateRange = borrowDate && returnDate
+            ? `${borrowDate.toLocaleDateString()} - ${returnDate.toLocaleDateString()}`
+            : borrowDate
+            ? `${borrowDate.toLocaleDateString()} - `
+            : '';
+        onChange(formattedDateRange);
+    }, [borrowDate, returnDate, onChange]);
+
+    const handleDayClick = () => {
+        // Close the picker after selecting the end date
+        setIsPickerOpen(false);
     };
 
-    const ITEM_HEIGHT = 48;
-    const ITEM_PADDING_TOP = 8;
+    const handleClearDates = () => {
+        setBorrowDate(null);
+        setReturnDate(null);
+        setErrorMessage(null);
+        setResetKey(prev => prev + 1);
+    };
 
-    const MenuProps = {
-        PaperProps: {
-          style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-            width: 250,
-          },
-        },
+    return (
+        <div style={{ position: 'relative', width: '100%' }}>
+            <TextField
+                label={label}
+                value={
+                    borrowDate && returnDate
+                    ? `${borrowDate.toLocaleDateString()} - ${returnDate.toLocaleDateString()}`
+                    : borrowDate
+                    ? `${borrowDate.toLocaleDateString()} - `
+                    : ''
+                }
+                placeholder="Select Dates"
+                size="small"
+                sx={{ width: '100%' }}
+                onClick={() => setIsPickerOpen(true)}
+                onFocus={() => setIsPickerOpen(true)}
+                InputLabelProps={{
+                    shrink: true,  // Make label float at all times
+                }}
+                InputProps={{
+                    readOnly: true,
+                    endAdornment: (
+                        (borrowDate || returnDate) && (
+                            <IconButton
+                                onClick={handleClearDates}
+                                edge="end"
+                            >
+                                <CloseIcon />
+                            </IconButton>
+                        )
+                    ),
+                }}
+            />
+            <div style={{ position: 'absolute', zIndex: 1000, display: isPickerOpen ? 'block' : 'none' }}>
+                <DateRangePicker
+                    key={resetKey}
+                    borrowDate={borrowDate}
+                    returnDate={returnDate}
+                    setBorrowDate={setBorrowDate}
+                    setReturnDate={setReturnDate}
+                    setErrorMessage={setErrorMessage}
+                    handleDayClick={handleDayClick}
+                />
+            </div>
+        </div>
+    );
+}
+
+interface MultipleSelectCheckmarksProps {
+    label: string;
+    options: string[];
+    selected: string[];
+    onChange: (selected: string[]) => void;
+}
+
+function MultipleSelectCheckmarks({ label, options, selected, onChange }: MultipleSelectCheckmarksProps) {
+    const [option, setOption] = useState<string[]>([]);
+
+    const handleChange = (event: SelectChangeEvent<typeof option>) => {
+        const {
+          target: { value },
+        } = event;
+        setOption(
+          // On autofill we get a stringified value.
+          typeof value === 'string' ? value.split(',') : value,
+        );
       };
 
     useEffect(() => {
-        onChange(personName);
-    }, [personName, onChange]);
+        onChange(option);
+    }, [option, onChange]);
+
+    const theme = createTheme({
+        components: {
+            MuiOutlinedInput: {
+                styleOverrides: {
+                    root: {
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'orange',
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'orange',
+                        },
+                    },
+                },
+            },
+            MuiInputLabel: {
+                styleOverrides: {
+                    root: {
+                        '&.Mui-focused': {
+                            color: 'orange',
+                        },
+                    },
+                },
+            },
+            MuiCheckbox: {
+                styleOverrides: {
+                    root: {
+                        '&.Mui-checked': {
+                            color: 'orange', // Set checkbox color to orange when checked
+                        },
+                    },
+                },
+            },
+            MuiMenuItem: {
+                styleOverrides: {
+                    root: {
+                        '&.Mui-selected': {
+                            backgroundColor: '#FFF7E0', // Change background color to a slightly darker orange when selected
+                        },
+                        '&.Mui-selected:hover': {
+                            backgroundColor: '#FFE4B5', // Change background color to a slightly darker orange when selected
+                        },
+                        '&.Mui-selected.Mui-focusVisible': {
+                            backgroundColor: '#FFE4B5', // Change background color to a slightly darker orange when selected
+                        },
+                    },
+                },
+            },
+        },
+    });
 
     return (
-        <div>
-                <InputLabel id={`multiple-select-label-${label}`}>{label}</InputLabel>
-                <Select
-                    labelId={`multiple-select-label-${label}`}
-                    id={`multiple-select-${label}`}
-                    multiple
-                    value={personName}
-                    onChange={handleChange}
-                    input={<OutlinedInput label={label} />}
-                    renderValue={(selected) => selected.join(', ')}
-                    MenuProps={MenuProps}
-                >
-                    {options.map((name) => (
-                        <MenuItem key={name} value={name}>
-                            <Checkbox checked={personName.indexOf(name) > -1} />
-                            <ListItemText primary={name} />
-                        </MenuItem>
-                    ))}
-                </Select>
-        </div>
+        
+            <div>
+                <ThemeProvider theme={theme}>
+                    <FormControl sx={{ width: '100%' }}>
+                        <InputLabel id={`multiple-select-label-${label}`} shrink={true}>{label}</InputLabel>
+                        <Select
+                            labelId={`multiple-select-label-${label}`}
+                            id={`multiple-select-${label}`}
+                            multiple
+                            displayEmpty
+                            size="small"
+                            value={option}
+                            onChange={handleChange}
+                            input={<OutlinedInput label={label} />}
+                            renderValue={(selected) => {
+                                if (selected.length === 0) {
+                                    return 'Select';
+                                } else {
+                                    return selected.join(', '); // No need to replace leading comma and space
+                                }
+                            }}
+                            style={{ color: option.length > 0 ? 'black' : '#b0b0b0', fontWeight: 'normal' }}
+                        >
+                            {options.map((name) => (
+                                <MenuItem 
+                                    key={name} 
+                                    value={name}>
+                                    <Checkbox checked={option.indexOf(name) > -1} />
+                                    <ListItemText primary={name} />
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </ThemeProvider>
+            </div>
     );
 }

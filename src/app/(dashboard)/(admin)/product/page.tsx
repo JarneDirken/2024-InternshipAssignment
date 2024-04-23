@@ -9,6 +9,8 @@ import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 interface Filter {
     label: string;
     state: [string, React.Dispatch<React.SetStateAction<string>>];
+    inputType: 'text' | 'dateRange' | 'multipleSelect';
+    options?: string[];
 }
 
 export default function Product() {
@@ -20,13 +22,17 @@ export default function Product() {
     const [brand, setBrand] = useState<string>('');
     const [location, setLocation] = useState<string>('');
     const [year, setYear] = useState<string>('');
+    const [availability, setAvailability] = useState<string>('');
+    const [borrowDate, setBorrowDate] = useState<string>('');
 
     const filters: Filter[] = [
-        { label: 'Name', state: [name, setName] },
-        { label: 'Model', state: [model, setModel] },
-        { label: 'Brand', state: [brand, setBrand] },
-        { label: 'Location', state: [location, setLocation] },
-        { label: 'Year', state: [year, setYear] }
+        { label: 'Name', state: [name, setName], inputType: 'text'},
+        { label: 'Model', state: [model, setModel], inputType: 'text' },
+        { label: 'Brand', state: [brand, setBrand], inputType: 'text' },
+        { label: 'Location', state: [location, setLocation], inputType: 'text' },
+        { label: 'Year', state: [year, setYear], inputType: 'text' },
+        { label: 'Availability', state: [availability, setAvailability], inputType: 'multipleSelect', options: ['Active', 'Inactive']},
+        { label: 'Borrow Date', state: [borrowDate, setBorrowDate], inputType: 'dateRange'}
     ];
 
     const [isModalOpen, setModalOpen] = useState(false);
@@ -77,8 +83,11 @@ export default function Product() {
             case 'year':
                 setYear(value);
                 break;
-            case 'year':
-                setYear(value);
+            case 'availability':
+                setAvailability(value);
+                break;
+            case 'borrowdate':
+                setBorrowDate(value);
                 break;
             default:
                 break;
@@ -103,7 +112,6 @@ export default function Product() {
                     filters={filters}
                     items={items}
                     openModal={openModal}
-                    userId={userId}
                     sortOptions={['Name', 'Model', 'Brand', 'Location']}
                 />
             </div>
