@@ -4,7 +4,6 @@ import { NextRequest } from "next/server";
 export async function GET(request: NextRequest, {params}: {params: {type: string, id: string}}) {
     const type = params.type;
     const id = params.id;
-
     if (type === 'user') {
         const data = await fetchUserHistory(parseInt(id, 10));
         return new Response(JSON.stringify(data), {
