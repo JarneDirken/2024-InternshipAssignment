@@ -27,6 +27,7 @@ import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
 import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
 import { ItemRequest } from "@/models/ItemRequest";
 import { Filter } from "@/models/Filter";
+import { Repair } from "@/models/Repair";
 
 interface FiltersProps {
     title: string;
@@ -36,7 +37,7 @@ interface FiltersProps {
     onFilterChange: (filterType: string, filterValue: string) => void;
     onSortChange: (sortBy: string, sortDirection: 'asc' | 'desc') => void;
     filters: Filter[];
-    items: Item[] | ItemRequest[];
+    items: Item[] | ItemRequest[] | Repair[];
     sortOptions: string[];
     isCardView?: boolean;
 }
