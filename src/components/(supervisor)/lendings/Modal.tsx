@@ -89,7 +89,8 @@ export default function Modal({ open, onClose, item, userId, handover, receive, 
         const data = {
             requestId: item.id,
             itemId: item.item.id,
-            repairState
+            repairState,
+            message
         };
 
         const response = await fetch(`/api/supervisor/checkitem/`, {

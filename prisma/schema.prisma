@@ -80,13 +80,13 @@ model Location {
 }
 
 model Reparation {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   itemId     Int
   repairDate DateTime
-  returnDate DateTime
+  returnDate DateTime?
   notes      String
   // relation
-  item       Item     @relation(fields: [itemId], references: [id])
+  item       Item      @relation(fields: [itemId], references: [id])
 }
 
 model RequestStatus {

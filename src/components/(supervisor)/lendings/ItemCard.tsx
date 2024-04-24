@@ -87,7 +87,7 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                     <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
-                                <div className="flex flex-row items-center w-5/6">
+                                <div className="flex flex-row items-center w-full">
                                     <div className="mr-2 w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
                                         {!item.item.image ? (
                                                 <Image 
@@ -173,38 +173,40 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                         )}
                                     </div>
                                 </div>
-                                <div className="w-1/12 flex flex-col gap-1">
-                                    {selectedTab === "borrows" && (
-                                        <Button 
-                                            text="Hand over"
-                                            textColor="custom-green"
-                                            borderColor="custom-green"
-                                            paddingX="px-0"
-                                            paddingY="py-0"
-                                            onClick={() => handover(item)}
-                                        />
-                                    )}
-                                    {selectedTab === "returns" && (
-                                        <Button 
-                                            text="Received"
-                                            textColor="custom-green"
-                                            borderColor="custom-green"
-                                            paddingX="px-0"
-                                            paddingY="py-0"
-                                            onClick={() => receive(item)}
-                                        />
-                                    )}
-                                    {selectedTab === "checkitem" && (
-                                        <Button 
-                                            text="Checked"
-                                            textColor="custom-green"
-                                            borderColor="custom-green"
-                                            paddingX="px-0"
-                                            paddingY="py-0"
-                                            onClick={() => checked(item)}
-                                        />
-                                    )}
-                                </div>
+                                {selectedTab !== "history" && (
+                                    <div className="w-1/12 flex flex-col gap-1">
+                                        {selectedTab === "borrows" && (
+                                            <Button 
+                                                text="Hand over"
+                                                textColor="custom-green"
+                                                borderColor="custom-green"
+                                                paddingX="px-0"
+                                                paddingY="py-0"
+                                                onClick={() => handover(item)}
+                                            />
+                                        )}
+                                        {selectedTab === "returns" && (
+                                            <Button 
+                                                text="Received"
+                                                textColor="custom-green"
+                                                borderColor="custom-green"
+                                                paddingX="px-0"
+                                                paddingY="py-0"
+                                                onClick={() => receive(item)}
+                                            />
+                                        )}
+                                        {selectedTab === "checkitem" && (
+                                            <Button 
+                                                text="Checked"
+                                                textColor="custom-green"
+                                                borderColor="custom-green"
+                                                paddingX="px-0"
+                                                paddingY="py-0"
+                                                onClick={() => checked(item)}
+                                            />
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <div className="overflow-hidden">

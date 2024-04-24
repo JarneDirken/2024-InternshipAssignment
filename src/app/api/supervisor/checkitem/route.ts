@@ -83,28 +83,33 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(req: NextApiRequest) {
     const { data } = await new Response(req.body).json();
-    const itemStatusId = data.repairState ? 5 : 1;
-    const requestStatusId = 7;
 
-    const updateItemRequest = await prisma.itemRequest.update({
-        where: {
-            id: data.requestId,
-        },
-        data: {
-            requestStatusId: requestStatusId,
-        },
+    const results = await prisma.$transaction(async prisma => {
+        const updateItemRequest = await prisma.itemRequest.update({
+            where: { id: data.requestId },
+            data: { requestStatusId: 7 },
+        });
+
+        const updateItem = await prisma.item.update({
+            where: { id: data.itemId },
+            data: { itemStatusId: data.repairState ? 5 : 1 },
+        });
+
+        let createReparation = null;
+        if (data.repairState) {
+            createReparation = await prisma.reparation.create({
+                data: {
+                    itemId: data.itemId,
+                    repairDate: new Date(),
+                    notes: data.message
+                }
+            });
+        }
+
+        return { updateItemRequest, updateItem, createReparation };
     });
 
-    const updateItem = await prisma.item.update({
-        where: {
-            id: data.itemId,
-        },
-        data: {
-            itemStatusId: itemStatusId,
-        }
-    })
-
-    return new Response(JSON.stringify({updateItemRequest, updateItem}), {
+    return new Response(JSON.stringify(results), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',
