@@ -39,6 +39,7 @@ export default function Lending() {
     const requests = useRecoilValue(updateRequest);
     const [handover, setHandover] = useState(false);
     const [receive, setReceive] = useState(false);
+    const [checked, setChecked] = useState(false);
     const [currentItems, setCurrentItems] = useState(borrows);
     const filters: Filter[] = [
         { label: 'Name', state: [nameFilter, setNameFilter], inputType: 'text', optionsKey: 'item.name' },
@@ -46,6 +47,7 @@ export default function Lending() {
         { label: 'Requestor', state: [requestor, setRequestor], inputType: 'text', optionsKey: 'borrower.firstName' },
         { label: 'Location', state: [location, setLocation], inputType: 'text', optionsKey: 'item.location.name' },
     ];
+    const [repairState, setRepairState] = useState(false);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -282,7 +284,7 @@ export default function Lending() {
         const queryString = new URLSearchParams(params).toString();
     
         try {
-            const response = await fetch(`/api/supervisor/itemrequest?${queryString}`);
+            const response = await fetch(`/api/supervisor/history?${queryString}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -301,6 +303,8 @@ export default function Lending() {
         setModalOpen(false);
         setHandover(false);
         setReceive(false);
+        setChecked(false);
+        setRepairState(false);
     };
 
     const checkTab = () => {
@@ -335,6 +339,7 @@ export default function Lending() {
                         items={checkItem}
                         itemLoading={itemLoading}
                         selectedTab={selectedTab}
+                        setChecked={setChecked}
                     />
                 );
             case "history":
@@ -363,6 +368,9 @@ export default function Lending() {
                 item={item}
                 handover={handover}
                 receive={receive}
+                checked={checked}
+                repairState={repairState}
+                setRepairState={setRepairState}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters

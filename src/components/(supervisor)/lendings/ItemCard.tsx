@@ -4,8 +4,6 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Loading from "@/components/states/Loading";
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import Image from 'next/image';
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 
 interface BorrowCardProps {
@@ -16,9 +14,10 @@ interface BorrowCardProps {
     selectedTab?: string;
     setHandover?: (value: boolean) => void;
     setReceive?: (value: boolean) => void;
+    setChecked?: (value: boolean) => void;
 };
 
-export default function ItemCard({ active, openModal, items, itemLoading, selectedTab, setHandover, setReceive }: BorrowCardProps) {
+export default function ItemCard({ active, openModal, items, itemLoading, selectedTab, setHandover, setReceive, setChecked }: BorrowCardProps) {
     const cardContainerHeight = "calc(100vh - 25.6rem)";
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
@@ -69,12 +68,17 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
     const handover = (item: ItemRequest) => {
         setHandover!(true);
         openModal(item);
-    }
+    };
 
     const receive = (item: ItemRequest) => {
         setReceive!(true);
         openModal(item);
-    }
+    };
+
+    const checked = (item: ItemRequest) => {
+        setChecked!(true);
+        openModal(item);
+    };
 
     return (
         <>
@@ -197,6 +201,7 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                             borderColor="custom-green"
                                             paddingX="px-0"
                                             paddingY="py-0"
+                                            onClick={() => checked(item)}
                                         />
                                     )}
                                 </div>

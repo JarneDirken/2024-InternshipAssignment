@@ -1,6 +1,5 @@
 import prisma from "@/services/db";
 import { Prisma } from "@prisma/client";
-import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
 interface WhereClause extends Prisma.ItemRequestWhereInput {}
 
@@ -34,9 +33,11 @@ export async function GET(request: NextRequest) {
             location: { 
                 name: {contains: locationFilter, mode: 'insensitive'}
             },
-            itemStatusId: 4,
+            itemStatusId: {
+                in: [1,3,4,5,6]
+            }
         },
-        requestStatusId: 5,
+        requestStatusId: 7,
         borrower: { 
             firstName: { contains: requestorFilter, mode: 'insensitive'}
         },
@@ -70,31 +71,11 @@ export async function GET(request: NextRequest) {
             approver: true,
         },
         orderBy: {
-            requestDate: "desc"
+            decisionDate: "desc"
         }
     });
 
     return new Response(JSON.stringify(itemRequests), {
-        status: 200,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-}
-
-export async function PUT(req: NextApiRequest) {
-    const { data } = await new Response(req.body).json();
-
-    const updateItemRequest = await prisma.itemRequest.update({
-        where: {
-            id: data.requestId,
-        },
-        data: {
-            requestStatusId: 6
-        },
-    });    
-
-    return new Response(JSON.stringify(updateItemRequest), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',

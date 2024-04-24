@@ -1,5 +1,6 @@
 import prisma from "@/services/db";
 import { Prisma } from "@prisma/client";
+import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
 interface WhereClause extends Prisma.ItemRequestWhereInput {}
 
@@ -79,3 +80,34 @@ export async function GET(request: NextRequest) {
         },
     });
 }
+
+export async function PUT(req: NextApiRequest) {
+    const { data } = await new Response(req.body).json();
+    const itemStatusId = data.repairState ? 5 : 1;
+    const requestStatusId = 7;
+
+    const updateItemRequest = await prisma.itemRequest.update({
+        where: {
+            id: data.requestId,
+        },
+        data: {
+            requestStatusId: requestStatusId,
+        },
+    });
+
+    const updateItem = await prisma.item.update({
+        where: {
+            id: data.itemId,
+        },
+        data: {
+            itemStatusId: itemStatusId,
+        }
+    })
+
+    return new Response(JSON.stringify({updateItemRequest, updateItem}), {
+        status: 200,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+};
