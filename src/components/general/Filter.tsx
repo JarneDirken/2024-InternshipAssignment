@@ -25,14 +25,8 @@ import SwapVertRoundedIcon from '@mui/icons-material/SwapVertRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
 import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
-import { Label } from "@mui/icons-material";
-
-interface Filter {
-    label: string;
-    state: [string, Dispatch<SetStateAction<string>>];
-    inputType: 'text' | 'dateRange' | 'multipleSelect';
-    options?: string[];
-}
+import { ItemRequest } from "@/models/ItemRequest";
+import { Filter } from "@/models/Filter";
 
 interface FiltersProps {
     title: string;
@@ -42,13 +36,12 @@ interface FiltersProps {
     onFilterChange: (filterType: string, filterValue: string) => void;
     onSortChange: (sortBy: string, sortDirection: 'asc' | 'desc') => void;
     filters: Filter[];
-    items: Item[];
-    openModal: (id: number) => void;
+    items: Item[] | ItemRequest[];
     sortOptions: string[];
     isCardView?: boolean;
 }
 
-export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, openModal, sortOptions, isCardView }: FiltersProps) {
+export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, sortOptions, isCardView }: FiltersProps) {
     const prevWidthRef = useRef<number | null>(null);
     const lastActiveRef = useRef<boolean | null>(null);
     const [sortBy, setSortBy] = useState('');
@@ -208,13 +201,28 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                     <div className="grid grid-cols-2 gap-4 mb-4 lg:grid-cols-4">
                         {filters.map((filter, index) => (
                             <div key={index}>
-                                {filter.inputType === 'text' && (
+                                {(filter.inputType === 'text' && filter.optionsKey) && (
                                     <Autocomplete
                                         disablePortal
                                         size="small"
                                         value={filter.state[0] || null}
                                         onChange={(event, value) => handleFilterChange(filter.label, value)}
-                                        options={[...new Set(items.map(item => item.name))]}
+                                        options={[
+                                            ...new Set(items.map((item) => {
+                                                // General case using optionsKey
+                                                const keys = filter.optionsKey!.split('.');
+                                                let result = item as any;  // Use type assertion to bypass TypeScript errors temporarily
+                                                for (const key of keys) {
+                                                    if (result && typeof result === 'object' && key in result) {
+                                                        result = result[key];
+                                                    } else {
+                                                        result = null;
+                                                        break;
+                                                    }
+                                                }
+                                                return result;
+                                            }).filter(option => option !== null && option !== undefined)) // Filter out null or undefined options
+                                        ]}
                                         isOptionEqualToValue={(option, value) => option === value}
                                         sx={{ width: '100%' }}
                                         renderInput={(params) => (

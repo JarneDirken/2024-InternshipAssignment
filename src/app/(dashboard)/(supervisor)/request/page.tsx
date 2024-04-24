@@ -5,15 +5,17 @@ import { useEffect, useState } from "react";
 import { getAuth } from 'firebase/auth';
 import app from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
-import Filters from "@/components/(user)/history/Filter";
+import Filters from "@/components/general/Filter";
 import ItemCard from "@/components/(supervisor)/requests/ItemCard";
 import Loading from "@/components/states/Loading";
 import Modal from "@/components/(supervisor)/requests/Modal";
 import { useRecoilValue } from "recoil";
 import { updateRequest } from "@/services/store";
 import MessageModal from "@/components/(user)/borrow/MessageModal";
+import { Filter } from "@/models/Filter";
+import ContentPasteOutlinedIcon from '@mui/icons-material/ContentPasteOutlined';
 
-export default function History() {
+export default function Requests() {
     const { isAuthorized, loading } = useAuth(['Supervisor', 'Admin']);
     const [selectedTab, setSelectedTab] = useState('normalBorrows'); // standard open tab
     const [active, setActive] = useState(true); // this is to toggle from list view to card view
@@ -29,8 +31,9 @@ export default function History() {
     const [totalUrgentBorrowsCount, setUrgentBorrowsCount] = useState(0);
     // filters
     const [nameFilter, setNameFilter] = useState(''); // name filter
-    const [borrowDateFilter, setBorrowDateFilter] = useState(''); // model filter
-    const [returnDateFilter, setReturnDateFilter] = useState(''); // brand filter
+    const [borrowDateFilter, setBorrowDateFilter] = useState(''); // filter
+    const [requestor, setRequestor] = useState('');  // filter
+    const [location, setLocation] = useState('');  // filter
     const [isModalOpen, setModalOpen] = useState(false); // modal
     const [rejected, setRejected] = useState(false);
     const [approved, setApproved] = useState(false);
@@ -38,6 +41,13 @@ export default function History() {
     const requests = useRecoilValue(updateRequest);
     const [isMessageModalOpen, setMessageModalOpen] = useState(false); // Message modal
     const [message, setMessage] = useState("");
+    const [currentItems, setCurrentItems] = useState(normalBorrows);
+    const filters: Filter[] = [
+        { label: 'Name', state: [nameFilter, setNameFilter], inputType: 'text', optionsKey: 'item.name' },
+        { label: 'Borrow Date', state: [borrowDateFilter, setBorrowDateFilter], inputType: 'dateRange'},
+        { label: 'Requestor', state: [requestor, setRequestor], inputType: 'text', optionsKey: 'borrower.firstName' },
+        { label: 'Location', state: [location, setLocation], inputType: 'text', optionsKey: 'item.location.name' },
+    ];
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -56,8 +66,11 @@ export default function History() {
             if(selectedTab === "urgentBorrows"){
                 getUrgentBorrows();
             }
+            if(selectedTab === "requestedBorrows"){
+                getAllRequests();
+            }
         }
-    }, [userId, requests]);
+    }, [userId, requests, nameFilter, borrowDateFilter, requestor, location]);
 
     useEffect(() => {
         if(selectedTab === "urgentBorrows"){
@@ -68,20 +81,52 @@ export default function History() {
         }
     }, [selectedTab]);
 
+    useEffect(() => {
+        switch (selectedTab) {
+            case "normalBorrows":
+                setCurrentItems(normalBorrows);
+                break;
+            case "urgentBorrows":
+                setCurrentItems(urgentBorrows);
+                break;
+            case "requestedBorrows":
+                setCurrentItems(allRequests);
+                break;
+            default:
+                setCurrentItems([]);
+        }
+    }, [selectedTab, normalBorrows, urgentBorrows, allRequests]);
+
     const handleFilterChange = (filterType: string, value: string) => {
         switch (filterType) {
             case 'name':
                 setNameFilter(value);
                 break;
-            case 'model':
+            case 'Borrow date':
                 setBorrowDateFilter(value);
                 break;
-            case 'brand':
-                setReturnDateFilter(value);
+            case 'requestor':
+                setRequestor(value);
+                break;
+            case 'location':
+                setLocation(value);
                 break;
             default:
                 break;
         }
+    };
+
+    const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
+        // Implement sorting logic here
+        console.log(`Sorting by ${sortBy} in ${sortDirection} order`);
+    };
+
+    const parseDateFilter = (dateFilter: string) => {
+        const dates = dateFilter.split(" - ");
+        const borrowDate = dates[0];
+        const returnDate = dates.length > 1 ? dates[1] : new Date().toLocaleDateString('en-US');
+    
+        return { borrowDate, returnDate };
     };
 
     const openModal = (itemRequest: ItemRequest) => {
@@ -91,9 +136,18 @@ export default function History() {
 
     async function getBorrows() {
         setItemLoading(true);
+        const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
+            location: location,
+            requestor: requestor
         };
+
+        // Include dates in the query only if they are defined
+        if (borrowDate) {
+            params.borrowDate = borrowDate;
+            params.returnDate = returnDate;
+        }
     
         // Only add userId to the query if it is not null
         if (userId !== null) {
@@ -112,7 +166,6 @@ export default function History() {
             const fetchedItems = data.itemRequests || [];
             const itemCount = data.totalCount || 0;
             const itemCountUrgent = data.totalCountUrgent || 0;
-            const itemCountAll = data.totalCountAll || 0;
 
             setNormalBorrows(fetchedItems);
             setTotalNormalBorrowsCount(itemCount);
@@ -126,9 +179,18 @@ export default function History() {
 
     async function getUrgentBorrows() {
         setItemLoading(true);
+        const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
+            location: location,
+            requestor: requestor
         };
+
+        // Include dates in the query only if they are defined
+        if (borrowDate) {
+            params.borrowDate = borrowDate;
+            params.returnDate = returnDate;
+        }
     
         // Only add userId to the query if it is not null
         if (userId !== null) {
@@ -156,9 +218,18 @@ export default function History() {
 
     async function getAllRequests() {
         setItemLoading(true);
+        const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
+            location: location,
+            requestor: requestor
         };
+
+        // Include dates in the query only if they are defined
+        if (borrowDate) {
+            params.borrowDate = borrowDate;
+            params.returnDate = returnDate;
+        }
     
         // Only add userId to the query if it is not null
         if (userId !== null) {
@@ -261,12 +332,16 @@ export default function History() {
             />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
+                    title="Requests"
+                    icon={<ContentPasteOutlinedIcon fontSize="large" />}
                     active={active}
                     setActive={setActive}
                     onFilterChange={handleFilterChange}
-                    items={normalBorrows}
-                    totalItemCount={totalNormalBorrowsCount}
-                    userId={userId}
+                    onSortChange={handleSortChange}
+                    items={currentItems}
+                    filters={filters}
+                    sortOptions={['Name', 'Borrow date']}
+                    isCardView={true}
                 />
             </div>
             <div className="rounded-xl">

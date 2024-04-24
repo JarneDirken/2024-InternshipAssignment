@@ -47,10 +47,6 @@ export default function DateRangePicker({ setBorrowDate, setReturnDate, setError
     };
 
     useEffect(() => {
-        console.log(selectedStartDate, selectedEndDate)
-    }, [selectedStartDate, selectedEndDate]);
-
-    useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
                 handleDayClick();

@@ -5,11 +5,12 @@ import { useEffect, useState } from "react";
 import { getAuth } from 'firebase/auth';
 import app from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
-import Filters from "@/components/(user)/history/Filter";
+import Filters from "@/components/general/Filter";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ItemCard from "@/components/(user)/ItemCard";
 import Loading from "@/components/states/Loading";
-
+import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
+import { Filter } from "@/models/Filter";
 
 export default function History() {
     const { isAuthorized, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
@@ -21,7 +22,10 @@ export default function History() {
     const [totalItemCount, setTotalItemCount] = useState(0);
     const [nameFilter, setNameFilter] = useState(''); // name filter
     const [borrowDateFilter, setBorrowDateFilter] = useState(''); // model filter
-    const [returnDateFilter, setReturnDateFilter] = useState(''); // brand filter
+    const filters: Filter[] = [
+        { label: 'Name', state: [nameFilter, setNameFilter], inputType: 'text', optionsKey: 'item.name'},
+        { label: 'Borrow Date', state: [borrowDateFilter, setBorrowDateFilter], inputType: 'dateRange'}
+    ];
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -38,33 +42,49 @@ export default function History() {
         if(userId) {
             getItems();
         }
-    }, [userId]);
+    }, [userId, nameFilter, borrowDateFilter]);
 
     const handleFilterChange = (filterType: string, value: string) => {
         switch (filterType) {
-            case 'name':
+            case 'Name':
                 setNameFilter(value);
                 break;
-            case 'model':
+            case 'Borrow date':
                 setBorrowDateFilter(value);
-                break;
-            case 'brand':
-                setReturnDateFilter(value);
                 break;
             default:
                 break;
         }
     };
 
+    const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
+        // Implement sorting logic here
+        console.log(`Sorting by ${sortBy} in ${sortDirection} order`);
+    };
+
     const openModal = () => {
 
     }
 
+    const parseDateFilter = (dateFilter: string) => {
+        const dates = dateFilter.split(" - ");
+        const borrowDate = dates[0];
+        const returnDate = dates.length > 1 ? dates[1] : new Date().toLocaleDateString('en-US');
+    
+        return { borrowDate, returnDate };
+    };
+
     async function getItems() {
         setItemLoading(true);
+        const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
         };
+
+        if (borrowDate) {
+            params.borrowDate = borrowDate;
+            params.returnDate = returnDate;
+        }
     
         // Only add userId to the query if it is not null
         if (userId !== null) {
@@ -134,12 +154,16 @@ export default function History() {
         <div>
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
+                    title="History"
+                    icon={<HistoryOutlinedIcon fontSize="large" />}
                     active={active}
                     setActive={setActive}
                     onFilterChange={handleFilterChange}
+                    onSortChange={handleSortChange}
                     items={items}
-                    totalItemCount={totalItemCount}
-                    userId={userId}
+                    filters={filters}
+                    sortOptions={['Name', 'Borrow date']}
+                    isCardView={true}
                 />
             </div>
             <div className="rounded-xl">

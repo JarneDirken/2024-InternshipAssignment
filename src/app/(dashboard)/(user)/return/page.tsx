@@ -4,13 +4,15 @@ import useAuth from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { getAuth } from 'firebase/auth';
 import app from "@/services/firebase-config";
-import Filters from "@/components/(user)/return/Filter";
+import Filters from "@/components/general/Filter";
 import { ItemRequest } from "@/models/ItemRequest";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ItemCard from "@/components/(user)/ItemCard";
 import Loading from "@/components/states/Loading";
 import { useRecoilState } from "recoil";
 import { updateRequest } from "@/services/store";
+import KeyboardReturnOutlinedIcon from '@mui/icons-material/KeyboardReturnOutlined';
+import { Filter } from "@/models/Filter";
 
 export default function Return() {
     const { isAuthorized, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
@@ -22,8 +24,11 @@ export default function Return() {
     const [totalItemCount, setTotalItemCount] = useState(0);
     const [nameFilter, setNameFilter] = useState(''); // name filter
     const [borrowDateFilter, setBorrowDateFilter] = useState(''); // model filter
-    const [returnDateFilter, setReturnDateFilter] = useState(''); // brand filter
     const [requests, setRequest] = useRecoilState(updateRequest);
+    const filters: Filter[] = [
+        { label: 'Name', state: [nameFilter, setNameFilter], inputType: 'text', optionsKey: 'item.name'},
+        { label: 'Borrow Date', state: [borrowDateFilter, setBorrowDateFilter], inputType: 'dateRange'}
+    ];
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -40,53 +45,18 @@ export default function Return() {
         if(userId) {
             getItems();
         }
-    }, [userId, requests]);
+    }, [userId, requests, nameFilter, borrowDateFilter]); 
 
     const handleFilterChange = (filterType: string, value: string) => {
         switch (filterType) {
-            case 'name':
+            case 'Name':
                 setNameFilter(value);
                 break;
-            case 'model':
+            case 'Borrow date':
                 setBorrowDateFilter(value);
-                break;
-            case 'brand':
-                setReturnDateFilter(value);
                 break;
             default:
                 break;
-        }
-    };
-
-    async function getItems() {
-        setItemLoading(true);
-        const params: Record<string, string> = {
-            name: nameFilter,
-        };
-    
-        // Only add userId to the query if it is not null
-        if (userId !== null) {
-            params.userId = userId;
-        }
-    
-        const queryString = new URLSearchParams(params).toString();
-    
-        try {
-            const response = await fetch(`/api/user/returns?${queryString}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-    
-            const data = await response.json();
-            const fetchedItems = data.itemRequests || [];
-            const itemCount = data.totalCount || 0;
-
-            setTotalItemCount(itemCount);
-            setItems(fetchedItems);
-        } catch (error) {
-            console.error("Failed to fetch items:", error);
-        } finally {
-            setItemLoading(false);
         }
     };
 
@@ -131,7 +101,58 @@ export default function Return() {
             </div>
         );
     };
+
+    const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
+        // Implement sorting logic here
+        console.log(`Sorting by ${sortBy} in ${sortDirection} order`);
+    };
+
+    const parseDateFilter = (dateFilter: string) => {
+        const dates = dateFilter.split(" - ");
+        const borrowDate = dates[0];
+        const returnDate = dates.length > 1 ? dates[1] : new Date().toLocaleDateString('en-US');
     
+        return { borrowDate, returnDate };
+    };
+
+    async function getItems() {
+        setItemLoading(true);
+        const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
+        const params: Record<string, string> = {
+            name: nameFilter,
+        };
+
+        // Include dates in the query only if they are defined
+        if (borrowDate) {
+            params.borrowDate = borrowDate;
+            params.returnDate = returnDate;
+        }
+    
+        // Only add userId to the query if it is not null
+        if (userId !== null) {
+            params.userId = userId;
+        }
+    
+        const queryString = new URLSearchParams(params).toString();
+    
+        try {
+            const response = await fetch(`/api/user/returns?${queryString}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            const data = await response.json();
+            const fetchedItems = data.itemRequests || [];
+            const itemCount = data.totalCount || 0;
+
+            setTotalItemCount(itemCount);
+            setItems(fetchedItems);
+        } catch (error) {
+            console.error("Failed to fetch items:", error);
+        } finally {
+            setItemLoading(false);
+        }
+    };
 
     if (loading || isAuthorized === null) { return <Loading/>; }
 
@@ -141,12 +162,16 @@ export default function Return() {
         <div>
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
+                    title="Returns"
+                    icon={<KeyboardReturnOutlinedIcon fontSize="large" />}
                     active={active}
                     setActive={setActive}
                     onFilterChange={handleFilterChange}
+                    onSortChange={handleSortChange}
                     items={items}
-                    totalItemCount={totalItemCount}
-                    userId={userId}
+                    filters={filters}
+                    sortOptions={['Name', 'Borrow date']}
+                    isCardView={true}
                 />
             </div>
             <div className="rounded-xl">
