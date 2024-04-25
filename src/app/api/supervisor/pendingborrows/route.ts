@@ -28,38 +28,48 @@ export async function GET(request: NextRequest) {
         });
     };
 
-    const whereClause: WhereClause = {
+    const baseWhereClause: WhereClause = {
         item: {
             name: { contains: nameFilter, mode: 'insensitive' },
             location: { 
-                name: {contains: locationFilter, mode: 'insensitive'}
+                name: { contains: locationFilter, mode: 'insensitive' }
             },
-            itemStatusId: 3,
         },
-        requestStatusId: 2,
         borrower: { 
-            firstName: { contains: requestorFilter, mode: 'insensitive'}
+            firstName: { contains: requestorFilter, mode: 'insensitive' }
         },
     };
-    
-    if (borrowDate) {
-        const borrowDateStart = new Date(borrowDate);
-        borrowDateStart.setHours(0, 0, 0, 0);  // Set to start of the day
-        whereClause.borrowDate = {
-            gte: borrowDateStart
-        };
-    }
-    
-    if (returnDate) {
-        const returnDateEnd = new Date(returnDate);
-        returnDateEnd.setHours(23, 59, 59, 999);  // Set to end of the day
-        whereClause.returnDate = {
-            lte: returnDateEnd
-        };
-    }
 
+    // Set dynamic parts based on specific needs
+    const dynamicWhereClauses = [2, 5, 6].map(statusId => ({
+        ...baseWhereClause,
+        requestStatusId: statusId
+    }));
+    
+   // Handle date filters
+   const handleDateFilter = (whereClause: WhereClause) => {
+        if (borrowDate) {
+            const borrowDateStart = new Date(borrowDate);
+            borrowDateStart.setHours(0, 0, 0, 0);
+            whereClause.borrowDate = {
+                gte: borrowDateStart
+            };
+        }
+        if (returnDate) {
+            const returnDateEnd = new Date(returnDate);
+            returnDateEnd.setHours(23, 59, 59, 999);
+            whereClause.returnDate = {
+                lte: returnDateEnd
+            };
+        }
+    };
+
+    // Apply date filters to each where clause
+    dynamicWhereClauses.forEach(handleDateFilter);
+
+    // Fetch and count requests
     const itemRequests = await prisma.itemRequest.findMany({
-        where: whereClause,
+        where: dynamicWhereClauses[0],
         include: { 
             item: {
                 include: {
@@ -74,25 +84,15 @@ export async function GET(request: NextRequest) {
         }
     });
 
-    const totalCount = await prisma.itemRequest.count({
-        where: {
-            requestStatusId: 2,
-        }
-    });
-
-    const totalCountReturns = await prisma.itemRequest.count({
-        where: {
-            requestStatusId: 5,
-        }
-    });
-
-    const totalCountCheckItem = await prisma.itemRequest.count({
-        where: {
-            requestStatusId: 6,
-        }
-    });
-
-    return new Response(JSON.stringify({itemRequests, totalCount, totalCountReturns, totalCountCheckItem}), {
+    const totalCounts = await Promise.all(dynamicWhereClauses.map(clause =>
+        prisma.itemRequest.count({ where: clause })
+    ));
+    return new Response(JSON.stringify({
+        itemRequests,
+        totalCount: totalCounts[0],
+        totalCountReturns: totalCounts[1],
+        totalCountCheckItem: totalCounts[2],
+    }), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',

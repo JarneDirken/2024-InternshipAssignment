@@ -64,12 +64,7 @@ export async function GET(request: NextRequest) {
     });
     
     const totalCount = await prisma.itemRequest.count({
-        where: {
-            borrowerId: uid,
-            requestStatusId: {
-                in: [6, 7]
-            }
-        }
+        where: whereClause,
     });
 
     return new Response(JSON.stringify({ itemRequests, totalCount }), {

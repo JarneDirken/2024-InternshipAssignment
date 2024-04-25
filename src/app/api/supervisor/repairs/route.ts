@@ -71,11 +71,7 @@ export async function GET(request: NextRequest) {
     });
 
     const totalCount = await prisma.reparation.count({
-        where: {
-            item: {
-                itemStatusId: 5,
-            },
-        }
+        where: whereClause,
     });
 
     return new Response(JSON.stringify({repairs, totalCount}), {

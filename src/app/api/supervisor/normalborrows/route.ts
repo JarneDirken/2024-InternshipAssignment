@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
         },
     });
 
-    if (!user){
+    if (!user) {
         return new Response(JSON.stringify("User not found"), {
             status: 404,
             headers: {
@@ -27,39 +27,41 @@ export async function GET(request: NextRequest) {
         });
     };
 
-    const whereClause: WhereClause = {
+    // Base where clause for all queries
+    const baseWhereClause: WhereClause = {
         item: {
             name: { contains: nameFilter, mode: 'insensitive' },
             location: { 
-                name: {contains: locationFilter, mode: 'insensitive'}
+                name: { contains: locationFilter, mode: 'insensitive' }
             },
             itemStatusId: 2,
         },
-        isUrgent: false,
         requestStatusId: 1,
         borrower: { 
-            firstName: { contains: requestorFilter, mode: 'insensitive'}
+            firstName: { contains: requestorFilter, mode: 'insensitive' }
         },
     };
-    
+
+    // Handle date filters
     if (borrowDate) {
         const borrowDateStart = new Date(borrowDate);
-        borrowDateStart.setHours(0, 0, 0, 0);  // Set to start of the day
-        whereClause.startBorrowDate = {
+        borrowDateStart.setHours(0, 0, 0, 0);
+        baseWhereClause.startBorrowDate = {
             gte: borrowDateStart
         };
     }
     
     if (returnDate) {
         const returnDateEnd = new Date(returnDate);
-        returnDateEnd.setHours(23, 59, 59, 999);  // Set to end of the day
-        whereClause.endBorrowDate = {
+        returnDateEnd.setHours(23, 59, 59, 999);
+        baseWhereClause.endBorrowDate = {
             lte: returnDateEnd
         };
     }
 
+    // Fetch item requests
     const itemRequests = await prisma.itemRequest.findMany({
-        where: whereClause,
+        where: baseWhereClause,
         include: { 
             item: {
                 include: {
@@ -73,40 +75,21 @@ export async function GET(request: NextRequest) {
         }
     });
 
-    const totalCount = await prisma.itemRequest.count({
+    // Function to count item requests based on urgency
+    const countRequests = async (isUrgent: boolean) => prisma.itemRequest.count({
         where: {
-            item: {
-                itemStatusId: 2,
-            },
-            isUrgent: false,
-            requestStatusId: 1,
+            ...baseWhereClause,
+            isUrgent: isUrgent
         }
     });
 
-    const totalCountUrgent = await prisma.itemRequest.count({
-        where: {
-            item: {
-                itemStatusId: 2,
-            },
-            isUrgent: true,
-            requestStatusId: 1,
-        }
-    });
+    // Concurrently count non-urgent and urgent requests
+    const [totalCount, totalCountUrgent] = await Promise.all([
+        countRequests(false),
+        countRequests(true)
+    ]);
 
-    const totalCountAll = await prisma.itemRequest.count({
-        where: {
-            item: {
-                itemStatusId: {
-                    in: [1,3,4,5,6]
-                }
-            },
-            requestStatusId: {
-                in: [2,3,4,5,6,7]
-            }
-        }
-    });
-
-    return new Response(JSON.stringify({itemRequests, totalCount, totalCountUrgent, totalCountAll}), {
+    return new Response(JSON.stringify({itemRequests, totalCount, totalCountUrgent}), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',
