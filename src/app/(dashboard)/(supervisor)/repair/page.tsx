@@ -155,7 +155,38 @@ export default function Reparation() {
     };
 
     async function getHistory() {
+        setItemLoading(true);
+        const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
+        const params: Record<string, string> = {
+            name: nameFilter,
+        };
 
+        // Include dates in the query only if they are defined
+        if (borrowDate) {
+            params.borrowDate = borrowDate;
+            params.returnDate = returnDate;
+        }
+    
+        // Only add userId to the query if it is not null
+        if (userId !== null) {
+            params.userId = userId;
+        };
+    
+        const queryString = new URLSearchParams(params).toString();
+    
+        try {
+            const response = await fetch(`/api/supervisor/repairhistory?${queryString}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            const data = await response.json();
+            setHistory(data);
+        } catch (error) {
+            console.error("Failed to fetch items:", error);
+        } finally {
+            setItemLoading(false);
+        }
     };
 
     if (loading || isAuthorized === null) { return <Loading/>; }
@@ -167,7 +198,7 @@ export default function Reparation() {
             <Modal 
                 open={isModalOpen}
                 onClose={closeModal}
-                userId={userId}
+                selectedTab={selectedTab}
                 item={repair}
                 repaired={repaired}
                 broken={broken}
@@ -220,7 +251,13 @@ export default function Reparation() {
                     />
                 )}
                 {selectedTab === "history" && (
-                    <div>History</div>
+                   <ItemCard 
+                    active={active}
+                    openModal={openModal}
+                    items={history}
+                    itemLoading={itemLoading}
+                    selectedTab={selectedTab}
+                />
                 )}
             </div>
         </div>

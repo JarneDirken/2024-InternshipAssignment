@@ -13,19 +13,20 @@ import { Repair } from "@/models/Repair";
 import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
 import { useRecoilState } from "recoil";
 import { repariState } from "@/services/store";
+import DoNotTouchOutlinedIcon from '@mui/icons-material/DoNotTouchOutlined';
 
 interface ModalCardProps {
     open: boolean;
     onClose: () => void;
     item: Repair | undefined;
-    userId: String | null;
+    selectedTab: string;
     repaired: boolean;
     broken: boolean;
     setRepaired: (value: boolean) => void;
     setBroken: (value: boolean) => void;
 }
 
-export default function Modal({ open, onClose, item, userId, repaired, broken, setRepaired, setBroken }: ModalCardProps) {
+export default function Modal({ open, onClose, item, repaired, broken, setRepaired, setBroken, selectedTab }: ModalCardProps) {
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
     const [repair, setRepair] = useRecoilState(repariState);
 
@@ -137,13 +138,34 @@ export default function Modal({ open, onClose, item, userId, repaired, broken, s
                                 </div>
                             </div>
                             <div className="flex flex-col xl:w-1/2 xl:items-end gap-2">
-                                <div className="flex gap-2 text-custom-primary">
-                                    <AccessTimeIcon fontSize="small"/>
-                                    Pending
-                                </div>
+                                {selectedTab === "history" ? (
+                                    <>
+                                        {item.returnDate && (
+                                            <div className="flex truncate text-custom-green gap-1 text-sm sm:text-base">
+                                                <CheckCircleOutlineOutlinedIcon fontSize="small"/>
+                                                <span>Repaired</span>
+                                            </div>
+                                        )}
+                                        {item.item.itemStatusId === 6 && (
+                                            <div className="flex truncate text-custom-red gap-1 text-sm sm:text-base">
+                                                <DoNotTouchOutlinedIcon fontSize="small"/>
+                                                <span>Broken</span>
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <div className="flex truncate text-custom-primary gap-1 text-sm sm:text-base">
+                                        <AccessTimeIcon fontSize="small"/>
+                                        <span>Pending</span>
+                                    </div>
+                                )}
                                 <div className="flex gap-2 text-custom-gray text-sm">
                                     <AccessTimeIcon fontSize="small"/>
-                                    {formatDate(item.repairDate)} - /
+                                    {item.returnDate ? (
+                                        <span>{formatDate(item.repairDate)} - {formatDate(item.returnDate)}</span>
+                                    ) : (
+                                        <span>{formatDate(item.repairDate)} - /</span>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -196,11 +218,11 @@ export default function Modal({ open, onClose, item, userId, repaired, broken, s
                         </div>
                     </div>
                 </div>
-                <div className="flex flex-row justify-between overflow-hidden items-center py-2 px-2 md:px-16 xl:px-36 border-t border-t-gray-200 bottom-0">
+                <div className={`flex flex-row overflow-hidden items-center py-2 px-2 md:px-16 xl:px-36 border-t border-t-gray-200 bottom-0 ${selectedTab==="history" ? 'justify-center' : 'justify-between'}`}>
                     <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
                         <button className="text-custom-gray">Cancel</button>
                     </div>
-                    {!repaired && !broken && (
+                    {(!repaired && !broken && selectedTab !== "history") && (
                         <>
                             <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-red cursor-pointer'
                                 onClick={() => setBroken(true)}>

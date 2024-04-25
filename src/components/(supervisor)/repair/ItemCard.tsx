@@ -1,9 +1,12 @@
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Loading from "@/components/states/Loading";
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
+import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
 import Image from 'next/image';
 import { Repair } from "@/models/Repair";
 import Button from '@/components/states/Button';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+import DoNotTouchOutlinedIcon from '@mui/icons-material/DoNotTouchOutlined';
 
 interface BorrowCardProps {
     active: boolean;
@@ -96,14 +99,35 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                         </div>
                                         <div className="flex truncate items-center text-gray-400 gap-1 text-xs sm:text-sm">
                                             <AccessTimeIcon fontSize="small"/>
-                                            <span>{formatDate(item.repairDate)} - /</span>
+                                            {item.returnDate ? (
+                                                <span>{formatDate(item.repairDate)} - {formatDate(item.returnDate)}</span>
+                                            ) : (
+                                                <span>{formatDate(item.repairDate)} - /</span>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="flex flex-col w-1/4">
-                                        <div className="flex truncate text-custom-primary gap-1 text-sm sm:text-base">
-                                            <AccessTimeIcon fontSize="small"/>
-                                            <span>Pending</span>
-                                        </div>
+                                        {selectedTab === "history" ? (
+                                            <>
+                                                {item.returnDate && (
+                                                    <div className="flex truncate text-custom-green gap-1 text-sm sm:text-base">
+                                                        <CheckCircleOutlineOutlinedIcon fontSize="small"/>
+                                                        <span>Repaired</span>
+                                                    </div>
+                                                )}
+                                                {item.item.itemStatusId === 6 && (
+                                                    <div className="flex truncate text-custom-red gap-1 text-sm sm:text-base">
+                                                        <DoNotTouchOutlinedIcon fontSize="small"/>
+                                                        <span>Broken</span>
+                                                    </div>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <div className="flex truncate text-custom-primary gap-1 text-sm sm:text-base">
+                                                <AccessTimeIcon fontSize="small"/>
+                                                <span>Pending</span>
+                                            </div>
+                                        )}
                                         <div className="truncate">
                                             <span className="font-semibold">Year:&nbsp;</span>
                                             <span>{formatDateYear(item.item.yearBought)}</span>
@@ -145,8 +169,15 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                 <div className="p-2 flex items-center flex-wrap">
                                     <div className="flex w-1/2 flex-col items-start truncate">
                                         <div className="flex items-center flex-wrap truncate">
-                                            <PersonOutlineOutlinedIcon fontSize="medium"/>
+                                            <HandymanOutlinedIcon fontSize="medium"/>
                                             <span className="font-semibold flex-wrap text-sm sm:text-lg">{item.item.name}</span>
+                                        </div>
+                                        <div className="flex items-center flex-wrap truncate">
+                                            <PersonOutlineOutlinedIcon fontSize="medium"/>
+                                            <span className="capitalize font-semibold flex-wrap text-sm sm:text-lg">
+                                                {item.item.ItemRequests?.[item.item.ItemRequests.length - 1]?.borrower?.firstName ?? 'Default First Name'}{' '}
+                                                {item.item.ItemRequests?.[item.item.ItemRequests.length - 1]?.borrower?.lastName ?? 'Default Last Name'}
+                                            </span>
                                         </div>
                                     </div>
                                     <div className="flex w-1/2 flex-col items-end truncate">
