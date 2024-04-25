@@ -14,7 +14,7 @@ export default function Unauthorized(){
         <div className='flex flex-col lg:flex-row items-center lg:justify-between justify-center mx-12 lg:mx-24' style={{ minHeight: 'calc(100vh - 128px)' }}>
             <div>
                 <Image 
-                    src="/assets/svg/403page/403_Error_Forbidden-bro.svg"
+                    src="/assets/svg/errorpages/403_Error_Forbidden-bro.svg"
                     width={500}
                     height={500}
                     alt="Illustration"

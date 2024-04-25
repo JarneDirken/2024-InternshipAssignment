@@ -78,6 +78,19 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
         return () => window.removeEventListener('resize', handleResize);
     }, [active, setActive]);
 
+    // useEffect(() => {
+    //     console.log("Filtered items before Autocomplete options are set:", items);
+    //     console.log("Options for Autocomplete:", items.map(item => {
+    //         const keys = filters.length > 0 ? filters[0].optionsKey.split('.') : []; // assuming all filters use similar structure
+    //         let result = item as any;
+    //         for (const key of keys) {
+    //             result = result && result[key] ? result[key] : null;
+    //             if (result === null) break;
+    //         }
+    //         return result;
+    //     }).filter(option => option !== null));
+    // }, [items, filters]);
+
     // Separate useEffect for initial load
     useEffect(() => {
         if (window.innerWidth < 1280) {
@@ -210,33 +223,25 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                         value={filter.state[0] || null}
                                         onChange={(event, value) => handleFilterChange(filter.label, value)}
                                         options={[
-                                            ...new Set(items.map((item) => {
-                                                // General case using optionsKey
+                                            ...new Set(items.map(item => {
                                                 const keys = filter.optionsKey!.split('.');
-                                                let result = item as any;  // Use type assertion to bypass TypeScript errors temporarily
+                                                let result = item as any;
                                                 for (const key of keys) {
-                                                    if (result && typeof result === 'object' && key in result) {
-                                                        result = result[key];
-                                                    } else {
-                                                        result = null;
-                                                        break;
-                                                    }
+                                                    result = result && result[key] ? result[key] : null;
+                                                    if (result === null) break;
                                                 }
                                                 return result;
-                                            }).filter(option => option !== null && option !== undefined)) // Filter out null or undefined options
+                                            }).filter(option => option !== null && option !== undefined))
                                         ]}
-                                        isOptionEqualToValue={(option, value) => option === value}
-                                        sx={{ width: '100%' }}
+                                        isOptionEqualToValue={(option, value) => option.id === value.id}
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}
                                                 label={filter.label}
                                                 placeholder="Search"
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                            />
-                                        )}
+                                                InputLabelProps={{ shrink: true }}
+                                            />)
+                                        }
                                     />
                                 )}
                                 {filter.inputType === 'dateRange' && (

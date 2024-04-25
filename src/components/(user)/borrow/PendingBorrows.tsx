@@ -29,7 +29,6 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
     const [canceled, setCanceled] = useState(false);
     const { enqueueSnackbar } = useSnackbar();
     
-    const cardContainerHeight = "calc(100vh - 25.6rem)";
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
     
@@ -137,7 +136,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
 
     return (
         <div>
-            <div className={active ? listViewClass : gridViewClass} style={{ maxHeight: cardContainerHeight }}>
+            <div className={active ? listViewClass : gridViewClass} style={{maxHeight: "60vh"}}>
                 {requests.map((request) => (
                     <div key={request.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (

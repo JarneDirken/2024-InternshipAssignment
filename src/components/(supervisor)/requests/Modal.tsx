@@ -18,6 +18,7 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { updateRequest } from "@/services/store";
+import { useRouter } from 'next/navigation';
 
 interface ModalCardProps {
     open: boolean;
@@ -36,6 +37,7 @@ export default function Modal({ open, onClose, item, userId, rejected, setReject
     const [message, setMessage] = useState<string | null>(null);  // State can be string or null
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
     const [requests, setRequest] = useRecoilState(updateRequest);
+    const router = useRouter();
 
     async function requestItem() {
         if (!item) { console.error("error"); return; }
@@ -80,12 +82,14 @@ export default function Modal({ open, onClose, item, userId, rejected, setReject
         return dateObj.toLocaleDateString('en-US', options);
     };
 
-    const viewNameHistory = () => {
-        console.log("Name");
+    const viewItemHistory = (itemId: number) => {
+        const type="item"
+        router.push(`/historypage/${type}/${itemId}`);
     };
 
-    const viewRequestorHistory = () => {
-        console.log("Requestor");
+    const viewUserHistory = (userId: number) => {
+        const type="user"
+        router.push(`/historypage/${type}/${userId}`);
     };
 
     const handleSuccess = () => {
@@ -214,7 +218,7 @@ export default function Modal({ open, onClose, item, userId, rejected, setReject
                                     <div className="flex gap-2">
                                         <span className="font-semibold text-gray-400">Name</span>
                                         {!rejected && !approved && (
-                                            <div className="text-custom-primary cursor-pointer" onClick={viewNameHistory}>
+                                            <div className="text-custom-primary cursor-pointer" onClick={() => viewItemHistory(item.item.id)}>
                                                 <RestoreOutlinedIcon fontSize="small"/>
                                             </div>
                                         )}
@@ -225,7 +229,7 @@ export default function Modal({ open, onClose, item, userId, rejected, setReject
                                     <div className="flex gap-2">
                                         <span className="font-semibold text-gray-400">Requestor</span>
                                         {!rejected && !approved && (
-                                            <div className="text-custom-primary cursor-pointer" onClick={viewRequestorHistory}>
+                                            <div className="text-custom-primary cursor-pointer" onClick={() => viewUserHistory(item.borrower.id)}>
                                                 <RestoreOutlinedIcon fontSize="small"/>
                                             </div>
                                         )}

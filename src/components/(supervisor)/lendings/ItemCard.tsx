@@ -20,7 +20,6 @@ interface BorrowCardProps {
 };
 
 export default function ItemCard({ active, openModal, items, itemLoading, selectedTab, setHandover, setReceive, setChecked }: BorrowCardProps) {
-    const cardContainerHeight = "calc(100vh - 25.6rem)";
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
 
@@ -84,7 +83,7 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
 
     return (
         <>
-            <div className={active ? listViewClass : gridViewClass} style={{ maxHeight: cardContainerHeight }}>
+            <div className={active ? listViewClass : gridViewClass} style={{maxHeight: "60vh"}}>
                 {items.map((item) => (
                     <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (

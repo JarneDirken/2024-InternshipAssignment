@@ -40,7 +40,13 @@ async function fetchUserHistory(userId: number) {
             role: true,
             ItemRequestsBorrower: {
                 include: {
-                    item: true,
+                    approver: true,
+                    item: {
+                        include: {
+                            location: true,
+                            Reparations: true,
+                        }
+                    },
                 }
             }
         }
@@ -59,6 +65,11 @@ async function fetchItemHistory(itemId: number) {
                 include: {
                     borrower: true,
                     approver: true,
+                    item: {
+                        include: {
+                            location: true,
+                        }
+                    }
                 }
             },
             Reparations: true,

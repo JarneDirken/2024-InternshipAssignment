@@ -14,6 +14,7 @@ import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
 import { useRecoilState } from "recoil";
 import { repariState } from "@/services/store";
 import DoNotTouchOutlinedIcon from '@mui/icons-material/DoNotTouchOutlined';
+import { useRouter } from 'next/navigation';
 
 interface ModalCardProps {
     open: boolean;
@@ -29,6 +30,7 @@ interface ModalCardProps {
 export default function Modal({ open, onClose, item, repaired, broken, setRepaired, setBroken, selectedTab }: ModalCardProps) {
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
     const [repair, setRepair] = useRecoilState(repariState);
+    const router = useRouter();
 
     async function repairItem() {
         if (!item) { console.error("error"); return; }
@@ -68,12 +70,14 @@ export default function Modal({ open, onClose, item, repaired, broken, setRepair
         return dateObj.toLocaleDateString('en-US', options);
     };
 
-    const viewNameHistory = () => {
-        console.log("Name");
+    const viewItemHistory = (itemId: number) => {
+        const type="item"
+        router.push(`/historypage/${type}/${itemId}`);
     };
 
-    const viewRequestorHistory = () => {
-        console.log("Requestor");
+    const viewUserHistory = (userId: number) => {
+        const type="user"
+        router.push(`/historypage/${type}/${userId}`);
     };
 
     const handleSuccess = () => {
@@ -174,7 +178,7 @@ export default function Modal({ open, onClose, item, repaired, broken, setRepair
                                 <div className="flex flex-col">
                                     <div className="flex gap-2">
                                         <span className="font-semibold text-gray-400">Name</span>
-                                        <div className="text-custom-primary cursor-pointer" onClick={viewNameHistory}>
+                                        <div className="text-custom-primary cursor-pointer" onClick={() => viewItemHistory(item.id)}>
                                             <RestoreOutlinedIcon fontSize="small"/>
                                         </div>
                                     </div>
@@ -183,7 +187,7 @@ export default function Modal({ open, onClose, item, repaired, broken, setRepair
                                 <div className="flex flex-col">
                                     <div className="flex gap-2">
                                         <span className="font-semibold text-gray-400">Last used</span>
-                                        <div className="text-custom-primary cursor-pointer" onClick={viewRequestorHistory}>
+                                        <div className="text-custom-primary cursor-pointer" onClick={() => viewUserHistory(item.item.ItemRequests?.[item.item.ItemRequests.length - 1]?.borrower?.id ?? 0)}>
                                             <RestoreOutlinedIcon fontSize="small"/>
                                         </div>
                                     </div>

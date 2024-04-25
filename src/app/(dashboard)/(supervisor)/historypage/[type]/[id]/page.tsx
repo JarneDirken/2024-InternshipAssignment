@@ -11,6 +11,8 @@ import ContentPasteOutlinedIcon from '@mui/icons-material/ContentPasteOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import { Item } from "@/models/Item";
 import { User } from "@/models/User";
+import ItemCard from "@/components/(supervisor)/historypage/ItemCard";
+import { ItemRequest } from "@/models/ItemRequest";
 
 export default function HistoryPage({ params } : {params: {type:string, id: string}}) {
     const type = params.type;
@@ -21,14 +23,14 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
     const auth = getAuth(app); // Get authentication
     const [history, setHistory] = useState<User[] | Item[]>([]);
     const [title, setTitle] = useState(""); // Manage title as a state
+    const [dataFound, setDataFound] = useState(true); // Initially true, set to false if no data
+    const [itemLoading, setItemLoading] = useState(true); // item loading
     // filters
     const [nameFilter, setNameFilter] = useState(''); // name filter
     const [borrowDateFilter, setBorrowDateFilter] = useState(''); // filter
     const [isModalOpen, setModalOpen] = useState(false); // modal
-    const filters: Filter[] = [
-        { label: 'Name', state: [nameFilter, setNameFilter], inputType: 'text', optionsKey: 'name' },
-        { label: 'Borrow Date', state: [borrowDateFilter, setBorrowDateFilter], inputType: 'dateRange'},
-    ];
+    const [filters, setFilters] = useState<Filter[]>([]);
+    const [filteredItems, setFilteredItems] = useState<User[] | Item[] | ItemRequest[]>([]);  // Use a more specific type if possible
     const icon = type === 'user' ? <PeopleAltOutlinedIcon fontSize="large" /> : <ContentPasteOutlinedIcon fontSize="large" />;
 
     useEffect(() => {
@@ -49,22 +51,47 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
     },[userId, type, id]);
 
     useEffect(() => {
-        console.log(history);
-    },[history])
-
-    useEffect(() => {
         if (type === "user" || type === "item") {
             if (history.length > 0) {
                 if (type === 'user') {
                     const user = history[0] as User;
                     setTitle(toTitleCase(`${user.firstName} ${user.lastName}`));
+                    const allUserRequests = history.flatMap((entity: User | Item) =>
+                        'ItemRequestsBorrower' in entity ? entity.ItemRequestsBorrower || [] : []
+                    );
+                    setFilteredItems(allUserRequests);
                 } else if (type === 'item') {
                     const item = history[0] as Item;
                     setTitle(toTitleCase(item.name));
+                    const allItemRequests = history.flatMap((entity: User | Item) =>
+                        'ItemRequests' in entity ? entity.ItemRequests || [] : []
+                    );
+                    setFilteredItems(allItemRequests);
                 }
             }
         }
     }, [history, type]);
+
+    useEffect(() => {
+        console.log("history: " + history);
+        console.log("filtered items: " + filteredItems)
+    }, [history])
+
+    useEffect(() => {
+        if (type === 'user') {
+            const userFilters: Filter[] = [
+                { label: 'Name', state: [nameFilter, setNameFilter], inputType: 'text', optionsKey: 'item.name' },
+                { label: 'Borrow Date', state: [borrowDateFilter, setBorrowDateFilter], inputType: 'dateRange' },
+            ];
+            setFilters(userFilters);
+        } else if (type === 'item') {
+            const itemFilters: Filter[] = [
+                { label: 'Item Name', state: [nameFilter, setNameFilter], inputType: 'text', optionsKey: 'name' },
+                { label: 'Borrow Date', state: [borrowDateFilter, setBorrowDateFilter], inputType: 'dateRange' },
+            ];
+            setFilters(itemFilters);
+        }
+    }, [type]);
     
     const handleFilterChange = (filterType: string, value: string) => {
         switch (filterType) {
@@ -88,9 +115,10 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
         return str.replace(/\w\S*/g, function(txt) {
             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
         });
-    }
+    };
 
     async function getHistory() {
+        setItemLoading(true);
         try {
             const response = await fetch(`/api/supervisor/historypage/${type}/${id}`);
             if (!response.ok) {
@@ -99,9 +127,18 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
     
             const data = await response.json();
             
-            setHistory(Array.isArray(data) ? data : [data]);
+            if (Array.isArray(data) && data.length === 0 || !Array.isArray(data) && !Object.keys(data).length) {
+                setDataFound(false);
+            } else {
+                setHistory(Array.isArray(data) ? data : [data]);
+            }
+            setItemLoading(false);
         } catch (error) {
             console.error("Failed to fetch items:", error);
+            setDataFound(false);
+            setItemLoading(false);
+        } finally {
+            setItemLoading(false);
         }
     };
     
@@ -110,6 +147,12 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
     if (!isAuthorized) { return <Unauthorized />; }
 
     if (type !== "user" && type !== "item") { return; }
+
+    if (!dataFound) {
+        return <div className="bg-white p-4 rounded-xl shadow-md text-center text-lg">
+            {`No ${type} found with ID ${id}`}
+        </div>;
+    }
 
     return (
         <div>
@@ -121,13 +164,31 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
                     setActive={setActive}
                     onFilterChange={handleFilterChange}
                     onSortChange={handleSortChange}
-                    items={history}
+                    items={filteredItems}
                     filters={filters}
                     sortOptions={['Name', 'Borrow date']}
                     isCardView={true}
                 />
             </div>
-            <h1>History for {type} id of {id}</h1>
+            <div className="rounded-xl">
+                <div className="flex border-b border-b-gray-300 bg-white rounded-tl-xl rounded-tr-xl z-0 overflow-x-scroll" id="selectTabs">
+                    <div className="relative">
+                        <div
+                            className='w-48 flex justify-center py-3 uppercase border-b-4 border-b-custom-primary text-custom-primary font-semibold'
+                        >
+                            {type==="user" ? (<span>Requested borrows</span>) : (<span>History</span>)}
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <ItemCard
+                        active={active}
+                        items={history}
+                        itemLoading={itemLoading}
+                        type={type}
+                    />
+                </div>
+            </div>
         </div>
     );
 }
