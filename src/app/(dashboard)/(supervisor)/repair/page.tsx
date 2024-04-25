@@ -10,6 +10,9 @@ import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
 import Filters from "@/components/general/Filter";
 import { Repair } from "@/models/Repair";
 import ItemCard from "@/components/(supervisor)/repair/ItemCard";
+import Modal from "@/components/(supervisor)/repair/Modal";
+import { useRecoilValue } from "recoil";
+import { repariState } from "@/services/store";
 
 export default function Reparation() {
     const { isAuthorized, loading } = useAuth(['Supervisor', 'Admin']);
@@ -19,14 +22,18 @@ export default function Reparation() {
     const auth = getAuth(app); // Get authentication
     // Items
     const [itemLoading, setItemLoading] = useState(true); // item loading
+    const [repair, setRepair] = useState<Repair>();
     const [repairs, setRepairs] = useState<Repair[]>([]);
     const [history, setHistory] = useState<Repair[]>([]);
     const [repairCount, setRepairCount] = useState(0);
     const [currentItems, setCurrentItems] = useState(repairs);
+    const repairRecoilValue = useRecoilValue(repariState);
     // filters
     const [nameFilter, setNameFilter] = useState(''); // name filter
     const [borrowDateFilter, setBorrowDateFilter] = useState(''); // filter
     const [isModalOpen, setModalOpen] = useState(false); // modal
+    const [repaired, setRepaired] = useState(false);
+    const [broken, setBroken] = useState(false);
     const filters: Filter[] = [
         { label: 'Name', state: [nameFilter, setNameFilter], inputType: 'text', optionsKey: 'item.name' },
         { label: 'Borrow Date', state: [borrowDateFilter, setBorrowDateFilter], inputType: 'dateRange'},
@@ -50,7 +57,7 @@ export default function Reparation() {
                 getHistory();
             }
         }
-    }, [userId, nameFilter, borrowDateFilter]);
+    }, [userId, nameFilter, borrowDateFilter, repairRecoilValue]);
 
     useEffect(() => {
         if(selectedTab === "history"){
@@ -73,6 +80,8 @@ export default function Reparation() {
 
     const closeModal = () => {
         setModalOpen(false);
+        setRepaired(false);
+        setBroken(false);
     };
 
     const handleFilterChange = (filterType: string, value: string) => {
@@ -102,7 +111,7 @@ export default function Reparation() {
     };
 
     const openModal = (item: Repair) => {
-        // setRepair(item);
+        setRepair(item);
         setModalOpen(true);
     };
 
@@ -155,6 +164,16 @@ export default function Reparation() {
 
     return (
         <div>
+            <Modal 
+                open={isModalOpen}
+                onClose={closeModal}
+                userId={userId}
+                item={repair}
+                repaired={repaired}
+                broken={broken}
+                setRepaired={setRepaired}
+                setBroken={setBroken}
+            />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
                     title="Repairs"
@@ -178,7 +197,7 @@ export default function Reparation() {
                         >
                             In repair
                         </div>
-                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-3 transform translate-x-1/2 -translate-y-1/2 text-xs ${selectedTab === 'repair' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
+                        <div className={`rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-4 right-11 transform translate-x-1/2 -translate-y-1/2 text-xs ${selectedTab === 'repair' ? 'bg-custom-primary' : 'bg-custom-gray'}`}>
                             {repairCount}
                         </div>
                     </div>

@@ -43,7 +43,7 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
     }, [userId]);
 
     useEffect(() => {
-        if ((type === "user" || type === "item") && userId){
+        if (((type === "user" || type === "item") && userId)){
             getHistory();
         }
     },[userId, type, id]);
@@ -53,17 +53,19 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
     },[history])
 
     useEffect(() => {
-        if (history.length > 0) {
-            if (type === 'user') {
-                const user = history[0] as User; // Cast the first element as User
-                setTitle(`${user.firstName} ${user.lastName}`);
-            } else if (type === 'item') {
-                const item = history[0] as Item; // Cast the first element as Item
-                setTitle(item.name);
+        if (type === "user" || type === "item") {
+            if (history.length > 0) {
+                if (type === 'user') {
+                    const user = history[0] as User;
+                    setTitle(toTitleCase(`${user.firstName} ${user.lastName}`));
+                } else if (type === 'item') {
+                    const item = history[0] as Item;
+                    setTitle(toTitleCase(item.name));
+                }
             }
         }
     }, [history, type]);
-
+    
     const handleFilterChange = (filterType: string, value: string) => {
         switch (filterType) {
             case 'name':
@@ -81,6 +83,12 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
         // Implement sorting logic here
         console.log(`Sorting by ${sortBy} in ${sortDirection} order`);
     };
+
+    function toTitleCase(str: string) {
+        return str.replace(/\w\S*/g, function(txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+    }
 
     async function getHistory() {
         try {

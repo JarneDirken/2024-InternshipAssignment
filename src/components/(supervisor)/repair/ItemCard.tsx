@@ -3,6 +3,7 @@ import Loading from "@/components/states/Loading";
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import Image from 'next/image';
 import { Repair } from "@/models/Repair";
+import Button from '@/components/states/Button';
 
 interface BorrowCardProps {
     active: boolean;
@@ -99,6 +100,10 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                         </div>
                                     </div>
                                     <div className="flex flex-col w-1/4">
+                                        <div className="flex truncate text-custom-primary gap-1 text-sm sm:text-base">
+                                            <AccessTimeIcon fontSize="small"/>
+                                            <span>Pending</span>
+                                        </div>
                                         <div className="truncate">
                                             <span className="font-semibold">Year:&nbsp;</span>
                                             <span>{formatDateYear(item.item.yearBought)}</span>
@@ -111,17 +116,28 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                     <div className="flex flex-col w-1/3">
                                         <div className="truncate">
                                             <span className="font-semibold">Requestor:&nbsp;</span>
-                                            <span className="capitalize">{item.item?.ItemRequests?.[0]?.borrower?.firstName} {item.item?.ItemRequests?.[0]?.borrower?.lastName}</span>
+                                            <span className="capitalize">
+                                                {item.item.ItemRequests?.[item.item.ItemRequests.length - 1]?.borrower?.firstName ?? 'Default First Name'}{' '}
+                                                {item.item.ItemRequests?.[item.item.ItemRequests.length - 1]?.borrower?.lastName ?? 'Default Last Name'}
+                                            </span>
                                         </div>
                                         <div className="truncate">
                                             <span className="font-semibold">Location:&nbsp;</span>
                                             <span>{item.item.location.name}</span>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="flex truncate w-1/5 items-center justify-end text-custom-primary gap-1 text-sm sm:text-base">
-                                    <AccessTimeIcon fontSize="small"/>
-                                    <span>Pending</span>
+                                    <div className="flex flex-col w-1/5 justify-end items-end">
+                                        <div>
+                                            <Button 
+                                                text='Details'
+                                                paddingX='px-2'
+                                                paddingY='py-1'
+                                                textColor='custom-primary'
+                                                borderColor='custom-primary'
+                                                onClick={() => openModal(item)}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         ) : (
@@ -134,6 +150,12 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                         </div>
                                     </div>
                                     <div className="flex w-1/2 flex-col items-end truncate">
+                                        <div className="flex justify-center items-center">
+                                            <div className="flex truncate items-center text-custom-primary gap-1 text-sm sm:text-base">
+                                                <AccessTimeIcon fontSize="small"/>
+                                                <span>Pending</span>
+                                            </div>
+                                        </div>
                                         <div className="flex truncate items-center text-gray-400 gap-1 text-xs sm:text-sm">
                                             <AccessTimeIcon fontSize="small"/>
                                             <span>{formatDate(item.repairDate)} - /</span>
@@ -191,10 +213,16 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                     </div>
                                 </div>
                                 <hr />
-                                <div className="flex justify-center items-center p-2 gap-6">
-                                    <div className="flex truncate items-center text-custom-primary gap-1 text-sm sm:text-base">
-                                        <AccessTimeIcon fontSize="small"/>
-                                        <span>Pending</span>
+                                <div className="flex flex-col w-full justify-center items-center p-1">
+                                    <div>
+                                        <Button 
+                                            text='Details'
+                                            paddingX='px-2'
+                                            paddingY='py-1'
+                                            textColor='custom-primary'
+                                            borderColor='custom-primary'
+                                            onClick={() => openModal(item)}
+                                        />
                                     </div>
                                 </div>
                             </div>

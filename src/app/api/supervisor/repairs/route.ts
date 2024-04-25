@@ -85,3 +85,33 @@ export async function GET(request: NextRequest) {
         },
     });
 }
+
+export async function PUT(req: NextApiRequest) {
+    const { data } = await new Response(req.body).json();
+
+    const updateRepair = await prisma.reparation.update({
+        where: {
+            id: data.repairId,
+        },
+        data: {
+            item: {
+                update: {
+                    where: {
+                        id: data.itemId
+                    },
+                    data: {
+                        itemStatusId: data.broken ? 6 : 1
+                    }
+                }
+            },
+            returnDate: data.broken ? null : new Date(),
+        },
+    });    
+
+    return new Response(JSON.stringify(updateRepair), {
+        status: 200,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+};

@@ -5,6 +5,8 @@ import Loading from "@/components/states/Loading";
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import Image from 'next/image';
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
+import DoNotTouchOutlinedIcon from '@mui/icons-material/DoNotTouchOutlined';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 
 interface BorrowCardProps {
     active: boolean;
@@ -173,9 +175,9 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                         )}
                                     </div>
                                 </div>
-                                {selectedTab !== "history" && (
-                                    <div className="w-1/12 flex flex-col gap-1">
-                                        {selectedTab === "borrows" && (
+                                <div className="w-1/12 flex flex-col gap-1">
+                                    {selectedTab !== "history" ? (
+                                        selectedTab === "borrows" ? (
                                             <Button 
                                                 text="Hand over"
                                                 textColor="custom-green"
@@ -184,8 +186,7 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                                 paddingY="py-0"
                                                 onClick={() => handover(item)}
                                             />
-                                        )}
-                                        {selectedTab === "returns" && (
+                                        ) : selectedTab === "returns" ? (
                                             <Button 
                                                 text="Received"
                                                 textColor="custom-green"
@@ -194,8 +195,7 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                                 paddingY="py-0"
                                                 onClick={() => receive(item)}
                                             />
-                                        )}
-                                        {selectedTab === "checkitem" && (
+                                        ) : selectedTab === "checkitem" ? (
                                             <Button 
                                                 text="Checked"
                                                 textColor="custom-green"
@@ -204,9 +204,24 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                                 paddingY="py-0"
                                                 onClick={() => checked(item)}
                                             />
-                                        )}
-                                    </div>
-                                )}
+                                        ) : null
+                                    ) : (
+                                        <>
+                                            {(item.item.itemStatusId === 6) && (
+                                                <div className="text-custom-red flex items-center gap-1 font-semibold">
+                                                    <DoNotTouchOutlinedIcon fontSize="small"/>
+                                                    <span>Broken</span>
+                                                </div>
+                                            )}
+                                            {(item.item.itemStatusId === 5) && (
+                                                <div className="text-custom-primary flex items-center gap-1 font-semibold">
+                                                    <WarningAmberOutlinedIcon fontSize="small"/>
+                                                    <span>In repair</span>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         ) : (
                             <div className="overflow-hidden">
