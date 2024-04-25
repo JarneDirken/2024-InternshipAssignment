@@ -259,8 +259,11 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                 sx={{
                                     fontSize: { xs: '0.8rem', sm: '1rem' }, // Smaller font on extra-small screens
                                     '& .MuiButton-startIcon, & .MuiButton-endIcon': {
-                                        fontSize: { xs: '18px', sm: '24px' } // Adjust icon sizes as well
-                                    }
+                                        fontSize: { xs: '15px', sm: '24px' } // Adjust icon sizes as well
+                                    },
+                                    whiteSpace: "nowrap", // Prevent text from wrapping
+                                    minWidth: "170px", // Minimum width to avoid squeezing on small screens
+                                    paddingTop: "6px" // Ensure padding is sufficient but not too large
                                 }} 
                             >
                                 Sort by {sortBy ? sortBy : 'Select'} {sortDirection === 'asc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}

@@ -19,17 +19,14 @@ import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { SnackbarProvider } from 'notistack';
 import useAuth from "@/hooks/useAuth";
-import Loading from "@/components/states/Loading";
 
 export default function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { userRole, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
+  const { userRole } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
   const pathname = usePathname();
-
-  if (loading) return <Loading />;
 
   return (
     <SnackbarProvider maxSnack={3}>

@@ -10,6 +10,8 @@ type ButtonProps = {
     paddingX?: string;
     paddingY?: string;
     font?: string;
+    buttonClassName?: string;
+    textClassName?: string;
 }
 
 export default function Button({ 
@@ -21,10 +23,12 @@ export default function Button({
     fillColor = 'white',
     paddingX = 'px-4',
     paddingY = 'py-1', 
-    font = "normal"
+    font = "normal",
+    buttonClassName = "",
+    textClassName = ""
 }: ButtonProps) {
-    const buttonClasses = `border rounded-lg items-center justify-center ${paddingY} ${paddingX} flex gap-1 border-${borderColor} bg-${fillColor}`;
-    const textClasses = `font-${font} text-${textColor} text-sm sm:text-lg`;
+    const buttonClasses = `border rounded-lg items-center justify-center ${paddingY} ${paddingX} flex gap-1 border-${borderColor} bg-${fillColor} ${buttonClassName}`;
+    const textClasses = `font-${font} text-${textColor} text-sm sm:text-lg ${textClassName}`;
 
     return (
         <button onClick={onClick} className={buttonClasses}>
