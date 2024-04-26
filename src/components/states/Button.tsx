@@ -12,6 +12,7 @@ type ButtonProps = {
     font?: string;
     buttonClassName?: string;
     textClassName?: string;
+    disabled?: boolean;
 }
 
 export default function Button({ 
@@ -25,13 +26,16 @@ export default function Button({
     paddingY = 'py-1', 
     font = "normal",
     buttonClassName = "",
-    textClassName = ""
+    textClassName = "",
+    disabled = false
 }: ButtonProps) {
-    const buttonClasses = `border rounded-lg items-center justify-center ${paddingY} ${paddingX} flex gap-1 border-${borderColor} bg-${fillColor} ${buttonClassName}`;
-    const textClasses = `font-${font} text-${textColor} text-sm sm:text-lg ${textClassName}`;
+    const buttonClasses = `border rounded-lg items-center justify-center ${paddingY} ${paddingX} flex gap-1 border-${borderColor} bg-${fillColor} ${buttonClassName} ${disabled ? 'bg-gray-200 border-gray-400 cursor-not-allowed' : ''}`;
+    const textClasses = `font-${font} text-${textColor} text-sm sm:text-lg ${textClassName} ${disabled ? 'text-gray-400' : ''}`;
 
     return (
-        <button onClick={onClick} className={buttonClasses}>
+        <button onClick={disabled ? undefined : onClick} className={buttonClasses}
+            disabled={disabled}
+        >
             {icon && <span className={textClasses}>{icon}</span>}
             <span className={`text-lg ${textClasses}`}>{text}</span>
         </button>

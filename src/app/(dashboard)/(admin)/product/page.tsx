@@ -12,6 +12,7 @@ import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutl
 import Button from "@/components/states/Button";
 import Checkbox from '@mui/material/Checkbox';
 import ProductCard from "@/components/(admin)/products/ProductCard";
+import Modal from "@/components/(admin)/products/Modal";
 
 interface Filter {
     label: string;
@@ -88,15 +89,6 @@ export default function Product() {
         }
     };
 
-    const openModal = (id: number) => {
-        setModalOpen(true);
-    }
-
-    const openModalProduct = (item: Item) => {
-        setItem(item);
-        setModalOpen(true);
-    };
-
     async function getAllItems() {
         const params: Record<string, string> = {
             name: name,
@@ -149,8 +141,26 @@ export default function Product() {
         setSelectedItems(newSelectedItems);
     };
 
+    const closeModal = () => {
+        setModalOpen(false);
+    };
+
+    const openModal = () => {
+        setModalOpen(true);
+    }
+
+    const openModalProduct = (item: Item) => {
+        setItem(item);
+        setModalOpen(true);
+    };
+
     return ( 
         <div>
+            <Modal 
+                open={isModalOpen}
+                onClose={closeModal}
+                item={item}
+            />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
                     active={active}
@@ -166,18 +176,19 @@ export default function Product() {
                 />
             </div>
             <div className="rounded-xl">
-                <div className="flex flex-wrap justify-center bg-white rounded-tl-xl rounded-tr-xl z-0 p-4">
-                    <Button 
-                        icon={<AddIcon />} 
-                        textColor="custom-primary" 
-                        borderColor="custom-primary" 
-                        fillColor="orange-100" 
-                        paddingX="px-2.5"
-                        paddingY="py-0.5"
-                        buttonClassName="mr-1 mb-2" 
-                        textClassName="font-semibold" 
-                        text="Add"
-                    />
+                <div className="flex flex-wrap justify-center md:justify-start bg-white gap-1 sm:gap-2 lg:gap-4 rounded-tl-xl rounded-tr-xl z-0 p-4">
+                    <div onClick={openModal}>
+                        <Button 
+                            icon={<AddIcon />} 
+                            textColor="custom-primary" 
+                            borderColor="custom-primary" 
+                            fillColor="orange-100" 
+                            paddingX="px-2.5"
+                            paddingY="py-0.5"
+                            textClassName="font-semibold" 
+                            text="Add"
+                        />
+                    </div>
                     <Button 
                         icon={<DeleteOutlinedIcon />} 
                         textColor="custom-red" 
@@ -185,9 +196,9 @@ export default function Product() {
                         fillColor="red-100" 
                         paddingX="px-2.5"
                         paddingY="py-0.5"
-                        buttonClassName="mr-1 mb-2 bg-red-100" 
                         textClassName="font-semibold" 
                         text="Delete" 
+                        disabled={selectedItems.size === 0}
                     />
                     <Button 
                         icon={<QrCode2RoundedIcon />} 
@@ -196,9 +207,10 @@ export default function Product() {
                         fillColor="blue-100" 
                         paddingX="px-2.5"
                         paddingY="py-0.5"
-                        buttonClassName="mb-2 bg-blue-100 border-custom-dark-blue" 
+                        buttonClassName="bg-blue-100 border-custom-dark-blue" 
                         textClassName="font-semibold text-custom-dark-blue" 
                         text="QR-Code" 
+                        disabled={selectedItems.size === 0}
                     />
                     <Button 
                         icon={<InsertDriveFileOutlinedIcon />} 
@@ -207,9 +219,9 @@ export default function Product() {
                         fillColor="blue-100" 
                         paddingX="px-2.5"
                         paddingY="py-0.5"
-                        buttonClassName="mr-1" 
                         textClassName="font-semibold" 
                         text="Export EXCEL" 
+                        disabled={selectedItems.size === 0}
                     />
                     <Button 
                         icon={<InsertDriveFileOutlinedIcon />} 
@@ -218,12 +230,12 @@ export default function Product() {
                         fillColor="blue-100" 
                         paddingX="px-2.5"
                         paddingY="py-0.5"
-                        buttonClassName="" 
                         textClassName="font-semibold" 
                         text="Import EXCEL" 
+                        disabled={selectedItems.size === 0}
                     />
                 </div>
-                <div className="w-full border-b border-b-gray-300 bg-white flex items-center relative">
+                <div className="w-full border-b border-b-gray-300 bg-white flex items-center relative lg:hidden">
                     <Checkbox 
                         className="absolute left-3 top-1/2 transform -translate-y-1/2" 
                         checked={selectedItems.size === items.length && items.length > 0}
@@ -231,8 +243,29 @@ export default function Product() {
                     />
                     <p className="text-custom-primary font-semibold px-16 py-2 border-b-2 border-b-custom-primary w-fit">PRODUCTS</p>
                 </div>
-                <div className="h-80 bg-white w-full rounded-b-xl overflow-y-auto">
+                <div className="bg-white w-full rounded-b-xl overflow-y-auto lg:hidden" style={{ height: '50vh' }}>
                     <ProductCard items={items} openModal={openModalProduct} itemLoading={itemLoading} selectedItems={selectedItems} onSelectItem={handleSelectItem} />
+                </div>
+                <div className="hidden lg:block">
+                    <div className="w-full bg-gray-100 hidden lg:grid grid-cols-12">
+                        <div className="col-span-1 mx-auto">
+                            <Checkbox 
+                                checked={selectedItems.size === items.length && items.length > 0}
+                                onChange={toggleSelectAll}
+                            />
+                        </div>
+                        <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 truncate">IMAGE</span>
+                        <span className="text-gray-500 border-r-4 border-white font-semibold col-span-2 py-2 pl-2 truncate">NO.</span>
+                        <span className="text-gray-500 border-r-4 border-white font-semibold col-span-2 py-2 pl-2 truncate">NAME</span>
+                        <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">MODEL</span>
+                        <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">BRAND</span>
+                        <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 xl:col-span-2 py-2 pl-2 truncate">LOCATION</span>
+                        <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">YEAR</span>
+                        <span className="text-gray-500 font-semibold col-span-2 xl:col-span-1 py-2 pl-2 truncate">ACTION</span>
+                    </div>
+                    <div className="bg-white w-full rounded-b-xl overflow-y-auto" style={{ height: '50vh' }}>
+                        <ProductCard items={items} openModal={openModalProduct} itemLoading={itemLoading} selectedItems={selectedItems} onSelectItem={handleSelectItem} />
+                    </div>
                 </div>
             </div>
         </div>

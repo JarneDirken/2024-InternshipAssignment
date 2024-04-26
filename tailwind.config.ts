@@ -28,6 +28,9 @@ const config: Config = {
         "custom-blue": "#00C2FF",
         "custom-light-orange": "#ffb96e",
         "custom-dark-blue": "#007DC4",
+      },
+      screens: {
+        'xs': '480px',
       }
     },
   },
