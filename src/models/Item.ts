@@ -23,5 +23,6 @@ export interface Item {
 export interface GroupedItem extends Item {
     borrowedCount: number;
     availableCount: number;
+    groupStatusId?: number;
     items: Item[]; // Array to store all items within the group
 }

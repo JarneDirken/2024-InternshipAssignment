@@ -95,29 +95,23 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
     };
 
     function renderItemStatus(item: GroupedItem) {
-        switch (item.itemStatusId) {
-            case 1:
-                return (
-                    <Button 
-                        text="Borrow" 
-                        textColor="white" 
-                        borderColor="custom-primary" 
-                        fillColor="custom-primary"
-                        paddingY="py-0"
-                        font="semibold"
-                        onClick={() => openModal(item)}
-                    />
-                );
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-                return <span>Borrowed</span>;
-            default:
-                return null;
+        const isAvailable = item.availableCount > 0;
+        if (isAvailable) {
+            return (
+                <Button 
+                    text="Borrow" 
+                    textColor="white" 
+                    borderColor="custom-primary" 
+                    fillColor="custom-primary"
+                    paddingY="py-0"
+                    font="semibold"
+                    onClick={() => openModal(item)}
+                />
+            );
+        } else {
+            return <span>Borrowed</span>;
         }
-    };
+    }
 
     if (loading) { return (<Loading />); };
 
@@ -184,7 +178,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                         </div>
                                     </div>
                                 </div>
-                                <div className="w-1/12">
+                                <div className="w-1/12 flex flex-col">
                                     {renderItemStatus(item)}
                                 </div>
                             </div>
