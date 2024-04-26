@@ -1,7 +1,8 @@
 import prisma from "@/services/db";
 import { Prisma } from "@prisma/client";
+import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
-interface WhereClause extends Prisma.ItemRequestWhereInput {}
+interface WhereClause extends Prisma.ReparationWhereInput {}
 
 interface OrderByType {
     [key: string]: Prisma.SortOrder | OrderByRecursiveType;
@@ -32,9 +33,7 @@ export async function GET(request: NextRequest) {
     const nameFilter = searchParams.get('name') || '';
     const borrowDate = searchParams.get('borrowDate');
     const returnDate = searchParams.get('returnDate');
-    const locationFilter = searchParams.get('location') || '';
-    const requestorFilter = searchParams.get('requestor') || '';
-    const sortBy = searchParams.get('sortBy') || 'requestDate';  // Default sort field
+    const sortBy = searchParams.get('sortBy') || 'repairDate';  // Default sort field
     const sortDirection = searchParams.get('sortDirection') as Prisma.SortOrder || 'desc';  // Default sort direction
 
     const orderBy = createNestedOrderBy(sortBy, sortDirection);
@@ -45,7 +44,7 @@ export async function GET(request: NextRequest) {
         },
     });
 
-    if (!user) {
+    if (!user){
         return new Response(JSON.stringify("User not found"), {
             status: 404,
             headers: {
@@ -54,70 +53,84 @@ export async function GET(request: NextRequest) {
         });
     };
 
-    // Base where clause for all queries
-    const baseWhereClause: WhereClause = {
+    const whereClause: WhereClause = {
         item: {
             name: { contains: nameFilter, mode: 'insensitive' },
-            location: { 
-                name: { contains: locationFilter, mode: 'insensitive' }
-            },
-            itemStatusId: 2,
-        },
-        requestStatusId: 1,
-        borrower: { 
-            firstName: { contains: requestorFilter, mode: 'insensitive' }
+            itemStatusId: 5,
         },
     };
-
-    // Handle date filters
+    
     if (borrowDate) {
         const borrowDateStart = new Date(borrowDate);
-        borrowDateStart.setHours(0, 0, 0, 0);
-        baseWhereClause.startBorrowDate = {
+        borrowDateStart.setHours(0, 0, 0, 0);  // Set to start of the day
+        whereClause.repairDate = {
             gte: borrowDateStart
         };
     }
     
     if (returnDate) {
         const returnDateEnd = new Date(returnDate);
-        returnDateEnd.setHours(23, 59, 59, 999);
-        baseWhereClause.endBorrowDate = {
+        returnDateEnd.setHours(23, 59, 59, 999);  // Set to end of the day
+        whereClause.returnDate = {
             lte: returnDateEnd
         };
     }
 
-    // Fetch item requests
-    const itemRequests = await prisma.itemRequest.findMany({
-        where: baseWhereClause,
-        include: { 
+    const repairs = await prisma.reparation.findMany({
+        where: whereClause,
+        include: {
             item: {
                 include: {
-                    location: true
+                    location: true,
+                    ItemRequests: {
+                        include: {
+                            borrower: true
+                        }
+                    }
                 }
             },
-            borrower: true
         },
-        orderBy: orderBy, 
+        orderBy: orderBy
     });
 
-    // Function to count item requests based on urgency
-    const countRequests = async (isUrgent: boolean) => prisma.itemRequest.count({
-        where: {
-            ...baseWhereClause,
-            isUrgent: isUrgent
-        }
+    const totalCount = await prisma.reparation.count({
+        where: whereClause,
     });
 
-    // Concurrently count non-urgent and urgent requests
-    const [totalCount, totalCountUrgent] = await Promise.all([
-        countRequests(false),
-        countRequests(true)
-    ]);
-
-    return new Response(JSON.stringify({itemRequests, totalCount, totalCountUrgent}), {
+    return new Response(JSON.stringify({repairs, totalCount}), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',
         },
     });
 }
+
+export async function PUT(req: NextApiRequest) {
+    const { data } = await new Response(req.body).json();
+
+    const updateRepair = await prisma.reparation.update({
+        where: {
+            id: data.repairId,
+        },
+        data: {
+            item: {
+                update: {
+                    where: {
+                        id: data.itemId
+                    },
+                    data: {
+                        itemStatusId: data.broken ? 6 : 1
+                    }
+                }
+            },
+            returnDate: data.broken ? null : new Date(),
+        },
+    });    
+
+    return new Response(JSON.stringify(updateRepair), {
+        status: 200,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+};

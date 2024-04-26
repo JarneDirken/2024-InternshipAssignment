@@ -1,8 +1,9 @@
+'use client';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/states/Button';
 import Image from 'next/image';
 
-export default function Unauthorized(){
+export default function Not404Found() {
     const router = useRouter(); // Get the router object
 
     // Function to navigate back to the previous page
@@ -14,7 +15,7 @@ export default function Unauthorized(){
         <div className='flex flex-col lg:flex-row items-center lg:justify-between justify-center mx-12 lg:mx-24' style={{ minHeight: 'calc(100vh - 128px)' }}>
             <div>
                 <Image 
-                    src="/assets/svg/errorpages/403_Error_Forbidden-bro.svg"
+                    src="/assets/svg/errorpages/404 Error-amico.svg"
                     width={500}
                     height={500}
                     alt="Illustration"
@@ -22,8 +23,8 @@ export default function Unauthorized(){
                 />
             </div>
             <div className='flex flex-col items-end'>
-                <h1 className='font-semibold text-3xl md:text-6xl text-custom-primary'>403 Forbidden</h1>
-                <span>Sorry but the requested source is not available for you.</span>
+                <h1 className='font-semibold text-3xl md:text-6xl text-custom-primary'>404 Not Found</h1>
+                <span>Sorry but the requested source isn't found.</span>
                 <span>What do you want to do next?</span>
                 <Button 
                     text='Go back'

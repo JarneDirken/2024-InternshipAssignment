@@ -8,11 +8,8 @@ import TextField from "@mui/material/TextField";
 import Image from 'next/image';
 //icons
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import ClearIcon from '@mui/icons-material/Clear';
-import ContentPasteOutlinedIcon from '@mui/icons-material/ContentPasteOutlined';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import RestoreOutlinedIcon from '@mui/icons-material/RestoreOutlined';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { useEffect, useState } from "react";
@@ -26,12 +23,20 @@ interface ModalCardProps {
     userId: String | null;
     handover?: boolean;
     receive?: boolean;
+    checked?: boolean;
+    repairState?: boolean;
+    setRepairState?: (value: boolean) => void;
 }
 
-export default function Modal({ open, onClose, item, userId, handover, receive }: ModalCardProps) {
-    const [message, setMessage] = useState<string | null>(null);  // State can be string or null
+export default function Modal({ open, onClose, item, userId, handover, receive, checked, repairState, setRepairState }: ModalCardProps) {
+    const [message, setMessage] = useState<string | null>("");  // State can be string or null
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
     const [requests, setRequest] = useRecoilState(updateRequest);
+
+    const handleMessageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const inputValue = event.target.value;
+        setMessage(inputValue === "" ? null : inputValue);  // Set to null if empty
+    };
 
     async function handOverItem() {
         if (!item) { console.error("error"); return; }
@@ -79,19 +84,16 @@ export default function Modal({ open, onClose, item, userId, handover, receive }
         }
     };
 
-    async function checkItem() {
+    async function checkItem(repairState: boolean | undefined) {
         if (!item) { console.error("error"); return; }
         const data = {
             requestId: item.id,
             itemId: item.item.id,
-            approverId: userId,
-            approveMessage: message,
-            decisionDate: new Date().toISOString(),
-            borrowDate: item.startBorrowDate,
-            returnDate: item.endBorrowDate
+            repairState,
+            message
         };
 
-        const response = await fetch(`/api/supervisor/itemrequest/`, {
+        const response = await fetch(`/api/supervisor/checkitem/`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -109,7 +111,6 @@ export default function Modal({ open, onClose, item, userId, handover, receive }
     const handleSuccess = () => {
         onClose();
         setRequest(!requests);
-        setMessage("");
     };
 
     const formatDateTime = (date?: Date | string) => {
@@ -130,6 +131,23 @@ export default function Modal({ open, onClose, item, userId, handover, receive }
         return dateObj.toLocaleDateString('en-US', options).replace(',', ' -');
     };
 
+    const theme = createTheme({
+        palette: {
+            primary: {
+                main: '#ff9800', // your primary color
+            },
+        },
+        components: {
+            MuiButton: {
+                styleOverrides: {
+                    textPrimary: {
+                        color: '#ff9800',
+                    },
+                },
+            },
+        },
+    });
+
     if (!item) { return; }
 
     return (
@@ -144,12 +162,30 @@ export default function Modal({ open, onClose, item, userId, handover, receive }
             >
                 <div className="flex px-4 py-4 justify-between items-center border-b border-b-gray-300">
                     <div className="flex items-center gap-2 text-custom-green font-semibold">
-                        <CheckCircleOutlineOutlinedIcon fontSize="large"/>
                         {handover && (
-                            <h1 id="borrow-modal-title" className="text-xl">You're about to lend this item out. Are you sure?</h1>
+                            <>
+                                <CheckCircleOutlineOutlinedIcon fontSize="large"/>
+                                <h1 id="borrow-modal-title" className="text-xl">You're about to lend this item out. Are you sure?</h1>
+                            </>
                         )}
                         {receive && (
-                            <h1 id="borrow-modal-title" className="text-xl">You're about to receive this item. Are you sure?</h1>
+                            <>
+                                <CheckCircleOutlineOutlinedIcon fontSize="large"/>
+                                <h1 id="borrow-modal-title" className="text-xl">You're about to receive this item. Are you sure?</h1>
+                            </>
+                        )}
+                        {checked && (
+                            repairState ? (
+                                <>
+                                    <WarningAmberIcon fontSize="large" className="text-custom-primary"/>
+                                    <h1 id="borrow-modal-title" className="text-xl text-custom-primary">You're about to mark this item as broken. Are you sure?</h1>
+                                </>
+                            ) : (
+                                <>
+                                    <CheckCircleOutlineOutlinedIcon fontSize="large"/>
+                                    <h1 id="borrow-modal-title" className="text-xl">You're about to check this item. Are you sure?</h1>
+                                </>
+                            )
                         )}
                     </div>
                     <ClearIcon className="cursor-pointer" onClick={onClose} />
@@ -178,7 +214,11 @@ export default function Modal({ open, onClose, item, userId, handover, receive }
                             <div className="flex flex-col xl:w-1/2 xl:items-end gap-2">
                                 <div className="flex gap-2 text-custom-gray text-sm">
                                     <AccessTimeIcon fontSize="small"/>
-                                    {formatDateTime(item.borrowDate)}
+                                    {handover ? (
+                                        formatDateTime(item.borrowDate)
+                                    ) : (
+                                        formatDateTime(item.returnDate)
+                                    )}
                                 </div>
                                 <div>
                                 {item.isUrgent && (
@@ -191,6 +231,23 @@ export default function Modal({ open, onClose, item, userId, handover, receive }
                                         </a>
                                     </div>
                                 )}
+                                </div>
+                                <div>
+                                    <span>Information requestor:</span>
+                                    <div className="flex items-center">
+                                        <span className="font-semibold text-gray-400">Telephone:&nbsp;</span>
+                                        <a className="text-custom-blue underline cursor-pointer" 
+                                            href={`tel:${item.borrower.tel}`} rel="noopener noreferrer">
+                                                {item.borrower.tel}
+                                        </a>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <span className="font-semibold text-gray-400">Email:&nbsp;</span>
+                                        <a className="text-custom-blue underline cursor-pointer" 
+                                            href={`mailto:${item.borrower.email}`} rel="noopener noreferrer">
+                                                {item.borrower.email}
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -228,22 +285,79 @@ export default function Modal({ open, onClose, item, userId, handover, receive }
                                 </div>
                             </div>
                         </div>
+                        {repairState && (
+                            <div className="mt-4">
+                                <ThemeProvider theme={theme}>
+                                        <TextField
+                                            id="outlined"
+                                            label="Repair message"
+                                            size="small"
+                                            className="bg-white w-full"
+                                            name="message"
+                                            type="text"
+                                            value={message || ""}
+                                            onChange={handleMessageChange}
+                                            placeholder="Message"
+                                            required
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                        />
+                                    </ThemeProvider>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="flex flex-row justify-between overflow-hidden items-center py-2 px-2 md:px-16 xl:px-36 border-t border-t-gray-200 bottom-0">
-                    <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
-                        <button className="text-custom-gray">Cancel</button>
-                    </div>
                     {handover && (
-                        <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green cursor-pointer'
-                            onClick={handOverItem}>
-                            <button className='text-custom-green'>Confirm</button>
+                        <div className="flex justify-between w-full">
+                            <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
+                                <button className="text-custom-gray">Cancel</button>
+                            </div>
+                            <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green cursor-pointer'
+                                onClick={handOverItem}>
+                                <button className='text-custom-green'>Confirm</button>
+                            </div>
                         </div>
                     )}
                     {receive && (
-                        <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green cursor-pointer'
-                            onClick={receiveItem}>
-                            <button className='text-custom-green'>Confirm</button>
+                        <div className="flex justify-between w-full">
+                            <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
+                                <button className="text-custom-gray">Cancel</button>
+                            </div>
+                            <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green cursor-pointer'
+                                onClick={receiveItem}>
+                                <button className='text-custom-green'>Confirm</button>
+                            </div>
+                        </div>
+                    )}
+                    {checked && (
+                        <div className="flex justify-between w-full">
+                            {repairState ? (
+                                <>
+                                <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={() => setRepairState!(false)}>
+                                    <button className="text-custom-gray">Cancel</button>
+                                </div>
+                                <div className={`border py-1 px-3 rounded-lg flex items-center gap-1 ${message ? 'border-custom-primary cursor-pointer' : 'border-custom-gray cursor-not-allowed'}`}
+                                    onClick={message ? () => checkItem(repairState) : undefined}>
+                                    <button className={`${message ? 'text-custom-primary cursor-pointer' : 'text-custom-gray cursor-not-allowed'}`}>Confirm</button>
+                                </div>
+                                </>
+                            ) : (
+                                <>
+                                <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
+                                    <button className="text-custom-gray">Cancel</button>
+                                </div>
+                                <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green cursor-pointer'
+                                    onClick={() => checkItem(repairState)}>
+                                    <button className='text-custom-green'>Confirm</button>
+                                </div>
+                                    <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-primary cursor-pointer'
+                                    onClick={() => setRepairState!(true)}>
+                                    <button className='text-custom-primary'>Repair</button>
+                                </div>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>

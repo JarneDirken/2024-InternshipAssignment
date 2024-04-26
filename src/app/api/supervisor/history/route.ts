@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     const returnDate = searchParams.get('returnDate');
     const locationFilter = searchParams.get('location') || '';
     const requestorFilter = searchParams.get('requestor') || '';
-    const sortBy = searchParams.get('sortBy') || 'requestDate';  // Default sort field
+    const sortBy = searchParams.get('sortBy') || 'decisionDate';  // Default sort field
     const sortDirection = searchParams.get('sortDirection') as Prisma.SortOrder || 'desc';  // Default sort direction
 
     const orderBy = createNestedOrderBy(sortBy, sortDirection);
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
         },
     });
 
-    if (!user) {
+    if (!user){
         return new Response(JSON.stringify("User not found"), {
             status: 404,
             headers: {
@@ -54,70 +54,56 @@ export async function GET(request: NextRequest) {
         });
     };
 
-    // Base where clause for all queries
-    const baseWhereClause: WhereClause = {
+    const whereClause: WhereClause = {
         item: {
             name: { contains: nameFilter, mode: 'insensitive' },
             location: { 
-                name: { contains: locationFilter, mode: 'insensitive' }
+                name: {contains: locationFilter, mode: 'insensitive'}
             },
-            itemStatusId: 2,
+            itemStatusId: {
+                in: [1,3,4,5,6]
+            }
         },
-        requestStatusId: 1,
+        requestStatusId: 7,
         borrower: { 
-            firstName: { contains: requestorFilter, mode: 'insensitive' }
+            firstName: { contains: requestorFilter, mode: 'insensitive'}
         },
     };
-
-    // Handle date filters
+    
     if (borrowDate) {
         const borrowDateStart = new Date(borrowDate);
-        borrowDateStart.setHours(0, 0, 0, 0);
-        baseWhereClause.startBorrowDate = {
+        borrowDateStart.setHours(0, 0, 0, 0);  // Set to start of the day
+        whereClause.borrowDate = {
             gte: borrowDateStart
         };
     }
     
     if (returnDate) {
         const returnDateEnd = new Date(returnDate);
-        returnDateEnd.setHours(23, 59, 59, 999);
-        baseWhereClause.endBorrowDate = {
+        returnDateEnd.setHours(23, 59, 59, 999);  // Set to end of the day
+        whereClause.returnDate = {
             lte: returnDateEnd
         };
     }
 
-    // Fetch item requests
     const itemRequests = await prisma.itemRequest.findMany({
-        where: baseWhereClause,
+        where: whereClause,
         include: { 
             item: {
                 include: {
                     location: true
                 }
             },
-            borrower: true
+            borrower: true,
+            approver: true,
         },
-        orderBy: orderBy, 
+        orderBy: orderBy
     });
 
-    // Function to count item requests based on urgency
-    const countRequests = async (isUrgent: boolean) => prisma.itemRequest.count({
-        where: {
-            ...baseWhereClause,
-            isUrgent: isUrgent
-        }
-    });
-
-    // Concurrently count non-urgent and urgent requests
-    const [totalCount, totalCountUrgent] = await Promise.all([
-        countRequests(false),
-        countRequests(true)
-    ]);
-
-    return new Response(JSON.stringify({itemRequests, totalCount, totalCountUrgent}), {
+    return new Response(JSON.stringify(itemRequests), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',
         },
     });
-}
+};

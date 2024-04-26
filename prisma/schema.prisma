@@ -8,21 +8,22 @@ datasource db {
 }
 
 model User {
-  id                   Int           @id @default(autoincrement())
+  id                   Int            @id @default(autoincrement())
   roleId               Int
-  firebaseUid          String        @unique
+  firebaseUid          String         @unique
   firstName            String
   lastName             String
-  email                String        @unique
-  studentCode          String        @unique @db.Char(8)
-  tel                  String        @unique
-  active               Boolean       @default(true)
-  createdAt            DateTime      @default(now())
+  email                String         @unique
+  studentCode          String         @unique @db.Char(8)
+  tel                  String         @unique
+  active               Boolean        @default(true)
+  createdAt            DateTime       @default(now())
   profilePic           String?
   //relation
-  role                 Role          @relation(fields: [roleId], references: [id])
-  ItemRequestsBorrower ItemRequest[] @relation(name: "Borrower")
-  ItemRequestsApprover ItemRequest[] @relation(name: "Approver")
+  role                 Role           @relation(fields: [roleId], references: [id])
+  ItemRequestsBorrower ItemRequest[]  @relation(name: "Borrower")
+  ItemRequestsApprover ItemRequest[]  @relation(name: "Approver")
+  Notification         Notification[]
 }
 
 model Role {
@@ -80,13 +81,13 @@ model Location {
 }
 
 model Reparation {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   itemId     Int
   repairDate DateTime
-  returnDate DateTime
+  returnDate DateTime?
   notes      String
   // relation
-  item       Item     @relation(fields: [itemId], references: [id])
+  item       Item      @relation(fields: [itemId], references: [id])
 }
 
 model RequestStatus {
@@ -124,4 +125,14 @@ model Parameter {
   id    Int    @id @default(autoincrement())
   name  String @unique
   value String
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  message   String
+  createdAt DateTime @default(now())
+  read      Boolean  @default(false)
+  // relation
+  user      User     @relation(fields: [userId], references: [id])
 }

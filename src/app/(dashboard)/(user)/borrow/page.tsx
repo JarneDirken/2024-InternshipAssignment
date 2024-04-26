@@ -68,7 +68,6 @@ export default function Borrow() {
     };
 
     async function getAllItems(){
-        
         try {
             if(userId){
                 const queryString = new URLSearchParams({

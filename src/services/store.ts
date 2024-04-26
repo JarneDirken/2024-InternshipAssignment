@@ -3,6 +3,7 @@ import { atom } from 'recoil';
 import { User } from '@/models/User';
 import { GroupedItem, Item } from '@/models/Item';
 import { ItemRequest } from '@/models/ItemRequest';
+import { Repair } from '@/models/Repair';
 
 export const userProfileState = atom<User | null>({
     key: 'userProfileState',
@@ -27,4 +28,9 @@ export const updateRequest = atom({
 export const requestsState = atom<ItemRequest[]>({
     key: 'requestsState',
     default: [],
+});
+
+export const repariState = atom({
+    key: 'repariState',
+    default: false,
 });

@@ -289,6 +289,10 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
         }
     };
 
+    const handleNewNotification = () => {
+        return "yey"
+    }
+
     async function getParameters() {
         try {
             const response = await fetch(`/api/admin/parameter`);

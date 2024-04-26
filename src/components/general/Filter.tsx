@@ -25,14 +25,11 @@ import SwapVertRoundedIcon from '@mui/icons-material/SwapVertRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
 import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
-import { Label } from "@mui/icons-material";
-
-interface Filter {
-    label: string;
-    state: [string, Dispatch<SetStateAction<string>>];
-    inputType: 'text' | 'dateRange' | 'multipleSelect';
-    options?: string[];
-}
+import { ItemRequest } from "@/models/ItemRequest";
+import { Filter } from "@/models/Filter";
+import { Repair } from "@/models/Repair";
+import { User } from "@/models/User";
+import { SortOptions } from "@/models/SortOptions";
 
 interface FiltersProps {
     title: string;
@@ -42,18 +39,18 @@ interface FiltersProps {
     onFilterChange: (filterType: string, filterValue: string) => void;
     onSortChange: (sortBy: string, sortDirection: 'asc' | 'desc') => void;
     filters: Filter[];
-    items: Item[];
-    openModal: (id: number) => void;
-    sortOptions: string[];
+    items: Item[] | ItemRequest[] | Repair[] | User[];
+    sortOptions: SortOptions[];
     isCardView?: boolean;
 }
 
-export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, openModal, sortOptions, isCardView }: FiltersProps) {
+export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, sortOptions, isCardView }: FiltersProps) {
     const prevWidthRef = useRef<number | null>(null);
     const lastActiveRef = useRef<boolean | null>(null);
     const [sortBy, setSortBy] = useState('');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [sortLabel, setSortLabel] = useState<string>('');
 
     const [borrowDate, setBorrowDate] = useState<Date | null>(null); // borrow date
     const [returnDate, setReturnDate] = useState<Date | null>(null); // return date
@@ -98,16 +95,27 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
         setAnchorEl(null);
     };
 
-    const handleSortOptionSelect = (sortByOption: string) => {
-        if (sortByOption === sortBy) {
-            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    const handleSortOptionSelect = (option: SortOptions) => {
+        const newSortBy = option.optionsKey;
+        let newSortDirection = sortDirection;
+    
+        if (newSortBy === sortBy) {
+            newSortDirection = sortDirection === 'asc' ? 'desc' : 'asc'; // Calculate the new direction first
         } else {
-            setSortBy(sortByOption);
-            setSortDirection('asc');
+            newSortDirection = 'asc'; // Default to 'asc' when a new sort field is selected
         }
-        onSortChange(sortByOption, sortDirection);
+    
+        setSortBy(newSortBy);
+        setSortDirection(newSortDirection); // Update state with the new direction
+        setSortLabel(option.label); // Update the sort label
+        onSortChange(newSortBy, newSortDirection); // Pass the new direction to the change handler
         setAnchorEl(null);
-    };
+    };     
+
+    const getSortLabelFromKey = (sortByKey: string) => {
+        const option = sortOptions.find(option => option.optionsKey === sortByKey);
+        return option ? option.label : 'Select';
+    };    
 
     const handleFilterChange = (label: string, value: string | null) => {
         onFilterChange(label, value || '');
@@ -129,6 +137,13 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
             filter.state[1]('');
             onFilterChange(label, '');
         }
+    };
+
+    const handleSortReset = () => {
+        setSortBy('');
+        setSortLabel('');
+        setSortDirection('desc');  // Reset to default sort direction or choose a reasonable default
+        onSortChange('', 'desc');  // Notify the system that sorting has been reset
     };
 
     const theme = createTheme({
@@ -208,25 +223,32 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                     <div className="grid grid-cols-2 gap-4 mb-4 lg:grid-cols-4">
                         {filters.map((filter, index) => (
                             <div key={index}>
-                                {filter.inputType === 'text' && (
+                                {(filter.inputType === 'text' && filter.optionsKey) && (
                                     <Autocomplete
                                         disablePortal
                                         size="small"
                                         value={filter.state[0] || null}
                                         onChange={(event, value) => handleFilterChange(filter.label, value)}
-                                        options={[...new Set(items.map(item => item.name))]}
-                                        isOptionEqualToValue={(option, value) => option === value}
-                                        sx={{ width: '100%' }}
+                                        options={[
+                                            ...new Set(items.map(item => {
+                                                const keys = filter.optionsKey!.split('.');
+                                                let result = item as any;
+                                                for (const key of keys) {
+                                                    result = result && result[key] ? result[key] : null;
+                                                    if (result === null) break;
+                                                }
+                                                return result;
+                                            }).filter(option => option !== null && option !== undefined))
+                                        ]}
+                                        isOptionEqualToValue={(option, value) => option.id === value.id}
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}
                                                 label={filter.label}
                                                 placeholder="Search"
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                            />
-                                        )}
+                                                InputLabelProps={{ shrink: true }}
+                                            />)
+                                        }
                                     />
                                 )}
                                 {filter.inputType === 'dateRange' && (
@@ -263,7 +285,7 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                     }
                                 }} 
                             >
-                                Sort by {sortBy ? sortBy : 'Select'} {sortDirection === 'asc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
+                            Sort by {getSortLabelFromKey(sortBy)} {sortDirection === 'asc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
                             </Button>
                             <Menu
                                 anchorEl={anchorEl}
@@ -271,7 +293,7 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                 onClose={handleSortClose}
                             >
                                 {sortOptions.map(option => (
-                                    <MenuItem key={option} onClick={() => handleSortOptionSelect(option)}>{option}</MenuItem>
+                                    <MenuItem key={option.label} onClick={() => handleSortOptionSelect(option)}>{option.label}</MenuItem>
                                 ))}
                             </Menu>
                         </div>
@@ -288,6 +310,13 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                             </div>
                         )
                     ))}
+                    {sortBy && (
+                        <div className="bg-gray-300 px-2 rounded-md flex items-center truncate">
+                            <ClearIcon fontSize="small" className="cursor-pointer" onClick={handleSortReset} />
+                            <span className="text-sm text-gray-600">Sort by:&nbsp;</span>
+                            <span className="text-sm">{`${sortLabel} (${sortDirection.toUpperCase()})`}</span>
+                        </div>
+                    )}
                 </div>
             </div>
         </>

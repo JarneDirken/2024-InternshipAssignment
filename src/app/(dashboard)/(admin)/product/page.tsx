@@ -111,7 +111,6 @@ export default function Product() {
                     onSortChange={handleSortChange}
                     filters={filters}
                     items={items}
-                    openModal={openModal}
                     sortOptions={['Name', 'Model', 'Brand', 'Location']}
                 />
             </div>

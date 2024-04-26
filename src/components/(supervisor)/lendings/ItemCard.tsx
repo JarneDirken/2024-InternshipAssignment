@@ -4,9 +4,9 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Loading from "@/components/states/Loading";
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import Image from 'next/image';
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
+import DoNotTouchOutlinedIcon from '@mui/icons-material/DoNotTouchOutlined';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 
 interface BorrowCardProps {
     active: boolean;
@@ -16,10 +16,10 @@ interface BorrowCardProps {
     selectedTab?: string;
     setHandover?: (value: boolean) => void;
     setReceive?: (value: boolean) => void;
+    setChecked?: (value: boolean) => void;
 };
 
-export default function ItemCard({ active, openModal, items, itemLoading, selectedTab, setHandover, setReceive }: BorrowCardProps) {
-    const cardContainerHeight = "calc(100vh - 25.6rem)";
+export default function ItemCard({ active, openModal, items, itemLoading, selectedTab, setHandover, setReceive, setChecked }: BorrowCardProps) {
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
 
@@ -69,21 +69,26 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
     const handover = (item: ItemRequest) => {
         setHandover!(true);
         openModal(item);
-    }
+    };
 
     const receive = (item: ItemRequest) => {
         setReceive!(true);
         openModal(item);
-    }
+    };
+
+    const checked = (item: ItemRequest) => {
+        setChecked!(true);
+        openModal(item);
+    };
 
     return (
         <>
-            <div className={active ? listViewClass : gridViewClass} style={{ maxHeight: cardContainerHeight }}>
+            <div className={active ? listViewClass : gridViewClass} style={{maxHeight: "60vh"}}>
                 {items.map((item) => (
                     <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
-                                <div className="flex flex-row items-center w-5/6">
+                                <div className="flex flex-row items-center w-full">
                                     <div className="mr-2 w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
                                         {!item.item.image ? (
                                                 <Image 
@@ -170,34 +175,50 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                     </div>
                                 </div>
                                 <div className="w-1/12 flex flex-col gap-1">
-                                    {selectedTab === "borrows" && (
-                                        <Button 
-                                            text="Hand over"
-                                            textColor="custom-green"
-                                            borderColor="custom-green"
-                                            paddingX="px-0"
-                                            paddingY="py-0"
-                                            onClick={() => handover(item)}
-                                        />
-                                    )}
-                                    {selectedTab === "returns" && (
-                                        <Button 
-                                            text="Received"
-                                            textColor="custom-green"
-                                            borderColor="custom-green"
-                                            paddingX="px-0"
-                                            paddingY="py-0"
-                                            onClick={() => receive(item)}
-                                        />
-                                    )}
-                                    {selectedTab === "checkitem" && (
-                                        <Button 
-                                            text="Checked"
-                                            textColor="custom-green"
-                                            borderColor="custom-green"
-                                            paddingX="px-0"
-                                            paddingY="py-0"
-                                        />
+                                    {selectedTab !== "history" ? (
+                                        selectedTab === "borrows" ? (
+                                            <Button 
+                                                text="Hand over"
+                                                textColor="custom-green"
+                                                borderColor="custom-green"
+                                                paddingX="px-0"
+                                                paddingY="py-0"
+                                                onClick={() => handover(item)}
+                                            />
+                                        ) : selectedTab === "returns" ? (
+                                            <Button 
+                                                text="Received"
+                                                textColor="custom-green"
+                                                borderColor="custom-green"
+                                                paddingX="px-0"
+                                                paddingY="py-0"
+                                                onClick={() => receive(item)}
+                                            />
+                                        ) : selectedTab === "checkitem" ? (
+                                            <Button 
+                                                text="Checked"
+                                                textColor="custom-green"
+                                                borderColor="custom-green"
+                                                paddingX="px-0"
+                                                paddingY="py-0"
+                                                onClick={() => checked(item)}
+                                            />
+                                        ) : null
+                                    ) : (
+                                        <>
+                                            {(item.item.itemStatusId === 6) && (
+                                                <div className="text-custom-red flex items-center gap-1 font-semibold">
+                                                    <DoNotTouchOutlinedIcon fontSize="small"/>
+                                                    <span>Broken</span>
+                                                </div>
+                                            )}
+                                            {(item.item.itemStatusId === 5) && (
+                                                <div className="text-custom-primary flex items-center gap-1 font-semibold">
+                                                    <WarningAmberOutlinedIcon fontSize="small"/>
+                                                    <span>In repair</span>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             </div>

@@ -1,4 +1,7 @@
+import { ItemRequest } from "./ItemRequest";
+
 export interface User {
+    id: number;
     roleId: number;
     firebaseUid: string;
     firstName: string;
@@ -9,4 +12,6 @@ export interface User {
     createdAt: Date;
     role: {id: number, name: string};
     profilePic?: string;
+    ItemRequests?: ItemRequest[];
+    ItemRequestsBorrower?: ItemRequest[];
 }

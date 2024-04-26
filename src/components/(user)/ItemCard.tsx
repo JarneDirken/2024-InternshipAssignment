@@ -19,7 +19,6 @@ interface BorrowCardProps {
 }
 
 export default function ItemCard({ active, openModal, items, calculateReturnDate, calculateHistoryDate, itemLoading }: BorrowCardProps) {
-    const cardContainerHeight = "calc(100vh - 25.6rem)";
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll w-full";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
@@ -79,7 +78,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
 
     return (
         <>
-            <div className={active ? listViewClass : gridViewClass} style={{ maxHeight: cardContainerHeight }}>
+            <div className={active ? listViewClass : gridViewClass} style={{maxHeight: "60vh"}}>
                 {items.map((item) => (
                     <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
@@ -106,12 +105,8 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                     </div>
                                     <div className="flex flex-col w-1/3">
                                         <div className="truncate">
-                                            {(item.requestStatusId === 4 && item.item.itemStatusId === 3) && (
-                                                <>
-                                                    {calculateReturnDate && (calculateReturnDate(item.endBorrowDate))}
-                                                    {calculateHistoryDate && calculateHistoryDate(item.endBorrowDate, item.returnDate)}
-                                                </>
-                                            )}
+                                            {calculateReturnDate && (calculateReturnDate(item.endBorrowDate))}
+                                            {calculateHistoryDate && calculateHistoryDate(item.endBorrowDate, item.returnDate)}
                                             {(item.requestStatusId === 5 && item.item.itemStatusId === 4) && (
                                                 <div className="flex truncate items-center text-custom-primary gap-1 text-sm sm:text-base">
                                                     <AccessTimeIcon fontSize="small"/>

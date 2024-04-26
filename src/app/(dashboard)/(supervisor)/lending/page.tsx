@@ -5,12 +5,15 @@ import { useEffect, useState } from "react";
 import { getAuth } from 'firebase/auth';
 import app from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
-import Filters from "@/components/(user)/history/Filter";
+import Filters from "@/components/general/Filter";
 import ItemCard from "@/components/(supervisor)/lendings/ItemCard";
 import Loading from "@/components/states/Loading";
 import Modal from "@/components/(supervisor)/lendings/Modal";
 import { useRecoilValue } from "recoil";
 import { updateRequest } from "@/services/store";
+import { Filter } from "@/models/Filter";
+import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
+import { SortOptions } from "@/models/SortOptions";
 
 export default function Lending() {
     const { isAuthorized, loading } = useAuth(['Supervisor', 'Admin']);
@@ -30,12 +33,27 @@ export default function Lending() {
     const [totalCheckItemCount, setTotalCheckItemCount] = useState(0);
     // filters
     const [nameFilter, setNameFilter] = useState(''); // name filter
-    const [borrowDateFilter, setBorrowDateFilter] = useState(''); // model filter
-    const [returnDateFilter, setReturnDateFilter] = useState(''); // brand filter
+    const [borrowDateFilter, setBorrowDateFilter] = useState(''); // filter
+    const [requestor, setRequestor] = useState('');  // filter
+    const [location, setLocation] = useState('');  // filter
     const [isModalOpen, setModalOpen] = useState(false); // modal
     const requests = useRecoilValue(updateRequest);
     const [handover, setHandover] = useState(false);
     const [receive, setReceive] = useState(false);
+    const [checked, setChecked] = useState(false);
+    const [currentItems, setCurrentItems] = useState(borrows);
+    const filters: Filter[] = [
+        { label: 'Name', state: [nameFilter, setNameFilter], inputType: 'text', optionsKey: 'item.name' },
+        { label: 'Borrow Date', state: [borrowDateFilter, setBorrowDateFilter], inputType: 'dateRange'},
+        { label: 'Requestor', state: [requestor, setRequestor], inputType: 'text', optionsKey: 'borrower.firstName' },
+        { label: 'Location', state: [location, setLocation], inputType: 'text', optionsKey: 'item.location.name' },
+    ];
+    const [repairState, setRepairState] = useState(false);
+    const sortOptions: SortOptions[] = [
+        { label: 'Name', optionsKey: 'item.name' },
+        { label: 'End Borrow Date', optionsKey: 'returnDate' },
+        { label: 'Location', optionsKey: 'item.location.name' }
+    ]; 
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -58,7 +76,7 @@ export default function Lending() {
                 getCheckItem();
             }
         }
-    }, [userId, requests]);
+    }, [userId, requests, nameFilter, borrowDateFilter, requestor, location]);
 
     useEffect(() => {
         if(selectedTab === "returns"){
@@ -72,20 +90,57 @@ export default function Lending() {
         }
     }, [selectedTab]);
 
+    useEffect(() => {
+        switch (selectedTab) {
+            case "borrows":
+                setCurrentItems(borrows);
+                break;
+            case "returns":
+                setCurrentItems(returns);
+                break;
+            case "checkitem":
+                setCheckItem(checkItem);
+                break;
+            case "history":
+                setCurrentItems(allRequests);
+                break;
+            default:
+                setCurrentItems([]);
+        }
+    }, [selectedTab, borrows, returns, checkItem, allRequests]);
+
     const handleFilterChange = (filterType: string, value: string) => {
         switch (filterType) {
             case 'name':
                 setNameFilter(value);
                 break;
-            case 'model':
+            case 'Borrow date':
                 setBorrowDateFilter(value);
                 break;
-            case 'brand':
-                setReturnDateFilter(value);
+            case 'requestor':
+                setRequestor(value);
+                break;
+            case 'location':
+                setLocation(value);
                 break;
             default:
                 break;
         }
+    };
+
+    const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
+        if(selectedTab === "borrows") { getBorrows(sortBy, sortDirection); }
+        if(selectedTab === "returns") { getReturns(sortBy, sortDirection); }
+        if(selectedTab === "checkitem") { getCheckItem(sortBy, sortDirection); }
+        if(selectedTab === "history") { getAllRequests(sortBy, sortDirection); }
+    };
+
+    const parseDateFilter = (dateFilter: string) => {
+        const dates = dateFilter.split(" - ");
+        const borrowDate = dates[0];
+        const returnDate = dates.length > 1 ? dates[1] : new Date().toLocaleDateString('en-US');
+    
+        return { borrowDate, returnDate };
     };
 
     const openModal = (itemRequest: ItemRequest) => {
@@ -93,11 +148,22 @@ export default function Lending() {
         setModalOpen(true);
     };
 
-    async function getBorrows() {
+    async function getBorrows(sortBy = 'requestDate', sortDirection = 'desc') {
         setItemLoading(true);
+        const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
+            location: location,
+            requestor: requestor,
+            sortBy: sortBy || 'requestDate',
+            sortDirection: sortDirection || 'desc'
         };
+
+        // Include dates in the query only if they are defined
+        if (borrowDate) {
+            params.borrowDate = borrowDate;
+            params.returnDate = returnDate;
+        }
     
         // Only add userId to the query if it is not null
         if (userId !== null) {
@@ -129,11 +195,22 @@ export default function Lending() {
         }
     };
 
-    async function getReturns() {
+    async function getReturns(sortBy = 'requestDate', sortDirection = 'desc') {
         setItemLoading(true);
+        const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
+            location: location,
+            requestor: requestor,
+            sortBy: sortBy || 'requestDate',
+            sortDirection: sortDirection || 'desc'
         };
+
+        // Include dates in the query only if they are defined
+        if (borrowDate) {
+            params.borrowDate = borrowDate;
+            params.returnDate = returnDate;
+        }
     
         // Only add userId to the query if it is not null
         if (userId !== null) {
@@ -158,11 +235,22 @@ export default function Lending() {
         }
     };
 
-    async function getCheckItem(){
+    async function getCheckItem(sortBy = 'requestDate', sortDirection = 'desc'){
         setItemLoading(true);
+        const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
+            location: location,
+            requestor: requestor,
+            sortBy: sortBy || 'requestDate',
+            sortDirection: sortDirection || 'desc'
         };
+
+        // Include dates in the query only if they are defined
+        if (borrowDate) {
+            params.borrowDate = borrowDate;
+            params.returnDate = returnDate;
+        }
     
         // Only add userId to the query if it is not null
         if (userId !== null) {
@@ -187,11 +275,22 @@ export default function Lending() {
         }
     };
 
-    async function getAllRequests() {
+    async function getAllRequests(sortBy = 'decisionDate', sortDirection = 'desc') {
         setItemLoading(true);
+        const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
+            location: location,
+            requestor: requestor,
+            sortBy: sortBy || 'decisionDate',
+            sortDirection: sortDirection || 'desc'
         };
+
+        // Include dates in the query only if they are defined
+        if (borrowDate) {
+            params.borrowDate = borrowDate;
+            params.returnDate = returnDate;
+        }
     
         // Only add userId to the query if it is not null
         if (userId !== null) {
@@ -201,7 +300,7 @@ export default function Lending() {
         const queryString = new URLSearchParams(params).toString();
     
         try {
-            const response = await fetch(`/api/supervisor/itemrequest?${queryString}`);
+            const response = await fetch(`/api/supervisor/history?${queryString}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -220,6 +319,8 @@ export default function Lending() {
         setModalOpen(false);
         setHandover(false);
         setReceive(false);
+        setChecked(false);
+        setRepairState(false);
     };
 
     const checkTab = () => {
@@ -254,6 +355,7 @@ export default function Lending() {
                         items={checkItem}
                         itemLoading={itemLoading}
                         selectedTab={selectedTab}
+                        setChecked={setChecked}
                     />
                 );
             case "history":
@@ -282,15 +384,22 @@ export default function Lending() {
                 item={item}
                 handover={handover}
                 receive={receive}
+                checked={checked}
+                repairState={repairState}
+                setRepairState={setRepairState}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
+                    title="Lendings"
+                    icon={<HandshakeOutlinedIcon fontSize="large" />}
                     active={active}
                     setActive={setActive}
                     onFilterChange={handleFilterChange}
-                    items={borrows}
-                    totalItemCount={totalBorrowsCount}
-                    userId={userId}
+                    onSortChange={handleSortChange}
+                    items={currentItems}
+                    filters={filters}
+                    sortOptions={sortOptions}
+                    isCardView={true}
                 />
             </div>
             <div className="rounded-xl">

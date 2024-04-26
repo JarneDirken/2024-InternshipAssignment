@@ -83,22 +83,18 @@ function groupItems(items: Item[]): GroupedItem[] {
         const key = `${item.name}-${item.model}-${item.brand}-${item.locationId}`;
 
         if (!grouped[key]) {
-            // Initialize a new grouped item with an items array containing the current item
-            grouped[key] = { ...item, availableCount: 0, borrowedCount: 0, items: [item] };
-            if (item.itemStatusId === 1) {
-                grouped[key].availableCount = 1;
-            } else {
-                grouped[key].borrowedCount = 1;
-            }
-        } else {
-            // Add current item to the items array and update counts
-            grouped[key].items.push(item);
-            if (item.itemStatusId === 1) {
-                grouped[key].availableCount++;
-            } else {
-                grouped[key].borrowedCount++;
-            }
+            grouped[key] = { ...item, availableCount: 0, borrowedCount: 0, items: [] };
         }
+
+        // Add current item to the items array
+        grouped[key].items.push(item);
+
+        // Sort items within the group so available ones are first
+        grouped[key].items.sort((a, b) => (a.itemStatusId === 1 ? -1 : 1));
+
+        // Recount available and borrowed items
+        grouped[key].availableCount = grouped[key].items.filter(i => i.itemStatusId === 1).length;
+        grouped[key].borrowedCount = grouped[key].items.filter(i => i.itemStatusId !== 1).length;
     });
 
     return Object.values(grouped);

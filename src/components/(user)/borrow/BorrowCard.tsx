@@ -28,7 +28,6 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
     const NUMBER_OF_ITEMS_TO_FETCH = 10;
     const listRef = useRef<HTMLDivElement>(null);
 
-    const cardContainerHeight = "calc(100vh - 25.6rem)";
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll w-full";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
 
@@ -96,29 +95,23 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
     };
 
     function renderItemStatus(item: GroupedItem) {
-        switch (item.itemStatusId) {
-            case 1:
-                return (
-                    <Button 
-                        text="Borrow" 
-                        textColor="white" 
-                        borderColor="custom-primary" 
-                        fillColor="custom-primary"
-                        paddingY="py-0"
-                        font="semibold"
-                        onClick={() => openModal(item)}
-                    />
-                );
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-                return <span>Borrowed</span>;
-            default:
-                return null;
+        const isAvailable = item.availableCount > 0;
+        if (isAvailable) {
+            return (
+                <Button 
+                    text="Borrow" 
+                    textColor="white" 
+                    borderColor="custom-primary" 
+                    fillColor="custom-primary"
+                    paddingY="py-0"
+                    font="semibold"
+                    onClick={() => openModal(item)}
+                />
+            );
+        } else {
+            return <span>Borrowed</span>;
         }
-    };
+    }
 
     if (loading) { return (<Loading />); };
 
@@ -132,7 +125,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
 
     return (
         <>
-            <div ref={listRef} className={active ? listViewClass : gridViewClass} style={{ maxHeight: cardContainerHeight }}>
+            <div ref={listRef} className={active ? listViewClass : gridViewClass} style={{maxHeight: "60vh"}}>
                 {items.map((item) => (
                     <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
@@ -185,7 +178,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                         </div>
                                     </div>
                                 </div>
-                                <div className="w-1/12">
+                                <div className="w-1/12 flex flex-col">
                                     {renderItemStatus(item)}
                                 </div>
                             </div>
