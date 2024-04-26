@@ -46,6 +46,8 @@ export default function Product() {
     const [isModalOpen, setModalOpen] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
     const auth = getAuth(app);
+    const [currentItem, setCurrentItem] = useState<Item | undefined>(undefined);
+    const [mode, setMode] = useState<'add' | 'edit' | 'delete'>('add');
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -145,9 +147,11 @@ export default function Product() {
         setModalOpen(false);
     };
 
-    const openModal = () => {
+    const openModal = (mode: 'add' | 'edit' | 'delete', item?: Item) => {
+        setMode(mode);
+        setCurrentItem(item);
         setModalOpen(true);
-    }
+    };
 
     const openModalProduct = (item: Item) => {
         setItem(item);
@@ -160,6 +164,7 @@ export default function Product() {
                 open={isModalOpen}
                 onClose={closeModal}
                 item={item}
+                mode="add"
             />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
@@ -171,13 +176,12 @@ export default function Product() {
                     onSortChange={handleSortChange}
                     filters={filters}
                     items={items}
-                    openModal={openModal}
                     sortOptions={['Name', 'Model', 'Brand', 'Location']}
                 />
             </div>
             <div className="rounded-xl">
                 <div className="flex flex-wrap justify-center md:justify-start bg-white gap-1 sm:gap-2 lg:gap-4 rounded-tl-xl rounded-tr-xl z-0 p-4">
-                    <div onClick={openModal}>
+                    <div onClick={() => openModal('add')}>
                         <Button 
                             icon={<AddIcon />} 
                             textColor="custom-primary" 
