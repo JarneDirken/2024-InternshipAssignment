@@ -13,6 +13,7 @@ import { Item } from "@/models/Item";
 import { User } from "@/models/User";
 import ItemCard from "@/components/(supervisor)/historypage/ItemCard";
 import { ItemRequest } from "@/models/ItemRequest";
+import { SortOptions } from "@/models/SortOptions";
 
 export default function HistoryPage({ params } : {params: {type:string, id: string}}) {
     const type = params.type;
@@ -32,6 +33,11 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
     const [filters, setFilters] = useState<Filter[]>([]);
     const [filteredItems, setFilteredItems] = useState<User[] | Item[] | ItemRequest[]>([]);  // Use a more specific type if possible
     const icon = type === 'user' ? <PeopleAltOutlinedIcon fontSize="large" /> : <ContentPasteOutlinedIcon fontSize="large" />;
+    const sortOptions: SortOptions[] = [
+        { label: 'Name', optionsKey: 'item.name' },
+        { label: 'End Borrow Date', optionsKey: 'returnDate' },
+        { label: 'Location', optionsKey: 'item.location.name' }
+    ]; 
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -48,7 +54,7 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
         if (((type === "user" || type === "item") && userId)){
             getHistory();
         }
-    },[userId, type, id]);
+    },[userId, type, id, nameFilter]);
 
     useEffect(() => {
         if (type === "user" || type === "item") {
@@ -71,11 +77,6 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
             }
         }
     }, [history, type]);
-
-    useEffect(() => {
-        console.log("history: " + history);
-        console.log("filtered items: " + filteredItems)
-    }, [history])
 
     useEffect(() => {
         if (type === 'user') {
@@ -119,8 +120,19 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
 
     async function getHistory() {
         setItemLoading(true);
+        const params: Record<string, string> = {
+            name: nameFilter,
+        };
+
+        // Only add userId to the query if it is not null
+        if (userId !== null) {
+            params.userId = userId;
+        };
+
+        const queryString = new URLSearchParams(params).toString();
+
         try {
-            const response = await fetch(`/api/supervisor/historypage/${type}/${id}`);
+            const response = await fetch(`/api/supervisor/historypage/${type}/${id}?${queryString}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -132,11 +144,9 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
             } else {
                 setHistory(Array.isArray(data) ? data : [data]);
             }
-            setItemLoading(false);
         } catch (error) {
             console.error("Failed to fetch items:", error);
             setDataFound(false);
-            setItemLoading(false);
         } finally {
             setItemLoading(false);
         }
@@ -166,7 +176,7 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
                     onSortChange={handleSortChange}
                     items={filteredItems}
                     filters={filters}
-                    sortOptions={['Name', 'Borrow date']}
+                    sortOptions={sortOptions}
                     isCardView={true}
                 />
             </div>

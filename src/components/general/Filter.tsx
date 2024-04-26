@@ -80,19 +80,6 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
         return () => window.removeEventListener('resize', handleResize);
     }, [active, setActive]);
 
-    // useEffect(() => {
-    //     console.log("Filtered items before Autocomplete options are set:", items);
-    //     console.log("Options for Autocomplete:", items.map(item => {
-    //         const keys = filters.length > 0 ? filters[0].optionsKey.split('.') : []; // assuming all filters use similar structure
-    //         let result = item as any;
-    //         for (const key of keys) {
-    //             result = result && result[key] ? result[key] : null;
-    //             if (result === null) break;
-    //         }
-    //         return result;
-    //     }).filter(option => option !== null));
-    // }, [items, filters]);
-
     // Separate useEffect for initial load
     useEffect(() => {
         if (window.innerWidth < 1280) {
