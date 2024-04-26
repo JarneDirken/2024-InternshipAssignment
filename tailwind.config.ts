@@ -26,6 +26,11 @@ const config: Config = {
         "custom-green": "#0C7403",
         "custom-red": "#FF0000",
         "custom-blue": "#00C2FF",
+        "custom-light-orange": "#ffb96e",
+        "custom-dark-blue": "#007DC4",
+      },
+      screens: {
+        'xs': '480px',
       }
     },
   },
