@@ -13,6 +13,7 @@ import { useRecoilValue } from "recoil";
 import { updateRequest } from "@/services/store";
 import { Filter } from "@/models/Filter";
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
+import { SortOptions } from "@/models/SortOptions";
 
 export default function Lending() {
     const { isAuthorized, loading } = useAuth(['Supervisor', 'Admin']);
@@ -48,6 +49,11 @@ export default function Lending() {
         { label: 'Location', state: [location, setLocation], inputType: 'text', optionsKey: 'item.location.name' },
     ];
     const [repairState, setRepairState] = useState(false);
+    const sortOptions: SortOptions[] = [
+        { label: 'Name', optionsKey: 'item.name' },
+        { label: 'End Borrow Date', optionsKey: 'returnDate' },
+        { label: 'Location', optionsKey: 'item.location.name' }
+    ]; 
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -123,8 +129,10 @@ export default function Lending() {
     };
 
     const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
-        // Implement sorting logic here
-        console.log(`Sorting by ${sortBy} in ${sortDirection} order`);
+        if(selectedTab === "borrows") { getBorrows(sortBy, sortDirection); }
+        if(selectedTab === "returns") { getReturns(sortBy, sortDirection); }
+        if(selectedTab === "checkitem") { getCheckItem(sortBy, sortDirection); }
+        if(selectedTab === "history") { getAllRequests(sortBy, sortDirection); }
     };
 
     const parseDateFilter = (dateFilter: string) => {
@@ -140,13 +148,15 @@ export default function Lending() {
         setModalOpen(true);
     };
 
-    async function getBorrows() {
+    async function getBorrows(sortBy = 'requestDate', sortDirection = 'desc') {
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
             location: location,
-            requestor: requestor
+            requestor: requestor,
+            sortBy: sortBy || 'requestDate',
+            sortDirection: sortDirection || 'desc'
         };
 
         // Include dates in the query only if they are defined
@@ -185,13 +195,15 @@ export default function Lending() {
         }
     };
 
-    async function getReturns() {
+    async function getReturns(sortBy = 'requestDate', sortDirection = 'desc') {
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
             location: location,
-            requestor: requestor
+            requestor: requestor,
+            sortBy: sortBy || 'requestDate',
+            sortDirection: sortDirection || 'desc'
         };
 
         // Include dates in the query only if they are defined
@@ -223,13 +235,15 @@ export default function Lending() {
         }
     };
 
-    async function getCheckItem(){
+    async function getCheckItem(sortBy = 'requestDate', sortDirection = 'desc'){
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
             location: location,
-            requestor: requestor
+            requestor: requestor,
+            sortBy: sortBy || 'requestDate',
+            sortDirection: sortDirection || 'desc'
         };
 
         // Include dates in the query only if they are defined
@@ -261,13 +275,15 @@ export default function Lending() {
         }
     };
 
-    async function getAllRequests() {
+    async function getAllRequests(sortBy = 'decisionDate', sortDirection = 'desc') {
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
             location: location,
-            requestor: requestor
+            requestor: requestor,
+            sortBy: sortBy || 'decisionDate',
+            sortDirection: sortDirection || 'desc'
         };
 
         // Include dates in the query only if they are defined
@@ -382,7 +398,7 @@ export default function Lending() {
                     onSortChange={handleSortChange}
                     items={currentItems}
                     filters={filters}
-                    sortOptions={['Name', 'Borrow date']}
+                    sortOptions={sortOptions}
                     isCardView={true}
                 />
             </div>

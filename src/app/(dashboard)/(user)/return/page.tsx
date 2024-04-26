@@ -13,6 +13,7 @@ import { useRecoilState } from "recoil";
 import { updateRequest } from "@/services/store";
 import KeyboardReturnOutlinedIcon from '@mui/icons-material/KeyboardReturnOutlined';
 import { Filter } from "@/models/Filter";
+import { SortOptions } from "@/models/SortOptions";
 
 export default function Return() {
     const { isAuthorized, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
@@ -29,6 +30,11 @@ export default function Return() {
         { label: 'Name', state: [nameFilter, setNameFilter], inputType: 'text', optionsKey: 'item.name'},
         { label: 'Borrow Date', state: [borrowDateFilter, setBorrowDateFilter], inputType: 'dateRange'}
     ];
+    const sortOptions: SortOptions[] = [
+        { label: 'Name', optionsKey: 'item.name' },
+        { label: 'End Borrow Date', optionsKey: 'returnDate' },
+        { label: 'Location', optionsKey: 'item.location.name' }
+    ];  
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -81,15 +87,6 @@ export default function Return() {
     
         const dayLabel = Math.abs(daysDiff) === 1 ? "day" : "days";
     
-        // if (daysDiff === 0) {
-        //     return (
-        //         <div className="flex items-center gap-1 text-custom-red">
-        //             <AccessTimeIcon fontSize="small" />
-        //             <span>Today</span>
-        //         </div>
-        //     );
-        // }
-    
         return (
             <div className={`flex items-center gap-1 ${urgent ? 'text-custom-red' : 'text-custom-primary'}`}>
                 <AccessTimeIcon fontSize="small" />
@@ -103,8 +100,7 @@ export default function Return() {
     };
 
     const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
-        // Implement sorting logic here
-        console.log(`Sorting by ${sortBy} in ${sortDirection} order`);
+        getItems(sortBy, sortDirection);
     };
 
     const parseDateFilter = (dateFilter: string) => {
@@ -115,11 +111,13 @@ export default function Return() {
         return { borrowDate, returnDate };
     };
 
-    async function getItems() {
+    async function getItems(sortBy = 'returnDate', sortDirection = 'desc') {
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
+            sortBy: sortBy || 'returnDate',
+            sortDirection: sortDirection || 'desc'
         };
 
         // Include dates in the query only if they are defined
@@ -170,7 +168,7 @@ export default function Return() {
                     onSortChange={handleSortChange}
                     items={items}
                     filters={filters}
-                    sortOptions={['Name', 'Borrow date']}
+                    sortOptions={sortOptions}
                     isCardView={true}
                 />
             </div>

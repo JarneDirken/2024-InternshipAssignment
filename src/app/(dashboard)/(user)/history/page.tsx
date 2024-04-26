@@ -11,6 +11,7 @@ import ItemCard from "@/components/(user)/ItemCard";
 import Loading from "@/components/states/Loading";
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import { Filter } from "@/models/Filter";
+import { SortOptions } from "@/models/SortOptions";
 
 export default function History() {
     const { isAuthorized, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
@@ -26,6 +27,11 @@ export default function History() {
         { label: 'Name', state: [nameFilter, setNameFilter], inputType: 'text', optionsKey: 'item.name'},
         { label: 'Borrow Date', state: [borrowDateFilter, setBorrowDateFilter], inputType: 'dateRange'}
     ];
+    const sortOptions: SortOptions[] = [
+        { label: 'Name', optionsKey: 'item.name' },
+        { label: 'End Borrow Date', optionsKey: 'returnDate' },
+        { label: 'Location', optionsKey: 'item.location.name' }
+    ];    
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -58,13 +64,8 @@ export default function History() {
     };
 
     const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
-        // Implement sorting logic here
-        console.log(`Sorting by ${sortBy} in ${sortDirection} order`);
+        getItems(sortBy, sortDirection);
     };
-
-    const openModal = () => {
-
-    }
 
     const parseDateFilter = (dateFilter: string) => {
         const dates = dateFilter.split(" - ");
@@ -74,11 +75,13 @@ export default function History() {
         return { borrowDate, returnDate };
     };
 
-    async function getItems() {
+    async function getItems(sortBy = 'returnDate', sortDirection = 'desc') {
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
+            sortBy: sortBy || 'returnDate',
+            sortDirection: sortDirection || 'desc'
         };
 
         if (borrowDate) {
@@ -162,7 +165,7 @@ export default function History() {
                     onSortChange={handleSortChange}
                     items={items}
                     filters={filters}
-                    sortOptions={['Name', 'Borrow date']}
+                    sortOptions={sortOptions}
                     isCardView={true}
                 />
             </div>
@@ -181,7 +184,6 @@ export default function History() {
                 </div>
                 <ItemCard 
                     active={active}
-                    openModal={openModal}
                     items={items}
                     calculateHistoryDate={calculateOnTime}
                     itemLoading={itemLoading}

@@ -13,6 +13,7 @@ import ItemCard from "@/components/(supervisor)/repair/ItemCard";
 import Modal from "@/components/(supervisor)/repair/Modal";
 import { useRecoilValue } from "recoil";
 import { repariState } from "@/services/store";
+import { SortOptions } from "@/models/SortOptions";
 
 export default function Reparation() {
     const { isAuthorized, loading } = useAuth(['Supervisor', 'Admin']);
@@ -38,6 +39,11 @@ export default function Reparation() {
         { label: 'Name', state: [nameFilter, setNameFilter], inputType: 'text', optionsKey: 'item.name' },
         { label: 'Borrow Date', state: [borrowDateFilter, setBorrowDateFilter], inputType: 'dateRange'},
     ];
+    const sortOptions: SortOptions[] = [
+        { label: 'Name', optionsKey: 'item.name' },
+        { label: 'Repair Date', optionsKey: 'repairDate' },
+        { label: 'Location', optionsKey: 'item.location.name' }
+    ]; 
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -98,8 +104,8 @@ export default function Reparation() {
     };
 
     const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
-        // Implement sorting logic here
-        console.log(`Sorting by ${sortBy} in ${sortDirection} order`);
+        if(selectedTab === "repair") { getRepairs(sortBy, sortDirection); }
+        if(selectedTab === "history") { getHistory(sortBy, sortDirection); }
     };
 
     const parseDateFilter = (dateFilter: string) => {
@@ -115,11 +121,13 @@ export default function Reparation() {
         setModalOpen(true);
     };
 
-    async function getRepairs() {
+    async function getRepairs(sortBy = 'repairDate', sortDirection = 'desc') {
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
+            sortBy: sortBy || 'repairDate',
+            sortDirection: sortDirection || 'desc'
         };
 
         // Include dates in the query only if they are defined
@@ -154,11 +162,13 @@ export default function Reparation() {
         }
     };
 
-    async function getHistory() {
+    async function getHistory(sortBy = 'repairDate', sortDirection = 'desc') {
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
         const params: Record<string, string> = {
             name: nameFilter,
+            sortBy: sortBy || 'repairDate',
+            sortDirection: sortDirection || 'desc'
         };
 
         // Include dates in the query only if they are defined
@@ -215,7 +225,7 @@ export default function Reparation() {
                     onSortChange={handleSortChange}
                     items={currentItems}
                     filters={filters}
-                    sortOptions={['Name', 'Borrow date']}
+                    sortOptions={sortOptions}
                     isCardView={true}
                 />
             </div>
