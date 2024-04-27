@@ -135,38 +135,38 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                                     loading="lazy"
                                 />
                             </div>
-                            <div className="truncate col-span-2 p-2">
+                            <div className="truncate col-span-2 p-2 self-center">
                                 <Tooltip title={item.number} placement="top-start">
                                     <span>{item.number}</span>
                                 </Tooltip>
                             </div>
-                            <div className="truncate col-span-2 p-2">
+                            <div className="truncate col-span-2 p-2 self-center">
                                 <Tooltip title={item.name} placement="top-start">
                                     <span>{item.name}</span>
                                 </Tooltip>
                             </div>
-                            <div className="truncate col-span-1 p-2">
+                            <div className="truncate col-span-1 p-2 self-center">
                                 <Tooltip title={item.model} placement="top-start">
                                     <span>{item.model}</span>
                                 </Tooltip>
                             </div>
-                            <div className="truncate col-span-1 p-2">
+                            <div className="truncate col-span-1 p-2 self-center">
                                 <Tooltip title={item.brand} placement="top-start">
                                     <span>{item.brand}</span>
                                 </Tooltip>
                             </div>
-                            <div className="truncate col-span-1 xl:col-span-2 p-2">
+                            <div className="truncate col-span-1 xl:col-span-2 p-2 self-center">
                                 <Tooltip title={item.location.name} placement="top-start">
                                     <span>{item.location.name}</span>
                                 </Tooltip>
                             </div>
-                            <div className="truncate col-span-1 p-2">
+                            <div className="truncate col-span-1 p-2 self-center">
                                 <Tooltip title={item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'} placement="top-start">
                                     <span>{item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'}</span>
                                 </Tooltip>
                             </div>
                             
-                            <div className="flex justify-evenly col-span-2 xl:col-span-1 p-2">
+                            <div className="flex justify-evenly col-span-2 xl:col-span-1 p-2 self-center">
                                 <Tooltip title="Edit" placement="top">
                                     <EditOutlinedIcon className="text-gray-400" />
                                 </Tooltip>

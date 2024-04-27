@@ -13,13 +13,8 @@ import Button from "@/components/states/Button";
 import Checkbox from '@mui/material/Checkbox';
 import ProductCard from "@/components/(admin)/products/ProductCard";
 import Modal from "@/components/(admin)/products/Modal";
-
-interface Filter {
-    label: string;
-    state: [string, React.Dispatch<React.SetStateAction<string>>];
-    inputType: 'text' | 'dateRange' | 'multipleSelect';
-    options?: string[];
-}
+import { SortOptions } from "@/models/SortOptions";
+import { Filter } from "@/models/Filter";
 
 export default function Product() {
     const [active, setActive] = useState(true);
@@ -35,11 +30,11 @@ export default function Product() {
     const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set<number>());
 
     const filters: Filter[] = [
-        { label: 'Name', state: [name, setName], inputType: 'text'},
-        { label: 'Model', state: [model, setModel], inputType: 'text' },
-        { label: 'Brand', state: [brand, setBrand], inputType: 'text' },
-        { label: 'Location', state: [location, setLocation], inputType: 'text' },
-        { label: 'Year', state: [year, setYear], inputType: 'text' },
+        { label: 'Name', state: [name, setName], inputType: 'text', optionsKey: 'name'},
+        { label: 'Model', state: [model, setModel], inputType: 'text', optionsKey: 'model'},
+        { label: 'Brand', state: [brand, setBrand], inputType: 'text', optionsKey: 'brand'},
+        { label: 'Location', state: [location, setLocation], inputType: 'text', optionsKey: 'location.name'},
+        { label: 'Year', state: [year, setYear], inputType: 'text', optionsKey: 'yearBought'},
         { label: 'Availability', state: [availability, setAvailability], inputType: 'multipleSelect', options: ['Active', 'Inactive']},
     ];
 
@@ -48,6 +43,14 @@ export default function Product() {
     const auth = getAuth(app);
     const [currentItem, setCurrentItem] = useState<Item | undefined>(undefined);
     const [mode, setMode] = useState<'add' | 'edit' | 'delete'>('add');
+
+    const sortOptions: SortOptions[] = [
+        { label: 'Name', optionsKey: 'item.name' },
+        { label: 'Model', optionsKey: 'item.model' },
+        { label: 'Brand', optionsKey: 'item.brand' },
+        { label: 'Location', optionsKey: 'item.location.name' }
+    ]; 
+
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -176,7 +179,7 @@ export default function Product() {
                     onSortChange={handleSortChange}
                     filters={filters}
                     items={items}
-                    sortOptions={['Name', 'Model', 'Brand', 'Location']}
+                    sortOptions={sortOptions}
                 />
             </div>
             <div className="rounded-xl">
@@ -193,17 +196,20 @@ export default function Product() {
                             text="Add"
                         />
                     </div>
-                    <Button 
-                        icon={<DeleteOutlinedIcon />} 
-                        textColor="custom-red" 
-                        borderColor="custom-red" 
-                        fillColor="red-100" 
-                        paddingX="px-2.5"
-                        paddingY="py-0.5"
-                        textClassName="font-semibold" 
-                        text="Delete" 
-                        disabled={selectedItems.size === 0}
-                    />
+                    <div onClick={() => openModal('delete')}>
+                        <Button 
+                            icon={<DeleteOutlinedIcon />} 
+                            textColor="custom-red"
+                            borderColor="custom-red" 
+                            fillColor="red-100" 
+                            paddingX="px-2.5"
+                            paddingY="py-0.5"
+                            buttonClassName="bg-red-100"
+                            textClassName="font-semibold" 
+                            text="Delete" 
+                            disabled={selectedItems.size === 0}
+                        />
+                    </div>
                     <Button 
                         icon={<QrCode2RoundedIcon />} 
                         textColor="custom-dark-blue" 
