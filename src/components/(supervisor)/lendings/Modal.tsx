@@ -168,25 +168,25 @@ export default function Modal({ open, onClose, item, userId, handover, receive, 
                         {handover && (
                             <>
                                 <CheckCircleOutlineOutlinedIcon fontSize="large"/>
-                                <h1 id="borrow-modal-title" className="text-xl">You're about to lend this item out. Are you sure?</h1>
+                                <h1 id="borrow-modal-title" className="text-xl">You&apos;re about to lend this item out. Are you sure?</h1>
                             </>
                         )}
                         {receive && (
                             <>
                                 <CheckCircleOutlineOutlinedIcon fontSize="large"/>
-                                <h1 id="borrow-modal-title" className="text-xl">You're about to receive this item. Are you sure?</h1>
+                                <h1 id="borrow-modal-title" className="text-xl">You&apos;re about to receive this item. Are you sure?</h1>
                             </>
                         )}
                         {checked && (
                             repairState ? (
                                 <>
                                     <WarningAmberIcon fontSize="large" className="text-custom-primary"/>
-                                    <h1 id="borrow-modal-title" className="text-xl text-custom-primary">You're about to mark this item as broken. Are you sure?</h1>
+                                    <h1 id="borrow-modal-title" className="text-xl text-custom-primary">You&apos;re about to mark this item as broken. Are you sure?</h1>
                                 </>
                             ) : (
                                 <>
                                     <CheckCircleOutlineOutlinedIcon fontSize="large"/>
-                                    <h1 id="borrow-modal-title" className="text-xl">You're about to check this item. Are you sure?</h1>
+                                    <h1 id="borrow-modal-title" className="text-xl">You&apos;re about to check this item. Are you sure?</h1>
                                 </>
                             )
                         )}

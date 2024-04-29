@@ -109,13 +109,13 @@ export default function Modal({ open, onClose, item, repaired, broken, setRepair
                     {repaired && (
                         <div className="flex items-center gap-2 text-custom-green font-semibold">
                             <CheckCircleOutlineOutlinedIcon fontSize="large"/>
-                            <h1 id="borrow-modal-title" className="text-xl">You're about to mark this item as repaired. Are you sure?</h1>
+                            <h1 id="borrow-modal-title" className="text-xl">You&apos;re about to mark this item as repaired. Are you sure?</h1>
                         </div>
                     )}
                     {broken && (
                         <div className="flex items-center gap-2 text-custom-red font-semibold">
                             <WarningAmberIcon fontSize="large"/>
-                            <h1 id="borrow-modal-title" className="text-xl">You're about to mark this item as broken. Are you sure?</h1>
+                            <h1 id="borrow-modal-title" className="text-xl">You&apos;re about to mark this item as broken. Are you sure?</h1>
                         </div>
                     )}
                     <ClearIcon className="cursor-pointer" onClick={onClose} />
