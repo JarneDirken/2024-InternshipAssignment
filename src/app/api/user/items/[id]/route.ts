@@ -1,5 +1,4 @@
 import prisma from '@/services/db';
-import admin from '@/services/firebase-admin-config';
 import { headers } from 'next/headers'
 import { NextRequest } from 'next/server';
 
@@ -15,8 +14,8 @@ export async function GET(res: NextRequest, { params }: {params: {id: string}}) 
             });
         }
 
-        // Verify the token using Firebase Admin
-        await admin.auth().verifyIdToken(token);
+        // // Verify the token using Firebase Admin
+        // await admin.auth().verifyIdToken(token);
 
         const id = params.id
         const item = await prisma.item.findFirst({
