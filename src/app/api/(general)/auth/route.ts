@@ -1,9 +1,8 @@
 import prisma from '@/services/db';
-import { NextApiRequest } from 'next';
+import { NextRequest } from 'next/server';
 
-export async function POST(req: NextApiRequest) {
-    const { uid } = await new Response(req.body).json();
-    if (!uid) { return; }
+export async function POST(req: NextRequest) {
+    const { uid } = await req.json();
     
     const userData = await prisma.user.findUnique({
         where: {
