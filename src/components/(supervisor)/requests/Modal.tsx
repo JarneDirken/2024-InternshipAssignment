@@ -158,13 +158,13 @@ export default function Modal({ open, onClose, item, userId, rejected, setReject
                     {rejected && (
                         <div className="flex items-center gap-2 text-custom-red font-semibold">
                             <WarningAmberIcon fontSize="large"/>
-                            <h1 id="borrow-modal-title" className="text-xl">You're about to reject a borrow request. Are you sure?</h1>
+                            <h1 id="borrow-modal-title" className="text-xl">You&apos;re about to reject a borrow request. Are you sure?</h1>
                         </div>
                     )}
                     {approved && (
                         <div className="flex items-center gap-2 text-custom-green font-semibold">
                             <CheckCircleOutlineOutlinedIcon fontSize="large"/>
-                            <h1 id="borrow-modal-title" className="text-xl">You're about to approve a borrow request. Are you sure?</h1>
+                            <h1 id="borrow-modal-title" className="text-xl">You&apos;re about to approve a borrow request. Are you sure?</h1>
                         </div>
                     )}
                     <ClearIcon className="cursor-pointer" onClick={onClose} />

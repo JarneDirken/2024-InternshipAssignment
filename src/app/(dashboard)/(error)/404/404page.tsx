@@ -24,7 +24,7 @@ export default function Not404Found() {
             </div>
             <div className='flex flex-col items-end'>
                 <h1 className='font-semibold text-3xl md:text-6xl text-custom-primary'>404 Not Found</h1>
-                <span>Sorry but the requested source isn't found.</span>
+                <span>Sorry but the requested source isn&apos;t found.</span>
                 <span>What do you want to do next?</span>
                 <Button 
                     text='Go back'
