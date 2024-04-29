@@ -13,13 +13,8 @@ import Button from "@/components/states/Button";
 import Checkbox from '@mui/material/Checkbox';
 import ProductCard from "@/components/(admin)/products/ProductCard";
 import Modal from "@/components/(admin)/products/Modal";
-
-interface Filter {
-    label: string;
-    state: [string, React.Dispatch<React.SetStateAction<string>>];
-    inputType: 'text' | 'dateRange' | 'multipleSelect';
-    options?: string[];
-}
+import { SortOptions } from "@/models/SortOptions";
+import { Filter } from "@/models/Filter";
 
 export default function Product() {
     const [active, setActive] = useState(true);
@@ -32,22 +27,28 @@ export default function Product() {
     const [location, setLocation] = useState<string>('');
     const [year, setYear] = useState<string>('');
     const [availability, setAvailability] = useState<string>('');
-    const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set<number>());
+    const [selectedItems, setSelectedItems] = useState<Item[]>([]);
 
     const filters: Filter[] = [
-        { label: 'Name', state: [name, setName], inputType: 'text'},
-        { label: 'Model', state: [model, setModel], inputType: 'text' },
-        { label: 'Brand', state: [brand, setBrand], inputType: 'text' },
-        { label: 'Location', state: [location, setLocation], inputType: 'text' },
-        { label: 'Year', state: [year, setYear], inputType: 'text' },
+        { label: 'Name', state: [name, setName], inputType: 'text', optionsKey: 'name'},
+        { label: 'Model', state: [model, setModel], inputType: 'text', optionsKey: 'model'},
+        { label: 'Brand', state: [brand, setBrand], inputType: 'text', optionsKey: 'brand'},
+        { label: 'Location', state: [location, setLocation], inputType: 'text', optionsKey: 'location.name'},
+        { label: 'Year', state: [year, setYear], inputType: 'text', optionsKey: 'yearBought'},
         { label: 'Availability', state: [availability, setAvailability], inputType: 'multipleSelect', options: ['Active', 'Inactive']},
     ];
 
     const [isModalOpen, setModalOpen] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
     const auth = getAuth(app);
-    const [currentItem, setCurrentItem] = useState<Item | undefined>(undefined);
     const [mode, setMode] = useState<'add' | 'edit' | 'delete'>('add');
+
+    const sortOptions: SortOptions[] = [
+        { label: 'Name', optionsKey: 'item.name' },
+        { label: 'Model', optionsKey: 'item.model' },
+        { label: 'Brand', optionsKey: 'item.brand' },
+        { label: 'Location', optionsKey: 'item.location.name' }
+    ]; 
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -125,21 +126,30 @@ export default function Product() {
     };
 
     const toggleSelectAll = () => {
-        if (selectedItems.size === items.length) {
-            setSelectedItems(new Set()); // Deselect all if all are selected
+        if (selectedItems.length === items.length) {
+            setSelectedItems([]); // Deselect all if all are selected
         } else {
             const newSelectedItems = new Set(items.map(item => item.id));
-            setSelectedItems(newSelectedItems); // Select all
+            setSelectedItems([...items]); // Select all
         }
     };
 
     const handleSelectItem = (id: number) => {
-        const newSelectedItems = new Set(selectedItems);
-        if (newSelectedItems.has(id)) {
-            newSelectedItems.delete(id);
+        const selectedIndex = selectedItems.findIndex(item => item.id === id);
+        let newSelectedItems = [...selectedItems];
+    
+        if (selectedIndex === -1) {
+            // Check if the item exists before adding it
+            const itemToAdd = items.find(item => item.id === id);
+            if (itemToAdd) {
+                newSelectedItems.push(itemToAdd);
+            } else {
+                console.error('Item not found');
+            }
         } else {
-            newSelectedItems.add(id);
+            newSelectedItems.splice(selectedIndex, 1);
         }
+    
         setSelectedItems(newSelectedItems);
     };
 
@@ -148,8 +158,10 @@ export default function Product() {
     };
 
     const openModal = (mode: 'add' | 'edit' | 'delete', item?: Item) => {
+        if (item) {
+            setSelectedItems([item]);
+        }
         setMode(mode);
-        setCurrentItem(item);
         setModalOpen(true);
     };
 
@@ -163,8 +175,8 @@ export default function Product() {
             <Modal 
                 open={isModalOpen}
                 onClose={closeModal}
-                item={item}
-                mode="add"
+                selectedItems={selectedItems}
+                mode={mode}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
@@ -176,7 +188,7 @@ export default function Product() {
                     onSortChange={handleSortChange}
                     filters={filters}
                     items={items}
-                    sortOptions={['Name', 'Model', 'Brand', 'Location']}
+                    sortOptions={sortOptions}
                 />
             </div>
             <div className="rounded-xl">
@@ -193,17 +205,20 @@ export default function Product() {
                             text="Add"
                         />
                     </div>
-                    <Button 
-                        icon={<DeleteOutlinedIcon />} 
-                        textColor="custom-red" 
-                        borderColor="custom-red" 
-                        fillColor="red-100" 
-                        paddingX="px-2.5"
-                        paddingY="py-0.5"
-                        textClassName="font-semibold" 
-                        text="Delete" 
-                        disabled={selectedItems.size === 0}
-                    />
+                    <div onClick={() => openModal('delete')}>
+                        <Button 
+                            icon={<DeleteOutlinedIcon />} 
+                            textColor="custom-red"
+                            borderColor="custom-red" 
+                            fillColor="red-100" 
+                            paddingX="px-2.5"
+                            paddingY="py-0.5"
+                            buttonClassName="bg-red-100"
+                            textClassName="font-semibold" 
+                            text="Delete" 
+                            disabled={selectedItems.length === 0}
+                        />
+                    </div>
                     <Button 
                         icon={<QrCode2RoundedIcon />} 
                         textColor="custom-dark-blue" 
@@ -214,7 +229,7 @@ export default function Product() {
                         buttonClassName="bg-blue-100 border-custom-dark-blue" 
                         textClassName="font-semibold text-custom-dark-blue" 
                         text="QR-Code" 
-                        disabled={selectedItems.size === 0}
+                        disabled={selectedItems.length === 0}
                     />
                     <Button 
                         icon={<InsertDriveFileOutlinedIcon />} 
@@ -225,7 +240,7 @@ export default function Product() {
                         paddingY="py-0.5"
                         textClassName="font-semibold" 
                         text="Export EXCEL" 
-                        disabled={selectedItems.size === 0}
+                        disabled={selectedItems.length === 0}
                     />
                     <Button 
                         icon={<InsertDriveFileOutlinedIcon />} 
@@ -236,13 +251,13 @@ export default function Product() {
                         paddingY="py-0.5"
                         textClassName="font-semibold" 
                         text="Import EXCEL" 
-                        disabled={selectedItems.size === 0}
+                        disabled={selectedItems.length === 0}
                     />
                 </div>
                 <div className="w-full border-b border-b-gray-300 bg-white flex items-center relative lg:hidden">
                     <Checkbox 
                         className="absolute left-3 top-1/2 transform -translate-y-1/2" 
-                        checked={selectedItems.size === items.length && items.length > 0}
+                        checked={selectedItems.length === items.length && items.length > 0}
                         onChange={toggleSelectAll}
                     />
                     <p className="text-custom-primary font-semibold px-16 py-2 border-b-2 border-b-custom-primary w-fit">PRODUCTS</p>
@@ -254,7 +269,7 @@ export default function Product() {
                     <div className="w-full bg-gray-100 hidden lg:grid grid-cols-12">
                         <div className="col-span-1 mx-auto">
                             <Checkbox 
-                                checked={selectedItems.size === items.length && items.length > 0}
+                                checked={selectedItems.length === items.length && items.length > 0}
                                 onChange={toggleSelectAll}
                             />
                         </div>
