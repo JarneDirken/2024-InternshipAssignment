@@ -1,6 +1,5 @@
 import prisma from '@/services/db';
 import { NextApiRequest, NextApiResponse } from 'next';
-import admin from '@/services/firebase-admin-config';
 import { headers } from 'next/headers'
 import { NextRequest } from 'next/server';
 
@@ -16,8 +15,8 @@ export async function GET(req: NextRequest, res: NextApiResponse) {
             });
         }
 
-        // Verify the token using Firebase Admin
-        await admin.auth().verifyIdToken(token);
+        // // Verify the token using Firebase Admin
+        // await admin.auth().verifyIdToken(token);
 
         const locations = await prisma.location.findMany();
 
