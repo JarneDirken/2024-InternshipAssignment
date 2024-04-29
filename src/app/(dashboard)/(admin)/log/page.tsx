@@ -24,10 +24,8 @@ export default function Log() {
 
     const listenForNotifications = () => {
         // Create a query against the collection.
-        const rolesToQuery = Array.isArray(userRole) ? userRole : [userRole];
         const notificationsQuery = query(
             collection(db, "notifications"),
-            where("toRole", "array-contains-any", rolesToQuery),
             orderBy("timeStamp", "desc")
         );
     

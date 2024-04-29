@@ -7,4 +7,5 @@ export interface Notification {
     timeStamp: Date;
     requestId?: number;
     userId?: number;
+    targets?: string[];
 }

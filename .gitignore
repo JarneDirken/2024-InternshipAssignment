@@ -38,4 +38,4 @@ yarn-error.log*
 next-env.d.ts
 
 # firebaseAdmin
-firebaseAdmin.json
+# firebaseAdmin.json

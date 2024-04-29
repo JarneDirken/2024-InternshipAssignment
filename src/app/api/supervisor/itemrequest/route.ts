@@ -59,7 +59,11 @@ export async function PUT(req: NextApiRequest) {
                         location: true,
                     }
                 },
-                borrower: true,
+                borrower: {
+                    include: {
+                        role: true
+                    }
+                },
             }
         });
 
@@ -91,29 +95,24 @@ export async function PUT(req: NextApiRequest) {
 
         // If the Prisma transaction was successful, send notification
         if (updateItemRequest) {
-            const borrower = await prisma.user.findUnique({
-                where: {
-                    firebaseUid: updateItemRequest.borrowerId
-                }
-            });
+            const borrower = updateItemRequest.borrower;
+           
+            const notification = {
+                isRead: false,
+                fromRole: [user?.role.name],
+                toRole: borrower.role.name,
+                message: `Your request for ${updateItemRequest.item.name} has been ${data.requestStatusId === 3 ? 'rejected' : 'approved'} - pick it up at ${updateItemRequest.item.location.name}`,
+                timeStamp: new Date(),
+                requestId: updateItemRequest.id,
+                userId: borrower.firebaseUid,
+                targets: [`${borrower.firebaseUid}`]
+            };
 
-            if (borrower) {
-                const notification = {
-                    isRead: false,
-                    fromRole: user?.role.name,
-                    toRole: ['Student', "Teacher", "Admin", "Supervisor"],
-                    message: `Your request for ${updateItemRequest.item.name} has been ${data.requestStatusId === 3 ? 'rejected' : 'approved'} - pick it up at ${updateItemRequest.item.location.name}`,
-                    timeStamp: new Date(),
-                    requestId: updateItemRequest.id,
-                    userId: borrower.firebaseUid,
-                };
-
-                // Add the notification to the 'notifications' collection in Firestore
-                try {
-                    await addDoc(collection(db, "notifications"), notification);
-                } catch (error) {
-                    console.error('Error sending notification:', error);
-                }
+            // Add the notification to the 'notifications' collection in Firestore
+            try {
+                await addDoc(collection(db, "notifications"), notification);
+            } catch (error) {
+                console.error('Error sending notification:', error);
             }
         }
 

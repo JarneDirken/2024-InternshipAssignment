@@ -142,7 +142,10 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                                         />
                                     </div>
                                     <div className="flex flex-col w-1/4 mr-2">
-                                         
+                                        <div className="truncate">
+                                            <span className="font-semibold">Name:&nbsp;</span>
+                                            <span>{item.name}</span>
+                                        </div>
                                         <div className="truncate">
                                             <span className="font-semibold">Model:&nbsp;</span>
                                             <span>{item.model}</span>

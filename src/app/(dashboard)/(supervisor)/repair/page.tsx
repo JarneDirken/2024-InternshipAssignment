@@ -14,6 +14,8 @@ import Modal from "@/components/(supervisor)/repair/Modal";
 import { useRecoilValue } from "recoil";
 import { repariState } from "@/services/store";
 import { SortOptions } from "@/models/SortOptions";
+import Button from "@/components/states/Button";
+import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 
 export default function Reparation() {
     const { isAuthorized, loading } = useAuth(['Supervisor', 'Admin']);
@@ -250,6 +252,20 @@ export default function Reparation() {
                             History
                         </div>
                     </div>
+                    {selectedTab === "history" && (
+                        <div className="flex items-center ml-2">
+                            <Button 
+                                icon={<InsertDriveFileOutlinedIcon />} 
+                                textColor="custom-dark-blue" 
+                                borderColor="custom-dark-blue" 
+                                fillColor="blue-100" 
+                                paddingX="px-2.5"
+                                paddingY="py-0.5"
+                                textClassName="font-semibold" 
+                                text="Export EXCEL" 
+                            />
+                        </div>
+                    )}
                 </div>
                 {selectedTab === "repair" && (
                     <ItemCard 

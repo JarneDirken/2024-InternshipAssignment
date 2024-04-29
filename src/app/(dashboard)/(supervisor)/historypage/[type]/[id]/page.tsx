@@ -14,6 +14,8 @@ import { User } from "@/models/User";
 import ItemCard from "@/components/(supervisor)/historypage/ItemCard";
 import { ItemRequest } from "@/models/ItemRequest";
 import { SortOptions } from "@/models/SortOptions";
+import Button from "@/components/states/Button";
+import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 
 export default function HistoryPage({ params } : {params: {type:string, id: string}}) {
     const type = params.type;
@@ -188,6 +190,18 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
                         >
                             {type==="user" ? (<span>Requested borrows</span>) : (<span>History</span>)}
                         </div>
+                    </div>
+                    <div className="flex items-center ml-2">
+                        <Button 
+                            icon={<InsertDriveFileOutlinedIcon />} 
+                            textColor="custom-dark-blue" 
+                            borderColor="custom-dark-blue" 
+                            fillColor="blue-100" 
+                            paddingX="px-2.5"
+                            paddingY="py-0.5"
+                            textClassName="font-semibold" 
+                            text="Export EXCEL" 
+                        />
                     </div>
                 </div>
                 <div>
