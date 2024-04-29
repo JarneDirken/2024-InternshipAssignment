@@ -2,6 +2,8 @@ import prisma from "@/services/db";
 import { Prisma } from "@prisma/client";
 import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
+import { db } from '@/services/firebase-config';
+import { collection, addDoc, where, getDocs, query, updateDoc } from "firebase/firestore"; 
 interface WhereClause extends Prisma.ItemRequestWhereInput {}
 
 interface OrderByType {
@@ -30,38 +32,95 @@ function createNestedOrderBy(sortBy: string, sortDirection: Prisma.SortOrder): O
 export async function PUT(req: NextApiRequest) {
     const { data } = await new Response(req.body).json();
 
-    const updateItemRequest = await prisma.itemRequest.update({
-        where: {
-            id: data.requestId,
-        },
-        data: {
-            requestStatus: {
-                connect: {
-                    id: data.requestStatusId
-                }
+    const result = await prisma.$transaction(async (prisma) => {
+        const updateItemRequest = await prisma.itemRequest.update({
+            where: {
+                id: data.requestId,
             },
-            approver: {
-                connect: {
-                    firebaseUid: data.approverId
-                }
+            data: {
+                requestStatus: {
+                    connect: {
+                        id: data.requestStatusId
+                    }
+                },
+                approver: {
+                    connect: {
+                        firebaseUid: data.approverId
+                    }
+                },
+                decisionDate: data.decisionDate,
+                approveMessage: data.approveMessage,
+                borrowDate: data.borrowDate,
+                returnDate: data.returnDate,
             },
-            decisionDate: data.decisionDate,
-            approveMessage: data.approveMessage,
-            borrowDate: data.borrowDate,
-            returnDate: data.returnDate,
-        },
-    });    
+            include: {
+                item: {
+                    include: {
+                        location: true,
+                    }
+                },
+                borrower: true,
+            }
+        });
 
-    const updateItem = await prisma.item.update({
-        where: {
-            id: data.itemId,
-        },
-        data: {
-            itemStatusId: data.requestStatusId === 2 ? 3 : data.requestStatusId === 3 ? 1 : undefined
-        },
+        const updateItem = await prisma.item.update({
+            where: {
+                id: data.itemId,
+            },
+            data: {
+                itemStatusId: data.requestStatusId === 2 ? 3 : data.requestStatusId === 3 ? 1 : undefined
+            },
+        });
+
+        const user = await prisma.user.findUnique({
+            where: {
+                firebaseUid: data.userId,
+            },
+            include: {
+                role: true
+            }
+        });
+
+        // Mark previous notifications related to this request as read
+        const notificationsRef = collection(db, "notifications");
+        const q = query(notificationsRef, where("requestId", "==", data.requestId), where("isRead", "==", false));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            updateDoc(doc.ref, { isRead: true });
+        });
+
+        // If the Prisma transaction was successful, send notification
+        if (updateItemRequest) {
+            const borrower = await prisma.user.findUnique({
+                where: {
+                    firebaseUid: updateItemRequest.borrowerId
+                }
+            });
+
+            if (borrower) {
+                const notification = {
+                    isRead: false,
+                    fromRole: user?.role.name,
+                    toRole: ['Student', "Teacher", "Admin", "Supervisor"],
+                    message: `Your request for ${updateItemRequest.item.name} has been ${data.requestStatusId === 3 ? 'rejected' : 'approved'} - pick it up at ${updateItemRequest.item.location.name}`,
+                    timeStamp: new Date(),
+                    requestId: updateItemRequest.id,
+                    userId: borrower.firebaseUid,
+                };
+
+                // Add the notification to the 'notifications' collection in Firestore
+                try {
+                    await addDoc(collection(db, "notifications"), notification);
+                } catch (error) {
+                    console.error('Error sending notification:', error);
+                }
+            }
+        }
+
+        return { updateItemRequest, updateItem };
     });
 
-    return new Response(JSON.stringify({updateItemRequest, updateItem}), {
+    return new Response(JSON.stringify(result), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',

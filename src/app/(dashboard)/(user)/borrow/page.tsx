@@ -4,7 +4,7 @@ import useAuth from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { GroupedItem, Item } from "@/models/Item";
 import { getAuth, getIdToken } from 'firebase/auth';
-import app from "@/services/firebase-config";
+import {app} from "@/services/firebase-config";
 import { useRecoilValue } from "recoil";
 import { createRequest, requestsState } from "@/services/store";
 import Filters from "@/components/(user)/borrow/Filter"

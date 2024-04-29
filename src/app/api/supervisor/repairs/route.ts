@@ -125,7 +125,7 @@ export async function PUT(req: NextApiRequest) {
             },
             returnDate: data.broken ? null : new Date(),
         },
-    });    
+    });
 
     return new Response(JSON.stringify(updateRepair), {
         status: 200,

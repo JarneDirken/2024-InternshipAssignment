@@ -49,7 +49,8 @@ export default function Modal({ open, onClose, item, userId, rejected, setReject
             approveMessage: message,
             decisionDate: new Date().toISOString(),
             borrowDate: item.startBorrowDate,
-            returnDate: item.endBorrowDate
+            returnDate: item.endBorrowDate,
+            userId,
         };
 
         const response = await fetch(`/api/supervisor/itemrequest/`, {

@@ -43,6 +43,7 @@ export default function Modal({ open, onClose, item, userId, handover, receive, 
         const data = {
             requestId: item.id,
             itemId: item.item.id,
+            userId
         };
 
         const response = await fetch(`/api/supervisor/pendingborrows/`, {
@@ -66,6 +67,7 @@ export default function Modal({ open, onClose, item, userId, handover, receive, 
         const data = {
             requestId: item.id,
             itemId: item.item.id,
+            userId
         };
 
         const response = await fetch(`/api/supervisor/pendingreturns/`, {
@@ -90,7 +92,8 @@ export default function Modal({ open, onClose, item, userId, handover, receive, 
             requestId: item.id,
             itemId: item.item.id,
             repairState,
-            message
+            message,
+            userId
         };
 
         const response = await fetch(`/api/supervisor/checkitem/`, {

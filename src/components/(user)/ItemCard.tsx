@@ -16,9 +16,10 @@ interface BorrowCardProps {
     calculateReturnDate?: (returnDate?: Date | string) => JSX.Element | null; // Now returns JSX.Element or null
     calculateHistoryDate?: (expectedReturnDate?: Date | string, actualReturnDate?: Date | string) => JSX.Element | null; // Now returns JSX.Element or null
     itemLoading: boolean;
+    userId: string | null;
 }
 
-export default function ItemCard({ active, openModal, items, calculateReturnDate, calculateHistoryDate, itemLoading }: BorrowCardProps) {
+export default function ItemCard({ active, openModal, items, calculateReturnDate, calculateHistoryDate, itemLoading, userId }: BorrowCardProps) {
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll w-full";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
@@ -44,6 +45,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
         const data = {
             requestId: item.id,
             itemId: item.item.id,
+            userId,
         };
 
         const response = await fetch(`/api/user/returns/`, {
@@ -85,28 +87,23 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                             <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
                                 <div className="flex flex-row items-center w-5/6">
                                 <div className="mr-2 flex w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
-                                        {!item.item.image ? (
-                                            <Image 
-                                                src="/assets/images/defaultImage.jpg"
-                                                width={72}
-                                                height={100}
-                                                alt="Default iamge"
-                                                loading="lazy"
-                                          />
-                                        ) : (
-                                                <Image 
-                                                    src={item.item.image}
-                                                    alt={item.item.name}
-                                                    width={100}
-                                                    height={72}
-                                                    loading="lazy"
-                                                />
-                                        )}
+                                        <Image 
+                                            src={!item.item.image ? "/assets/images/defaultImage.jpg" : item.item.image}
+                                            alt={item.item.name}
+                                            style={{ width: 'auto', height: '72px'}}
+                                            width={72}
+                                            height={100}
+                                            loading="lazy"
+                                        />
                                     </div>
                                     <div className="flex flex-col w-1/3">
                                         <div className="truncate">
-                                            {calculateReturnDate && (calculateReturnDate(item.endBorrowDate))}
-                                            {calculateHistoryDate && calculateHistoryDate(item.endBorrowDate, item.returnDate)}
+                                        {(item.requestStatusId === 4 && item.item.itemStatusId === 3) && (
+                                                <>
+                                                    {calculateReturnDate && (calculateReturnDate(item.endBorrowDate))}
+                                                    {calculateHistoryDate && calculateHistoryDate(item.endBorrowDate, item.returnDate)}
+                                                </>
+                                            )}
                                             {(item.requestStatusId === 5 && item.item.itemStatusId === 4) && (
                                                 <div className="flex truncate items-center text-custom-primary gap-1 text-sm sm:text-base">
                                                     <AccessTimeIcon fontSize="small"/>
@@ -224,23 +221,14 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                 <hr />
                                 <div className="flex items-center p-4 max-w-xs w-full">
                                     <div className="mr-2 flex w-[100px] h-[72px] justify-center items-center max-h-[72px] overflow-hidden">
-                                            {!item.item.image ? (
-                                                <Image 
-                                                    src="/assets/images/defaultImage.jpg"
-                                                    width={72}
-                                                    height={100}
-                                                    alt="Default iamge"
-                                                    loading="lazy"
-                                            />
-                                            ) : (
-                                                    <Image 
-                                                        src={item.item.image}
-                                                        alt={item.item.name}
-                                                        width={100}
-                                                        height={72}
-                                                        loading="lazy"
-                                                    />
-                                            )}
+                                        <Image 
+                                            src={!item.item.image ? "/assets/images/defaultImage.jpg" : item.item.image}
+                                            alt={item.item.name}
+                                            style={{ width: 'auto', height: '72px'}}
+                                            width={72}
+                                            height={100}
+                                            loading="lazy"
+                                        />
                                         </div>
                                     <div className="flex flex-col items-start w-2/3">
                                         <div className="flex items-center gap-6 max-w-full">

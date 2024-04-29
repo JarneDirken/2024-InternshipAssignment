@@ -1,60 +1,102 @@
 import prisma from '@/services/db';
+import { db } from '@/services/firebase-config';
+import { collection, addDoc } from "firebase/firestore"; 
 import { NextApiRequest } from 'next';
 import { NextRequest } from 'next/server';
 
 export async function POST(req: NextApiRequest) {
     const { data } = await new Response(req.body).json();
 
-    // Check if the item already has an active request with itemStatusId: 3
-    const existingRequest = await prisma.itemRequest.findFirst({
-        where: {
-            itemId: data.itemId,
-            item: {
-                itemStatusId: 2,
-            },
-        },
-    });
+    let createItemRequest : any;
 
-    // If an existing request is found, return an error response
-    if (existingRequest) {
-        return new Response(JSON.stringify({ error: "Item is already in a request." }), {
-            status: 400,
-            headers: {
-                'Content-Type': 'application/json',
+    const result = await prisma.$transaction(async (prisma) => {
+        // Check if the item already has an active request with itemStatusId: 3
+        const existingRequest = await prisma.itemRequest.findFirst({
+            where: {
+                itemId: data.itemId,
+                item: {
+                    itemStatusId: 2,
+                },
             },
         });
-    }
 
-    const createItemRequest = await prisma.itemRequest.create({
-        data: {
-            item: {
-                connect: { id: data.itemId },
+        if (existingRequest) {
+            throw new Error("Item is already in a request.");
+        }
+
+        createItemRequest = await prisma.itemRequest.create({
+            data: {
+                item: {
+                    connect: { id: data.itemId },
+                },
+                requestStatus: {
+                    connect: { id: data.requestStatusId },
+                },
+                borrower: {
+                    connect: { firebaseUid: data.borrowerId },
+                },
+                requestDate: data.requestDate,
+                startBorrowDate: data.startBorrowDate,
+                endBorrowDate: data.endBorrowDate,
+                file: data.file,
+                isUrgent: data.isUrgent,
+                amountRequest: data.amountRequest,
             },
-            requestStatus: {
-                connect: { id: data.requestStatusId },
+        });
+
+        const updateItem = await prisma.item.update({
+            where: {
+                id: data.itemId,
             },
-            borrower: {
-                connect: { firebaseUid: data.borrowerId },
+            data: {
+                itemStatusId: 2,
             },
-            requestDate: data.requestDate,
-            startBorrowDate: data.startBorrowDate,
-            endBorrowDate: data.endBorrowDate,
-            file: data.file,
-            isUrgent: data.isUrgent,
-            amountRequest: data.amountRequest,
-        },
+        });
+
+        return { createItemRequest, updateItem:updateItem };
     });
 
-    const updateItem = await prisma.item.update({
-        where: {
-            id: data.itemId,
-        },
-        data: {
-            itemStatusId: 2
-        },
-    });
+    // If the Prisma transaction was successful, send notifications
+    if (result) {
+        const user = await prisma.user.findUnique({
+            where: {
+                firebaseUid: data.borrowerId,
+            },
+            include: {
+                role: true,
+            }
+        });
 
-    return new Response(JSON.stringify({createItemRequest, updateItem}), {
+        const supervisorsAndAdmins = await prisma.user.findMany({
+            where: {
+                OR: [
+                    { role: { name: "Supervisor" } },
+                    { role: { name: "Admin" } }
+                ],
+            },
+        });
+
+        try {
+            await Promise.all(supervisorsAndAdmins.map(supervisor => {
+                const notification = {
+                    isRead: false,
+                    fromRole: user?.role.name,
+                    toRole: ["Supervisor", "Admin"],
+                    message: `${data.isUrgent ? 'New urgent borrow request' : 'New borrow request'} from ${user?.firstName} ${user?.lastName}`,
+                    timeStamp: new Date(),
+                    requestId: createItemRequest.id,
+                    userId: data.borrowerId,
+                };
+
+                // Add the notification to the 'notifications' collection in Firestore
+                return addDoc(collection(db, "notifications"), notification);
+            }));
+        } catch (error) {
+            console.error('Error sending notifications:', error);
+        }
+    };
+
+    return new Response(JSON.stringify(result), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',

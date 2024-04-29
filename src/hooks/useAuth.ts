@@ -47,5 +47,4 @@ function useAuth(allowedRoles: string[] = []) {
   return { userRole, isAuthorized, loading };
 }
 
-
 export default useAuth;

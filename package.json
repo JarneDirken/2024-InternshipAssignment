@@ -6,7 +6,7 @@
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "scripts": {
-    "dev": "ts-node server.ts",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

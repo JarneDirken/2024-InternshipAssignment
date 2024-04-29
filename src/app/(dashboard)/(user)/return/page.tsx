@@ -3,7 +3,7 @@ import Unauthorized from "@/app/(dashboard)/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { getAuth } from 'firebase/auth';
-import app from "@/services/firebase-config";
+import {app} from "@/services/firebase-config";
 import Filters from "@/components/general/Filter";
 import { ItemRequest } from "@/models/ItemRequest";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -190,6 +190,7 @@ export default function Return() {
                     items={items}
                     calculateReturnDate={calculateDaysRemaining}
                     itemLoading={itemLoading}
+                    userId={userId}
                 />
             </div>
         </div>

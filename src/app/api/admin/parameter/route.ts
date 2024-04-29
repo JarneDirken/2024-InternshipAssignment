@@ -1,5 +1,7 @@
 import prisma from '@/services/db';
 import { NextApiRequest } from "next";
+import { db } from '@/services/firebase-config';
+import { collection, addDoc } from "firebase/firestore"; 
 
 export async function GET() {
     const parameters = await prisma.parameter.findMany();
@@ -32,7 +34,50 @@ export async function PUT(req: NextApiRequest) {
             where: { name: 'eveningEndTime' },
             data: { value: data.eveningEndTime },
         }),
+        prisma.parameter.updateMany({
+            where: { name: 'morningBufferTime' },
+            data: { value: data.morningBufferTime },
+        }),
+        prisma.parameter.updateMany({
+            where: { name: 'eveningBufferTime' },
+            data: { value: data.eveningBufferTime },
+        }),
     ]);
+
+    if (results) {
+        const user = await prisma.user.findUnique({
+            where: {
+                firebaseUid: data.userId,
+            },
+            include: {
+                role: true,
+            }
+        });
+
+        const admins = await prisma.user.findMany({
+            where: {
+                role: { name: "Admin" }
+            },
+        });
+
+        try {
+            await Promise.all(admins.map(admin => {
+                // Directly create the notification object as intended to store in Firestore
+                const notification = {
+                    isRead: true,
+                    fromRole: user?.role.name,
+                    toRole: ["Admin"],
+                    message: `Parameters updated by: ${user?.firstName} ${user?.lastName}`,
+                    timeStamp: new Date(),
+                };
+
+                // Add the notification to the 'notifications' collection in Firestore
+                return addDoc(collection(db, "notifications"), notification);
+            }));
+        } catch (error) {
+            console.error('Error sending notifications:', error);
+        }
+    }
 
     return new Response(JSON.stringify(results), {
         status: 200,

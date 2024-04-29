@@ -3,7 +3,7 @@ import { useState } from "react";
 import Filters from "@/components/general/Filter";
 import { Item } from "@/models/Item";
 import { getAuth, getIdToken } from 'firebase/auth';
-import app from "@/services/firebase-config";
+import {app} from "@/services/firebase-config";
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 
 interface Filter {
