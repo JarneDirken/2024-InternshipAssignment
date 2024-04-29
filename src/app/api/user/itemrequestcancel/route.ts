@@ -1,10 +1,10 @@
 import prisma from '@/services/db';
-import { NextApiRequest } from 'next';
 import { db } from '@/services/firebase-config';
 import { collection, addDoc, where, query, getDocs, updateDoc, doc } from "firebase/firestore"; 
+import { NextRequest } from 'next/server';
 
-export async function DELETE(req: NextApiRequest) {
-    const { data } = await new Response(req.body).json();
+export async function DELETE(req: NextRequest) {
+    const { data } = await req.json();
 
     const result = await prisma.$transaction(async (prisma) => {
         const deleteItemRequest = await prisma.itemRequest.delete({

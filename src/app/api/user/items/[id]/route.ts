@@ -1,9 +1,9 @@
 import prisma from '@/services/db';
-import { NextApiResponse } from 'next';
 import admin from '@/services/firebase-admin-config';
 import { headers } from 'next/headers'
+import { NextRequest } from 'next/server';
 
-export async function GET(res: NextApiResponse, { params }: {params: {id: string}}) {
+export async function GET(res: NextRequest, { params }: {params: {id: string}}) {
     try {
         const token = (headers().get('authorization'));
         if (!token) {

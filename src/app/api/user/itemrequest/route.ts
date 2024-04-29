@@ -1,11 +1,10 @@
 import prisma from '@/services/db';
 import { db } from '@/services/firebase-config';
 import { collection, addDoc } from "firebase/firestore"; 
-import { NextApiRequest } from 'next';
 import { NextRequest } from 'next/server';
 
-export async function POST(req: NextApiRequest) {
-    const { data } = await new Response(req.body).json();
+export async function POST(req: NextRequest) {
+    const { data } = await req.json();
 
     let createItemRequest : any;
 

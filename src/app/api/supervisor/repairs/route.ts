@@ -1,6 +1,5 @@
 import prisma from "@/services/db";
 import { Prisma } from "@prisma/client";
-import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
 interface WhereClause extends Prisma.ReparationWhereInput {}
 
@@ -105,8 +104,8 @@ export async function GET(request: NextRequest) {
     });
 }
 
-export async function PUT(req: NextApiRequest) {
-    const { data } = await new Response(req.body).json();
+export async function PUT(req: NextRequest) {
+    const { data } = await req.json();
 
     const updateRepair = await prisma.reparation.update({
         where: {

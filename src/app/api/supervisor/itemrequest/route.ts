@@ -1,6 +1,5 @@
 import prisma from "@/services/db";
 import { Prisma } from "@prisma/client";
-import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
 import { db } from '@/services/firebase-config';
 import { collection, addDoc, where, getDocs, query, updateDoc } from "firebase/firestore"; 
@@ -29,8 +28,8 @@ function createNestedOrderBy(sortBy: string, sortDirection: Prisma.SortOrder): O
     return currentOrderBy;
 }
 
-export async function PUT(req: NextApiRequest) {
-    const { data } = await new Response(req.body).json();
+export async function PUT(req: NextRequest) {
+    const { data } = await req.json();
 
     const result = await prisma.$transaction(async (prisma) => {
         const updateItemRequest = await prisma.itemRequest.update({

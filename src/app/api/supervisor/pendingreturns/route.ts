@@ -2,7 +2,6 @@ import prisma from "@/services/db";
 import { db } from "@/services/firebase-config";
 import { Prisma } from "@prisma/client";
 import { addDoc, collection, getDocs, query, updateDoc, where } from "firebase/firestore";
-import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
 interface WhereClause extends Prisma.ItemRequestWhereInput {}
 
@@ -109,8 +108,8 @@ export async function GET(request: NextRequest) {
     });
 }
 
-export async function PUT(req: NextApiRequest) {
-    const { data } = await new Response(req.body).json();
+export async function PUT(req: NextRequest) {
+    const { data } = await req.json();
 
     const updateItemRequest = await prisma.itemRequest.update({
         where: {
