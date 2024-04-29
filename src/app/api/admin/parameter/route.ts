@@ -1,7 +1,7 @@
 import prisma from '@/services/db';
-import { NextApiRequest } from "next";
 import { db } from '@/services/firebase-config';
 import { collection, addDoc } from "firebase/firestore"; 
+import { NextRequest } from 'next/server';
 
 export async function GET() {
     const parameters = await prisma.parameter.findMany();
@@ -14,8 +14,8 @@ export async function GET() {
     });
 };
 
-export async function PUT(req: NextApiRequest) {
-    const { data } = await new Response(req.body).json();
+export async function PUT(req: NextRequest) {
+    const { data } = await req.json();
 
     const results = await prisma.$transaction([
         prisma.parameter.updateMany({

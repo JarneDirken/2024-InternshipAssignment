@@ -1,7 +1,8 @@
 import prisma from '@/services/db';
 import { NextApiRequest } from 'next';
+import { NextRequest } from 'next/server';
 
-export async function GET(req: NextApiRequest, { params }: {params: {id: string}}) {
+export async function GET(req: NextRequest, { params }: {params: {id: string}}) {
     const id = params.id
     const location = await prisma.location.findFirst({
         where: {
@@ -17,7 +18,7 @@ export async function GET(req: NextApiRequest, { params }: {params: {id: string}
     });
 }
 
-export async function DELETE(req: NextApiRequest, { params }: {params: {id: string}}) {
+export async function DELETE(req: NextRequest, { params }: {params: {id: string}}) {
     const id = params.id
     const location = await prisma.location.delete({
         where: {
@@ -33,9 +34,9 @@ export async function DELETE(req: NextApiRequest, { params }: {params: {id: stri
     });
 }
 
-export async function PATCH(req: NextApiRequest, { params }: {params: {id: string}}){
+export async function PATCH(req: NextRequest, { params }: {params: {id: string}}){
     const id = params.id
-    const data = await new Response(req.body).json();
+    const data = await req.json();
     const updateLocation = await prisma.location.update({
         where: {id: parseInt(id, 10)},
         data: data

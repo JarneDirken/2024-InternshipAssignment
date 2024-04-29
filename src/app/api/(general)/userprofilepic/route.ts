@@ -1,8 +1,8 @@
 import prisma from '@/services/db';
-import { NextApiRequest } from 'next';
+import { NextRequest } from 'next/server';
 
-export async function PATCH(req: NextApiRequest) {
-    const { profilePicUrl, uid } = await new Response(req.body).json();
+export async function PATCH(req: NextRequest) {
+    const { profilePicUrl, uid } = await req.json();
 
     if (!uid) {
         return new Response(JSON.stringify({ error: 'UID is required' }), {
