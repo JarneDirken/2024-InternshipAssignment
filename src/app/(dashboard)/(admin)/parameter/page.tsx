@@ -12,6 +12,9 @@ import { ParameterType } from '@/models/ParameterType';
 import Button from '@/components/states/Button';
 import { useSnackbar } from 'notistack';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import { InputAdornment, TextField } from '@mui/material';
+import { getAuth } from 'firebase/auth';
+import {app} from "@/services/firebase-config";
 
 export default function Parameter() {
     const { isAuthorized, loading } = useAuth(['Admin']);
@@ -23,9 +26,24 @@ export default function Parameter() {
     const [endMorningTimeString, setEndMorningTimeString] = useState('');
     const [startEveningTimeString, setStartEveningTimeString] = useState('');
     const [endEveningTimeString, setEndEveningTimeString] = useState('');
+    const [monringBufferTime, setMorningBufferTime] = useState('');
+    const [EveningBufferTime, setEveningBufferTime] = useState('');
     type DayjsSetterType = (value: Dayjs | null) => void;
     type StringSetterType = (value: string) => void;
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
+    const [userId, setUserId] = useState<string | null>(null); // userID
+    const auth = getAuth(app); // Get authentication
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                setUserId(user.uid);
+            } else {
+                setUserId(null);
+            }
+        });
+        return () => unsubscribe();
+    }, [userId]);
 
     useEffect(() => {
         getParameters();
@@ -67,10 +85,24 @@ export default function Parameter() {
                     stringSetter(param.value);
                 }
             };
+
+            // Define setBufferTime for buffer time parameters
+            const setBufferTime = (paramName: string, setter: React.Dispatch<React.SetStateAction<string>>) => {
+                const param = data.find(p => p.name === paramName);
+                if (param) {
+                    setter(param.value); // Directly set the string since buffer time is just a number of minutes
+                }
+            };
+
+            // Set times
             setTime('morningStartTime', setStartMorningTime, setStartMorningTimeString);
             setTime('morningEndTime', setEndMorningTime, setEndMorningTimeString);
             setTime('eveningStartTime', setStartEveningTime, setStartEveningTimeString);
             setTime('eveningEndTime', setEndEveningTime, setEndEveningTimeString);
+
+            // Set buffer times
+            setBufferTime('morningBufferTime', setMorningBufferTime);
+            setBufferTime('eveningBufferTime', setEveningBufferTime);
         } catch (error) {
             console.error("Failed to fetch parameters:", error);
         }
@@ -96,6 +128,9 @@ export default function Parameter() {
             morningEndTime: endMorningTimeString,
             eveningStartTime: startEveningTimeString,
             eveningEndTime: endEveningTimeString,
+            morningBufferTime: monringBufferTime,
+            eveningBufferTime: EveningBufferTime,
+            userId,
         };
 
         const response = await fetch(`/api/admin/parameter/`, {
@@ -180,6 +215,26 @@ export default function Parameter() {
                             views={['hours', 'minutes']}
                         />
                     </LocalizationProvider>
+                    <TextField 
+                        label="Morning buffer time"
+                        id="outlined-start-adornment"
+                        value={monringBufferTime}
+                        type="number"
+                        onChange={(e) => setMorningBufferTime(e.target.value)}
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">min</InputAdornment>,
+                        }}
+                    />
+                    <TextField 
+                        label="Evening buffer time"
+                        id="outlined-start-adornment"
+                        type="number"
+                        value={EveningBufferTime}
+                        onChange={(e) => setEveningBufferTime(e.target.value)}
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">min</InputAdornment>,
+                        }}
+                    />
                 </ThemeProvider>
                 <Button 
                     text='Save'

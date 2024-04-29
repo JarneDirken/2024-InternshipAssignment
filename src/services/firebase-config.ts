@@ -1,6 +1,5 @@
-// firebase-config.js or firebase-config.ts
-
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -17,5 +16,7 @@ if (!getApps().length) {
 } else {
     app = getApp();
 }
+// Initialize Cloud Firestore and get a reference to the service
+const db = getFirestore(app);
 
-export default app;
+export { app, db };

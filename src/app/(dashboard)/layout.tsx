@@ -15,6 +15,7 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import DashboardHeader from "@/components/layout/dashboardheader";
 import DashboardFrame from "@/components/layout/dashboardframe";
 import DashboardContext from "@/components/layout/sidebarcontext";
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { SnackbarProvider } from 'notistack';
@@ -74,6 +75,9 @@ export default function DashboardLayout({
                 <SidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Users" />
                 <Link href="/parameter">
                   <SidebarItem icon={<SettingsOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Parameters" active={pathname === "/parameter"} />
+                </Link>
+                <Link href="/log">
+                  <SidebarItem icon={<ArticleOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Logs" active={pathname === "/log"} />
                 </Link>
               </>
             )}

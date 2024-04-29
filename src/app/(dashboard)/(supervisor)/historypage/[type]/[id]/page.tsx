@@ -4,7 +4,7 @@ import Filters from "@/components/general/Filter";
 import Loading from "@/components/states/Loading";
 import useAuth from "@/hooks/useAuth";
 import { Filter } from "@/models/Filter";
-import app from "@/services/firebase-config";
+import {app} from "@/services/firebase-config";
 import { getAuth } from "firebase/auth";
 import { useEffect, useState } from "react";
 import ContentPasteOutlinedIcon from '@mui/icons-material/ContentPasteOutlined';

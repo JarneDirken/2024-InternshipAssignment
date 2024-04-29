@@ -21,6 +21,10 @@ import DatePicker from "@/components/states/DatePicker";
 import EditIcon from '@mui/icons-material/Edit';
 import dayjs, { Dayjs } from "dayjs";
 import { ParameterType } from "@/models/ParameterType";
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 interface ModalCardProps {
     open: boolean;
@@ -50,6 +54,8 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
     const [endMorningTimeString, setEndMorningTimeString] = useState('');
     const [startEveningTimeString, setStartEveningTimeString] = useState('');
     const [endEveningTimeString, setEndEveningTimeString] = useState('');
+    const [monringBufferTime, setMorningBufferTime] = useState('');
+    const [EveningBufferTime, setEveningBufferTime] = useState('');
     type DayjsSetterType = (value: Dayjs | null) => void;
 
     useEffect(() => {
@@ -70,56 +76,121 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
         const start = dayjs(startDate);
         const end = dayjs(endDate);
         const now = dayjs();  // Get current date and time
+        const midnight = start.startOf('day');
     
-        // Function to check if date is a weekday
-        const isWeekday = (date: Dayjs) => {
+        // Check if date is a weekday
+        const isWeekday = (date: dayjs.Dayjs) => {
             const day = date.day();
-            return day !== 0 && day !== 6; // Exclude Saturday (6) and Sunday (0)
+            return day !== 0 && day !== 6;
         };
     
-        // Function to check if time is within specific Dayjs hours and minutes
-        const isWithinTime = (date: Dayjs, startTimeString: string, endTimeString: string): boolean => {
+        // Check if time is within specified hours
+        const isWithinTime = (date: dayjs.Dayjs, startTimeString: string, endTimeString: string): boolean => {
             const dayFormat = date.format('YYYY-MM-DD');
             const startTime = dayjs(dayFormat + 'T' + startTimeString);
             const endTime = dayjs(dayFormat + 'T' + endTimeString);
-        
-            // Check if the date time is same or after start time and before end time
-            return (date.isSame(startTime) || date.isAfter(startTime)) && date.isBefore(endTime);
+            return date.isSameOrAfter(startTime) && date.isBefore(endTime);
         };
     
-        // Check for weekend
+        // Check for buffer time urgency
+        const checkBuffer = (date: dayjs.Dayjs, bufferTime: string, startTimeString: string) => {
+            const bufferStart = dayjs(date.format('YYYY-MM-DD') + 'T' + startTimeString).subtract(parseInt(bufferTime), 'minute');
+            return date.isSameOrAfter(bufferStart) && date.isBefore(dayjs(date.format('YYYY-MM-DD') + 'T' + startTimeString));
+        };
+    
+        // Weekend check
         if (!isWeekday(start) || !isWeekday(end)) {
-            setIsUrgent(true);
+            setErrorMessage("Can only borrow during weekdays");
             return;
         }
-
-        // Check if selected start date/time has already passed
+    
+        // Past date check
         if (start.isBefore(now)) {
             setErrorMessage("Can't select a start date that has already passed");
-            return;  // Exit the function early as the condition fails
+            return;
         }
     
-        // Validate specific time slots using Dayjs objects
-        const startMorningValid = isWithinTime(start, startMorningTimeString, endMorningTimeString);
-        const endMorningValid = isWithinTime(end, startMorningTimeString, endMorningTimeString);
-        const startEveningValid = isWithinTime(start, startEveningTimeString, endEveningTimeString);
-        const endEveningValid = isWithinTime(end, startEveningTimeString, endEveningTimeString);
+        // Check for request times in the morning or evening, not considering buffer times
+        const isRequestTimeValid = (
+            date: dayjs.Dayjs,
+            bufferTime: string,
+            startTimeString: string,
+            endTimeString: string
+          ) => {
+            // Check if the request is before the buffer starts or after it ends
+            const startOfBuffer = dayjs(date.format('YYYY-MM-DD') + 'T' + startTimeString).subtract(parseInt(bufferTime), 'minute');
+            const endOfBuffer = dayjs(date.format('YYYY-MM-DD') + 'T' + endTimeString).add(parseInt(bufferTime), 'minute');
+            return date.isSameOrAfter(startOfBuffer) && date.isSameOrBefore(endOfBuffer);
+        };
 
-        // Same day check with specific conditions
-        if (start.isSame(end, 'day')) {
-            // Check that start is morning and end is evening for same-day return
-            if (startMorningValid && endEveningValid) {
-                setIsUrgent(false);  // Non-urgent for correct same-day timing
-            } else {
-                setIsUrgent(true);
-            }
-        } else {
-            // For different days, simply check if start and end times are valid
-            const startValid = startMorningValid || startEveningValid;
-            const endValid = endMorningValid || endEveningValid;
-            setIsUrgent(!(startValid && endValid));
+        // Check for validity and urgency
+        const isMorningRequestValid = isRequestTimeValid(start, monringBufferTime, startMorningTimeString, endMorningTimeString);
+        const isEveningRequestValid = isRequestTimeValid(start, EveningBufferTime, startEveningTimeString, endEveningTimeString);
+    
+        // Check if the start time is before the morning buffer time or in the evening after the buffer time
+        const startMorningBeforeBuffer = start.isBefore(dayjs(dayjs().format('YYYY-MM-DD') + 'T' + startMorningTimeString).subtract(parseInt(monringBufferTime), 'minute'));
+        const startEveningAfterBuffer = start.isSameOrAfter(dayjs(dayjs().format('YYYY-MM-DD') + 'T' + startEveningTimeString).subtract(parseInt(EveningBufferTime), 'minute'));
+    
+        // Buffer times denial
+        const startBufferMorning = checkBuffer(start, monringBufferTime, startMorningTimeString);
+        const startBufferEvening = checkBuffer(start, EveningBufferTime, startEveningTimeString);
+        if (startBufferMorning || startBufferEvening) {
+            setErrorMessage("Cannot request during this time");
+            return;
         }
-    };
+    
+        // Validate time slots for morning and evening
+        const startMorningValid = isRequestTimeValid(start, monringBufferTime, startMorningTimeString, endMorningTimeString);
+        const startEveningValid = isRequestTimeValid(start, EveningBufferTime, startEveningTimeString, endEveningTimeString);
+        const endMorningValid = isWithinTime(end, startMorningTimeString, endMorningTimeString);
+        const endEveningValid = isWithinTime(end, startEveningTimeString, endEveningTimeString);
+    
+        // Check if it's an urgent request
+        if (!isMorningRequestValid && !isEveningRequestValid) {
+            // If the start time is not valid for both morning and evening, it's urgent
+            setIsUrgent(true);
+        } else if (startBufferMorning || startBufferEvening) {
+            // If it's during the buffer time, it's not allowed
+            setErrorMessage("Cannot request during this time");
+        } else if (start.isSameOrAfter(EveningBufferTime) && start.isBefore(dayjs(midnight).add(1, 'day'))) {
+            // If it's after the evening buffer start time, no more requests can be made
+            setErrorMessage("Cannot request anymore today");
+        }
+
+        // Same-day return check
+        if (start.isSame(end, 'day')) {
+            if (!(startMorningValid && endEveningValid)) {
+                setErrorMessage("Cannot borrow and return on the same day outside of morning start to evening end");
+                return;
+            }
+        }
+    
+        // Check if end time is valid
+        if (!endMorningValid && !endEveningValid) {
+            setErrorMessage("Return has to be between the given hours");
+            return;
+        }
+    
+        // Adjusted conditions based on the provided scenarios
+        let isUrgent = false;
+        if (startMorningBeforeBuffer && start.isSameOrAfter(dayjs().startOf('day')) && isWithinTime(start, "00:00", startMorningTimeString)) {
+            // Request before the morning buffer time for morning is not urgent
+            isUrgent = false;
+        } else if (startEveningAfterBuffer && start.isBefore(dayjs(dayjs().format('YYYY-MM-DD') + 'T' + startEveningTimeString))) {
+            // No requests after start of the evening buffer time
+            setErrorMessage("Cannot request anymore today");
+            return;
+        } else if (!startMorningValid && !startEveningValid) {
+            // Request outside of valid morning/evening slots but not during buffer times is urgent
+            isUrgent = true;
+        } else if (startMorningValid || startEveningValid) {
+            // Request during valid morning/evening slots and respecting buffer times is not urgent
+            isUrgent = false;
+        }
+    
+        // Determine urgency based on buffer times and incorrect timing
+        setIsUrgent(isUrgent);
+    };    
 
     const handleDateSelection = (type: 'borrow' | 'return', date: Date) => {
         if (type === 'borrow') {
@@ -289,10 +360,6 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
         }
     };
 
-    const handleNewNotification = () => {
-        return "yey"
-    }
-
     async function getParameters() {
         try {
             const response = await fetch(`/api/admin/parameter`);
@@ -311,10 +378,22 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
                     stringSetter(param.value);
                 }
             };
+
+            // Define setBufferTime for buffer time parameters
+            const setBufferTime = (paramName: string, setter: React.Dispatch<React.SetStateAction<string>>) => {
+                const param = data.find(p => p.name === paramName);
+                if (param) {
+                    setter(param.value); // Directly set the string since buffer time is just a number of minutes
+                }
+            };
+
             setTime('morningStartTime', setStartMorningTime, setStartMorningTimeString);
             setTime('morningEndTime', setEndMorningTime, setEndMorningTimeString);
             setTime('eveningStartTime', setStartEveningTime, setStartEveningTimeString);
             setTime('eveningEndTime', setEndEveningTime, setEndEveningTimeString);
+
+            setBufferTime('morningBufferTime', setMorningBufferTime);
+            setBufferTime('eveningBufferTime', setEveningBufferTime);
         } catch (error) {
             console.error("Failed to fetch parameters:", error);
         }

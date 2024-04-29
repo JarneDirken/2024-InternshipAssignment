@@ -1,5 +1,7 @@
 import prisma from "@/services/db";
+import { db } from "@/services/firebase-config";
 import { Prisma } from "@prisma/client";
+import { addDoc, collection, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
 interface WhereClause extends Prisma.ItemRequestWhereInput {}
@@ -117,7 +119,55 @@ export async function PUT(req: NextApiRequest) {
         data: {
             requestStatusId: 6
         },
-    });    
+        include: {
+            item: true,
+        }
+    });
+
+    const user = await prisma.user.findUnique({
+        where: {
+            firebaseUid: data.userId,
+        },
+        include: {
+            role: true
+        }
+    });
+
+    // Mark previous notifications related to this request as read
+    const notificationsRef = collection(db, "notifications");
+    const q = query(notificationsRef, where("requestId", "==", data.requestId), where("isRead", "==", false));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+        updateDoc(doc.ref, { isRead: true });
+    });
+
+    // If the Prisma transaction was successful, send notification
+    if (updateItemRequest) {
+        const borrower = await prisma.user.findUnique({
+            where: {
+                firebaseUid: updateItemRequest.borrowerId
+            }
+        });
+
+        if (borrower) {
+            const notification = {
+                isRead: false,
+                fromRole: user?.role.name,
+                toRole: ['Student', "Teacher", "Admin", "Supervisor"],
+                message: `${updateItemRequest.item.name} succesfully received`,
+                timeStamp: new Date(),
+                requestId: updateItemRequest.id,
+                userId: borrower.firebaseUid,
+            };
+
+            // Add the notification to the 'notifications' collection in Firestore
+            try {
+                await addDoc(collection(db, "notifications"), notification);
+            } catch (error) {
+                console.error('Error sending notification:', error);
+            }
+        }
+    }
 
     return new Response(JSON.stringify(updateItemRequest), {
         status: 200,

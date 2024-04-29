@@ -1,5 +1,7 @@
 import prisma from "@/services/db";
+import { db } from "@/services/firebase-config";
 import { Prisma } from "@prisma/client";
+import { addDoc, collection, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
 interface WhereClause extends Prisma.ItemRequestWhereInput {}
@@ -113,6 +115,7 @@ export async function PUT(req: NextApiRequest) {
         const updateItemRequest = await prisma.itemRequest.update({
             where: { id: data.requestId },
             data: { requestStatusId: 7 },
+            include: { item: true, }
         });
 
         const updateItem = await prisma.item.update({
@@ -129,6 +132,42 @@ export async function PUT(req: NextApiRequest) {
                     notes: data.message
                 }
             });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                firebaseUid: data.userId,
+            },
+            include: {
+                role: true
+            }
+        });
+    
+        // Mark previous notifications related to this request as read
+        const notificationsRef = collection(db, "notifications");
+        const q = query(notificationsRef, where("requestId", "==", data.requestId), where("isRead", "==", false));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            updateDoc(doc.ref, { isRead: true });
+        });
+    
+        if (updateItemRequest) {
+            const messageSuffix = data.repairState === 5 ? "put in repair" : "checked";
+            const notification = {
+                isRead: true,
+                fromRole: user?.role.name,
+                toRole: ['Student', "Teacher", "Admin", "Supervisor"],
+                message: `${updateItemRequest.item.name} succesfully ${messageSuffix}`,
+                timeStamp: new Date(),
+                requestId: updateItemRequest.id,
+            };
+    
+            // Add the notification to the 'notifications' collection in Firestore
+            try {
+                await addDoc(collection(db, "notifications"), notification);
+            } catch (error) {
+                console.error('Error sending notification:', error);
+            }
         }
 
         return { updateItemRequest, updateItem, createReparation };

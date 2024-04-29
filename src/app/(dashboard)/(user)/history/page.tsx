@@ -3,7 +3,7 @@ import Unauthorized from "@/app/(dashboard)/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { getAuth } from 'firebase/auth';
-import app from "@/services/firebase-config";
+import {app} from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
 import Filters from "@/components/general/Filter";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';

@@ -27,6 +27,15 @@ import { userProfileState } from '@/services/store';
 import Tooltip from '@mui/material/Tooltip';
 import useAuth from '@/hooks/useAuth';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
+import { db } from '@/services/firebase-config';
+import { collection, onSnapshot, query, where, doc, updateDoc } from "firebase/firestore"; 
+import { Notification } from '@/models/Notification';
+import { Menu } from '@mui/material';
+import MenuItem from "@mui/material/MenuItem";
+import ClearIcon from '@mui/icons-material/Clear';
+import IconButton from "@mui/material/IconButton";
+import { useSnackbar } from 'notistack';
 
 export default function DashboardHeader() {
     const [isOpen, setIsOpen] = useState(false);
@@ -34,6 +43,9 @@ export default function DashboardHeader() {
     const pathname = usePathname();
     const auth = getAuth();
     const { userRole, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
@@ -42,6 +54,13 @@ export default function DashboardHeader() {
             }
         });
     }, []);
+
+    useEffect(() => {
+        if (profile && userRole!.length > 0 && !loading) {
+            const unsubscribe = listenForNotifications();
+            return () => unsubscribe();
+        }
+    }, [profile, userRole, loading]);
 
     useEffect(() => {
         // Define the function that handles screen resizing
@@ -59,9 +78,74 @@ export default function DashboardHeader() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    // Function to listen for real-time updates
+    const listenForNotifications = () => {
+        // Create a query against the collection.
+        // This is an example where we listen for notifications meant for the current user.
+        const rolesToQuery = Array.isArray(userRole) ? userRole : [userRole];
+        // Adjust the query based on how your notifications are structured.
+        const notificationsQuery = query(
+            collection(db, "notifications"),
+            where("toRole", "array-contains-any", rolesToQuery)
+        );
+
+       // Listen for query results in real time
+        const unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if ((change.type === "added" || change.type === "modified") && change.doc.data().isRead === false) {
+                    const data = change.doc.data();
+                    const notification: Notification = {
+                        id: change.doc.id,
+                        message: data.message,
+                        isRead: data.isRead,
+                        fromRole: data.fromRole,
+                        toRole: data.toRole,
+                        timeStamp: new Date(data.timeStamp.seconds * 1000),
+                        requestId: data.requestId,
+                    };
+                    if (change.type === "added") {
+                        setNotifications(prevNotifications => [...prevNotifications, notification].filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i));
+                    } else if (change.type === "modified") {
+                        setNotifications(prevNotifications => prevNotifications.map(n => n.id === notification.id ? notification : n));
+                    }
+                } else if (change.type === "modified" && change.doc.data().isRead === true) {
+                    // Remove the notification if it's marked as read
+                    setNotifications(prevNotifications => prevNotifications.filter(n => n.id !== change.doc.id));
+                }
+            });
+        });
+
+        // Unsubscribe from the listener when the component unmounts or user logs out
+        return () => unsubscribe();
+    };
+
     const handleLogout = () => {
         const auth = getAuth();
         auth.signOut();
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const removeNotification = async (id: string) => {
+        const notificationDocRef = doc(db, "notifications", id);
+        try {
+            await updateDoc(notificationDocRef, {
+                isRead: true
+            });
+            enqueueSnackbar('Notification marked as read', { variant: 'success' });
+    
+            // Optionally, remove the notification from the state if you don't want it to show in the UI anymore
+            setNotifications(prevNotifications => prevNotifications.filter(notification => notification.id !== id));
+        } catch (error) {
+            console.error('Error updating notification:', error);
+            enqueueSnackbar('Failed to mark notification as read', { variant: 'error' });
+        }
     };
 
     async function fetchUserProfile(uid: string) {
@@ -90,9 +174,48 @@ export default function DashboardHeader() {
                 {isOpen ? <CloseIcon fontSize="large" /> : <MenuIcon fontSize="large" />}
             </div>
             <div className='flex items-center mr-10 sm:mr-16 w-full sm:w-1/5 justify-end'>
-                <Tooltip title="Notifciations" arrow>
-                    <NotificationsOutlinedIcon className="text-4xl cursor-pointer" />
-                </Tooltip>
+                <div className="relative">
+                    <div onClick={handleMenuOpen}>
+                        <NotificationsOutlinedIcon className="text-4xl cursor-pointer" />
+                    </div>
+                    <div className='rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-1 right-1 transform translate-x-1/2 -translate-y-1/2 text-xs bg-custom-primary'>
+                        {notifications.length}
+                    </div>
+                    <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleMenuClose}
+                        className="cursor-pointer"
+                    >
+                        {notifications.length > 0 ? (
+                            notifications.map((item) => (
+                                <MenuItem key={item.id} onClick={handleMenuClose}>
+                                    <div className="flex justify-between items-center w-full">
+                                        <span onClick={(e) => {
+                                            e.stopPropagation();
+                                        }}>
+                                            {item.message} - {item.timeStamp.toLocaleDateString()}
+                                        </span>
+                                        <IconButton
+                                            edge="end"
+                                            aria-label="remove"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                removeNotification(item.id);
+                                            }}
+                                            size="small"
+                                            className="justify-end" 
+                                        >
+                                            <ClearIcon fontSize="small" />
+                                        </IconButton>
+                                    </div>
+                                </MenuItem>
+                            ))
+                        ) : (
+                            <MenuItem onClick={handleMenuClose}>No notifications</MenuItem>
+                        )}
+                    </Menu>
+                </div>
                 {!profile ? (
                     <Loading />
                 ) : (
@@ -201,6 +324,12 @@ export default function DashboardHeader() {
                                     icon={<SettingsOutlinedIcon fontSize="inherit" className="text-2xl" />} 
                                     text="Parameters"  
                                     active={pathname === "/parameter"} />
+                                </Link>
+                                <Link href="/log">
+                                    <MobileSidebarItem 
+                                    icon={<ArticleOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    text="Logs"  
+                                    active={pathname === "/log"} />
                                 </Link>
                             </>
                         )}
