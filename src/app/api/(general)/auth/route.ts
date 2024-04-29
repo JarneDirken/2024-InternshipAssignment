@@ -3,7 +3,8 @@ import { NextApiRequest } from 'next';
 
 export async function POST(req: NextApiRequest) {
     const { uid } = await new Response(req.body).json();
-
+    if (!uid) { return; }
+    
     const userData = await prisma.user.findUnique({
         where: {
             firebaseUid: uid,
