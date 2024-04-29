@@ -86,6 +86,7 @@ export async function POST(req: NextApiRequest) {
                     timeStamp: new Date(),
                     requestId: createItemRequest.id,
                     userId: data.borrowerId,
+                    targets: ["Supervisor", "Admin"]
                 };
 
                 // Add the notification to the 'notifications' collection in Firestore

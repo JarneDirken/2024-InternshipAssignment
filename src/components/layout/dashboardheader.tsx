@@ -46,6 +46,7 @@ export default function DashboardHeader() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const { enqueueSnackbar } = useSnackbar();
+    const [userId, setUserId] = useState<string | null>(null); // userID
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
@@ -61,6 +62,17 @@ export default function DashboardHeader() {
             return () => unsubscribe();
         }
     }, [profile, userRole, loading]);
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                setUserId(user.uid);
+            } else {
+                setUserId(null);
+            }
+        });
+        return () => unsubscribe();
+    }, [userId]);
 
     useEffect(() => {
         // Define the function that handles screen resizing
@@ -83,10 +95,11 @@ export default function DashboardHeader() {
         // Create a query against the collection.
         // This is an example where we listen for notifications meant for the current user.
         const rolesToQuery = Array.isArray(userRole) ? userRole : [userRole];
+        const targetsToQuery = [userId, ...rolesToQuery];
         // Adjust the query based on how your notifications are structured.
         const notificationsQuery = query(
             collection(db, "notifications"),
-            where("toRole", "array-contains-any", rolesToQuery)
+            where("targets", "array-contains-any", targetsToQuery)
         );
 
        // Listen for query results in real time
@@ -102,6 +115,7 @@ export default function DashboardHeader() {
                         toRole: data.toRole,
                         timeStamp: new Date(data.timeStamp.seconds * 1000),
                         requestId: data.requestId,
+                        targets: data.targets,
                     };
                     if (change.type === "added") {
                         setNotifications(prevNotifications => [...prevNotifications, notification].filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i));

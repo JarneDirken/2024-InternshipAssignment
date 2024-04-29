@@ -172,6 +172,7 @@ export async function PUT(req: NextApiRequest) {
                     message: `User ${user?.firstName} ${user?.lastName} returned: ${item?.name}`,
                     timeStamp: new Date(),
                     requestId: data.requestId,
+                    targets: ['Supervisor', 'Admin']
                 };
 
                 // Add the notification to the 'notifications' collection in Firestore

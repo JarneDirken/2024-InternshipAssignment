@@ -1,7 +1,7 @@
 import prisma from "@/services/db";
 import { db } from "@/services/firebase-config";
 import { Prisma } from "@prisma/client";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
 interface WhereClause extends Prisma.ItemRequestWhereInput {}
@@ -159,6 +159,14 @@ export async function PUT(req: NextApiRequest) {
             }
         });
 
+        // Mark previous notifications related to this request as read
+        const notificationsRef = collection(db, "notifications");
+        const q = query(notificationsRef, where("requestId", "==", data.requestId), where("isRead", "==", false));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            updateDoc(doc.ref, { isRead: true });
+        });
+
         if (borrower) {
             const notification = {
                 isRead: false,
@@ -168,6 +176,7 @@ export async function PUT(req: NextApiRequest) {
                 timeStamp: new Date(),
                 requestId: updateItemRequest.id,
                 userId: borrower.firebaseUid,
+                targets: [`${borrower.firebaseUid}`]
             };
 
             // Add the notification to the 'notifications' collection in Firestore

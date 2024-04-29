@@ -158,6 +158,7 @@ export async function PUT(req: NextApiRequest) {
                 timeStamp: new Date(),
                 requestId: updateItemRequest.id,
                 userId: borrower.firebaseUid,
+                targets: [`${borrower.firebaseUid}`]
             };
 
             // Add the notification to the 'notifications' collection in Firestore
