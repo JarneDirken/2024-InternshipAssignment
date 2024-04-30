@@ -152,10 +152,6 @@ export default function Reparation() {
         Status: string | undefined;
     }
 
-    useEffect(() => {
-        console.log(history);
-    }, [history])
-
     const exportRepairHistoryToExcel = (filename: string, worksheetName: string) => {
         if (!history || !history.length) return;
     
