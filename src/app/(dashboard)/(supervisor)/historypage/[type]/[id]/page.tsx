@@ -119,6 +119,7 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
     interface ExportDataUser {
         [key: string]: number | string | undefined;
         RequestID: number;
+        ItemName: string;
         Borrower: string;
         Approver: string;
         Location: string;

@@ -16,6 +16,7 @@ import { repariState } from "@/services/store";
 import { SortOptions } from "@/models/SortOptions";
 import Button from "@/components/states/Button";
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import * as XLSX from 'xlsx';
 
 export default function Reparation() {
     const { isAuthorized, loading } = useAuth(['Supervisor', 'Admin']);
@@ -121,6 +122,74 @@ export default function Reparation() {
     const openModal = (item: Repair) => {
         setRepair(item);
         setModalOpen(true);
+    };
+
+    const formatDate = (dateString: Date): string => {
+        const date = new Date(dateString);
+        const options: Intl.DateTimeFormatOptions = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            hour12: true
+        };
+        return date.toLocaleString('en-US', options);
+    };
+
+    interface ExportDataRepair {
+        [key: string]: number | string | undefined;
+        RepairId: number;
+        ItemName: string;
+        ItemBrand: string;
+        ItemModel: string;
+        ItemYear: string | undefined;
+        LastUsed: string;
+        Location: string;
+        RepairDate: string;
+        ReturnDate: string;
+        Status: string | undefined;
+    }
+
+    useEffect(() => {
+        console.log(history);
+    }, [history])
+
+    const exportRepairHistoryToExcel = (filename: string, worksheetName: string) => {
+        if (!history || !history.length) return;
+    
+        const dataToExport: ExportDataRepair[] = history.map(item => ({
+            RepairId: item.id,
+            ItemName: item.item.name,
+            ItemBrand: item.item.brand,
+            ItemModel: item.item.model,
+            ItemYear: formatDate(item.item.yearBought!),
+            LastUsed: `${item.item.ItemRequests?.[item.item.ItemRequests.length - 1]?.borrower?.firstName} ${item.item.ItemRequests?.[item.item.ItemRequests.length - 1]?.borrower?.lastName}`,
+            Location: item.item.location.name,
+            RepairDate: formatDate(item.repairDate),
+            ReturnDate: formatDate(item.returnDate!),
+            Status: item.item.itemStatus?.name,
+        }));
+    
+        // Create a worksheet from the data
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    
+        // Create a new workbook and append the worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, worksheetName);
+    
+        // Adjust column widths
+        const colWidths = Object.keys(dataToExport[0]).map(key => ({
+            wch: Math.max(
+                ...dataToExport.map(item => item[key] ? item[key]!.toString().length : 0),
+                key.length  // Include the length of the header in the calculation
+            )
+        }));
+        worksheet['!cols'] = colWidths;
+    
+        // Write the workbook to a file
+        XLSX.writeFile(workbook, `${filename}.xlsx`);
     };
 
     async function getRepairs(sortBy = 'repairDate', sortDirection = 'desc') {
@@ -262,7 +331,8 @@ export default function Reparation() {
                                 paddingX="px-2.5"
                                 paddingY="py-0.5"
                                 textClassName="font-semibold" 
-                                text="Export EXCEL" 
+                                text="Export EXCEL"
+                                onClick={() => exportRepairHistoryToExcel(`Repair-History`, 'HistoryData')}
                             />
                         </div>
                     )}
