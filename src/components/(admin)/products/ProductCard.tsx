@@ -49,25 +49,14 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                             {/* First Column */}
                             <div className="w-1/5"></div>
                             <div className="flex-1 w-1/4">
-                                {!item.image ? (
-                                    <Image 
-                                        src="/assets/images/defaultImage.jpg"
-                                        style={{ width: 'auto', height: 'auto'}}
-                                        width={60}
-                                        height={60}
-                                        alt="Default iamge"
-                                        loading="lazy"
-                                    />
-                                ) : (
-                                    <Image 
-                                        src={item.image}
-                                        alt={item.name}
-                                        style={{ width: 'auto', height: 'auto' }} 
-                                        width={60}
-                                        height={60}
-                                        loading="lazy"
-                                    />
-                                )}
+                                <Image 
+                                    src={item.image || "/assets/images/defaultImage.jpg"}
+                                    alt={item.name || "Default Image"}
+                                    style={{ width: 'auto', height: 'auto' }} 
+                                    width={60}
+                                    height={60}
+                                    loading="lazy"
+                                />
                                 <div className="truncate">
                                     <span className="font-medium text-gray-400">Brand&nbsp;</span><br/>
                                     <span>{item.brand}</span>

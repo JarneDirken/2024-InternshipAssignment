@@ -15,6 +15,8 @@ import Button from "@/components/states/Button";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import Image from 'next/image';
+import Tooltip from '@mui/material/Tooltip';
 
 interface ModalCardProps {
     open: boolean;
@@ -132,12 +134,12 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
             case 'add':
                 return (
                     <>
-                        <div className="mx-auto w-4/5 bg-gray-100 border-2 border-gray-300 border-dotted p-3 flex flex-col justify-center items-center rounded">
-                                <FileUploadOutlinedIcon className="text-gray-600 mb-1.5" />
-                                <div className="text-sm">
-                                    <span className="text-blue-500">Click to upload</span><span> or drag and drop</span>
-                                </div>
-                                <span className="text-xs text-gray-400">JPG,JPEG,PNG less then 5MB.</span>
+                        <div className="mx-auto w-11/12 bg-gray-100 border-2 border-gray-300 border-dotted p-3 flex flex-col justify-center items-center rounded">
+                            <FileUploadOutlinedIcon className="text-gray-600 mb-1.5" />
+                            <div className="text-sm">
+                                <span className="text-blue-500">Click to upload</span><span> or drag and drop</span>
+                            </div>
+                            <span className="text-xs text-gray-400">JPG,JPEG,PNG less then 5MB.</span>
                         </div>
                         <div className="flex justify-center mt-4">
                             <TextField
@@ -145,7 +147,7 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
                                 id="outlined-required"
                                 label="Name"
                                 size="small"
-                                className='w-4/5'
+                                className='w-11/12'
                                 name='name'
                                 />
                         </div>
@@ -155,7 +157,7 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
                                 id="outlined-required"
                                 label="Model"
                                 size="small"
-                                className='w-4/5'
+                                className='w-11/12'
                                 name='model'
                                 />
                         </div>
@@ -165,12 +167,12 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
                                 id="outlined-required"
                                 label="Brand"
                                 size="small"
-                                className='w-4/5'
+                                className='w-11/12'
                                 name='brand'
                                 />
                         </div>
                         <div className="flex justify-center mt-4">
-                            <FormControl className="w-4/5" size="small">
+                            <FormControl className="w-11/12" size="small">
                                 <InputLabel required id="roles-label">Roles</InputLabel>
                                 <Select
                                     labelId="roles-label"
@@ -184,7 +186,7 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
                             </FormControl>
                         </div>
                         <div className="flex justify-center mt-4">
-                            <FormControl className="w-4/5" size="small">
+                            <FormControl className="w-11/12" size="small">
                                 <InputLabel required id="location-label">Location</InputLabel>
                                 <Select
                                     labelId="location-label"
@@ -203,13 +205,13 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
                                 id="outlined-required"
                                 label="Year"
                                 size="small"
-                                className='w-4/5'
+                                className='w-11/12'
                                 name='year'
                                 type="number"
                                 />
                         </div>
                         <div className="flex justify-center mt-4">
-                            <FormControl className="w-4/5" size="small">
+                            <FormControl className="w-11/12" size="small">
                                 <InputLabel required id="status-label">Status</InputLabel>
                                 <Select
                                     labelId="status-label"
@@ -223,7 +225,7 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
                             </FormControl>
                         </div>
                         <div className="flex justify-center mt-4">
-                            <FormControl className="w-4/5" size="small">
+                            <FormControl className="w-11/12" size="small">
                                 <InputLabel required id="availability-label">Availability</InputLabel>
                                 <Select
                                     labelId="availability-label"
@@ -242,7 +244,7 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
                                 id="outlined-required"
                                 label="Notes"
                                 size="small"
-                                className='w-4/5'
+                                className='w-11/12'
                                 name='notes'
                                 />
                         </div>
@@ -252,7 +254,7 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
                                 id="outlined-required"
                                 label="School number"
                                 size="small"
-                                className='w-4/5'
+                                className='w-11/12'
                                 name='school number'
                                 />
                         </div>
@@ -274,7 +276,84 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
                     return <p>No items selected.</p>;
                 } else {
                     return (
-                        <p>Are you sure you want to delete {selectedItems.length > 1 ? 'these items' : 'this item'}?</p>
+                        <>
+                            {selectedItems.length === 1 && (
+                                <div className="px-4 grid grid-cols-4">
+                                    <div className="col-span-1 grid grid-rows-4">
+                                        <div className="row-span-3 flex">
+                                            <Image 
+                                                src={selectedItems[0].image || "/assets/images/defaultImage.jpg"}
+                                                alt={selectedItems[0].name || "Default Image"}
+                                                style={{ width: '50px', height: '50px', objectFit: 'cover'}}
+                                                width={60}
+                                                height={60}
+                                                loading="lazy"
+                                            />
+                                        </div>
+                                        <div className="truncate">
+                                            <span className="font-medium text-gray-400">Year&nbsp;</span><br/>
+                                            <Tooltip title={selectedItems[0].yearBought ? new Date(selectedItems[0].yearBought).getFullYear() : 'N/A'} placement="top-start">
+                                                <span>{selectedItems[0].yearBought ? new Date(selectedItems[0].yearBought).getFullYear() : 'N/A'}</span>
+                                            </Tooltip>
+                                        </div>
+                                    </div>
+                                    <div className="col-span-3">
+                                        <div className="truncate">
+                                            <span className="font-medium text-gray-400">Name&nbsp;</span><br/>
+                                            <Tooltip title={selectedItems[0].name} placement="top-start">
+                                                <span>{selectedItems[0].name}</span>
+                                            </Tooltip>
+                                        </div>
+                                        <div className="truncate">
+                                            <span className="font-medium text-gray-400">Brand&nbsp;</span><br/>
+                                            <Tooltip title={selectedItems[0].brand} placement="top-start">
+                                                <span>{selectedItems[0].brand}</span>
+                                            </Tooltip>
+                                        </div>
+                                        <div className="truncate">
+                                            <span className="font-medium text-gray-400">Model&nbsp;</span><br/>
+                                            <Tooltip title={selectedItems[0].model} placement="top-start">
+                                                <span>{selectedItems[0].model}</span>
+                                            </Tooltip>
+                                        </div>
+                                        <div className="truncate">
+                                            <span className="font-medium text-gray-400">Location&nbsp;</span><br/>
+                                            <Tooltip title={selectedItems[0].location.name} placement="top-start">
+                                                <span>{selectedItems[0].location.name}</span>
+                                            </Tooltip>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            {selectedItems.length > 1 && (
+                                <div className="flex justify-center">
+                                    <div>
+                                        <p className="mb-3">Are you sure you want to delete {selectedItems.length} items?</p>
+                                        <div>
+                                            {selectedItems.map((selectedItem) => (
+                                                <div key={selectedItem.id} className="flex items-center gap-3 mt-1">
+                                                    <div>
+                                                        <Image 
+                                                            src={selectedItem.image || "/assets/images/defaultImage.jpg"}
+                                                            alt={selectedItem.name || "Default Image"}
+                                                            style={{ width: '30px', height: '30px', objectFit: 'cover'}}
+                                                            width={20}
+                                                            height={20}
+                                                            loading="lazy"
+                                                        />
+                                                    </div>
+                                                    <div className="truncate">
+                                                        <Tooltip title={selectedItem.name} placement="top-start">
+                                                            <span>{selectedItem.name}</span>
+                                                        </Tooltip>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     );
                 }
         }
@@ -301,17 +380,21 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
             aria-labelledby="modal-title"
             aria-describedby="modal-description"
         >
-            <Box className="modal-box bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80%] md:w-[50%] rounded-lg shadow-lg h-[70%] flex flex-col">
-                <div className="flex justify-between py-3 px-4 border-b-2 border-gray-200">
-                    <div className="flex gap-2">
-                        <span className="font-bold">{mode === 'add'? <Inventory2OutlinedIcon /> : mode === 'edit' ? <Inventory2OutlinedIcon /> : <WarningAmberRoundedIcon />}</span>
-                        <span className="font-bold">{mode === 'add'? 'Add product' : mode === 'edit' ? 'Edit product' : 'Delete product'}</span>
+            <Box className="modal-box bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80%] md:w-[50%] rounded-lg shadow-lg max-h-[70%] flex flex-col">
+                <div className="flex justify-between items-center py-3 px-4 border-b-2 border-gray-200">
+                    <div className="flex items-center gap-2">
+                        <span className="font-bold my-auto">{mode === 'add'? <Inventory2OutlinedIcon /> : mode === 'edit' ? <Inventory2OutlinedIcon /> : <WarningAmberRoundedIcon className="text-custom-red text-3xl" />}</span>
+                        <span className={`font-bold ${mode === 'delete' ? 'text-custom-red' : ''}`}>
+                            {mode === 'add' ? 'Add product' : mode === 'edit' ? 'Edit product' :
+                            selectedItems?.length === 1 ? "You're about to delete this item. Are you sure?" :
+                            "Delete products"}
+                        </span>
                     </div>
                     <div onClick={onClose}>
                         <span><CloseOutlinedIcon /></span>
                     </div>
                 </div>
-                <div id="modal-description" className="modal-body h-full py-3 overflow-y-auto">
+                <div id="modal-description" className="modal-body h-full p-3 overflow-y-auto">
                     {renderContent()}
                 </div>
                 <div className="flex justify-around py-3 px-4 border-t-2 border-gray-200">
