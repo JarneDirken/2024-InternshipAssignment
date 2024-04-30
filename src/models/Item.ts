@@ -18,6 +18,10 @@ export interface Item {
     consumable: boolean,
     amount?: number,
     ItemRequests?: ItemRequest[]
+    itemStatus?: {
+        id: number;
+        name: string;
+    }
 }
 
 export interface GroupedItem extends Item {

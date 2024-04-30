@@ -240,7 +240,7 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                                 return result;
                                             }).filter(option => option !== null && option !== undefined))
                                         ]}
-                                        isOptionEqualToValue={(option, value) => option.id === value.id}
+                                        isOptionEqualToValue={(option, value) => option === value}
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}
