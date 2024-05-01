@@ -33,8 +33,8 @@ export async function GET(request: NextRequest, {params}: {params: {type: string
     const uid = searchParams.get("userId") || '';
     const nameFilterUser = searchParams.get('nameUser') || '';
     const nameFilterItem = searchParams.get('nameItem') || '';
-    const borrowDate = searchParams.get('borrowDateUser');
-    const returnDate = searchParams.get('returnDateUser');
+    const borrowDateUser = searchParams.get('borrowDateUser');
+    const returnDateUser = searchParams.get('returnDateUser');
     const borrowDateItem = searchParams.get('borrowDateItem');
     const returnDateItem = searchParams.get('returnDateItem');
     const sortBy = searchParams.get('sortBy') || 'requestDate';  // Default sort field
@@ -64,16 +64,16 @@ export async function GET(request: NextRequest, {params}: {params: {type: string
             },
         };
         // Handle date filters
-        if (borrowDate) {
-            const borrowDateStart = new Date(borrowDate);
+        if (borrowDateUser) {
+            const borrowDateStart = new Date(borrowDateUser);
             borrowDateStart.setHours(0, 0, 0, 0);
             whereClause.startBorrowDate = {
                 gte: borrowDateStart
             };
         }
         
-        if (returnDate) {
-            const returnDateEnd = new Date(returnDate);
+        if (returnDateUser) {
+            const returnDateEnd = new Date(returnDateUser);
             returnDateEnd.setHours(23, 59, 59, 999);
             whereClause.endBorrowDate = {
                 lte: returnDateEnd
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest, {params}: {params: {type: string
             },
         });
     } else if (type === 'item') {
-        const whereClause: WhereClause = {
+        const whereClauseItem: WhereClause = {
             borrower: {
                 firstName: { contains: nameFilterItem, mode: 'insensitive' },
             },
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest, {params}: {params: {type: string
         if (borrowDateItem) {
             const borrowDateStart = new Date(borrowDateItem);
             borrowDateStart.setHours(0, 0, 0, 0);
-            whereClause.startBorrowDate = {
+            whereClauseItem.startBorrowDate = {
                 gte: borrowDateStart
             };
         }
@@ -104,11 +104,11 @@ export async function GET(request: NextRequest, {params}: {params: {type: string
         if (returnDateItem) {
             const returnDateEnd = new Date(returnDateItem);
             returnDateEnd.setHours(23, 59, 59, 999);
-            whereClause.endBorrowDate = {
+            whereClauseItem.endBorrowDate = {
                 lte: returnDateEnd
             };
         }
-        const data = await fetchItemHistory(parseInt(id, 10), whereClause, orderBy);
+        const data = await fetchItemHistory(parseInt(id, 10), whereClauseItem, orderBy);
         return new Response(JSON.stringify(data), {
             status: 200,
             headers: {
@@ -175,6 +175,11 @@ async function fetchItemHistory(itemId: number, whereClause: WhereClause, orderB
                     approver: true,
                     item: {
                         include: {
+                            Reparations: {
+                                include: {
+                                    item: true,
+                                }
+                            },
                             location: true,
                         }
                     }

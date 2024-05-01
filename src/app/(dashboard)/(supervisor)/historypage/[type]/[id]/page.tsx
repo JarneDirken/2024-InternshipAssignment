@@ -85,18 +85,18 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
                     const user = history[0] as User;
                     setTitle(toTitleCase(`${user.firstName} ${user.lastName}`));
                     // Assuming that `ItemRequestsBorrower` is a property that holds `ItemRequest[]`
-                    const allUserRequests = history.flatMap((entity: User | Item) =>
+                    const userRelatedItems = history.flatMap((entity: User | Item) =>
                         'ItemRequestsBorrower' in entity ? (entity as User).ItemRequestsBorrower || [] : []
                     );
-                    setFilteredItemsItem(allUserRequests);
+                    setFilteredItemsItem(userRelatedItems);
                 } else if (type === 'item') {
                     const item = history[0] as Item;
                     setTitle(toTitleCase(item.name));
                     // Assuming that `ItemRequests` is a property that holds `Users[]`
-                    const allItemRequests = history.flatMap((entity: User | Item) =>
+                    const itemRelatedUsers = history.flatMap((entity: User | Item) =>
                         'ItemRequests' in entity ? (entity as Item).ItemRequests || [] : []
                     );
-                    setFilteredItemsUser(allItemRequests);
+                    setFilteredItemsUser(itemRelatedUsers);
                 }
             }
         }
@@ -221,7 +221,6 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
         // Write the workbook to a file
         XLSX.writeFile(workbook, `${filename}.xlsx`);
     };
-    
     
     const handleFilterChange = (filterType: string, value: string) => {
         if (type === 'user') {
@@ -353,7 +352,7 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
                 setActive={setActive}
                 onFilterChange={handleFilterChange}
                 onSortChange={handleSortChange}
-                items={type === "user" ? filteredItemsUser : filteredItemsItem}
+                items={type === "user" ? filteredItemsItem : filteredItemsUser}
                 filters={type === 'user' ? userFilters : itemFilters}
                 sortOptions={type === 'user' ? sortOptionsUser : sortOptionsItem}
                 isCardView={true}
@@ -385,7 +384,7 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
                 <div>
                     <ItemCard
                         active={active}
-                        items={history}
+                        items={type === "user" ? filteredItemsItem : filteredItemsUser}
                         itemLoading={itemLoading}
                         type={type}
                     />
