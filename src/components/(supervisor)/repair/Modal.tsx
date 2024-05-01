@@ -178,7 +178,7 @@ export default function Modal({ open, onClose, item, repaired, broken, setRepair
                                 <div className="flex flex-col">
                                     <div className="flex gap-2">
                                         <span className="font-semibold text-gray-400">Name</span>
-                                        <div className="text-custom-primary cursor-pointer" onClick={() => viewItemHistory(item.id)}>
+                                        <div className="text-custom-primary cursor-pointer" onClick={() => viewItemHistory(item.itemId)}>
                                             <RestoreOutlinedIcon fontSize="small"/>
                                         </div>
                                     </div>

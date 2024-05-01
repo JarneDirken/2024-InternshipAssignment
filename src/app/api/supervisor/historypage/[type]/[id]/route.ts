@@ -175,7 +175,11 @@ async function fetchItemHistory(itemId: number, whereClause: WhereClause, orderB
                     approver: true,
                     item: {
                         include: {
-                            Reparations: true,
+                            Reparations: {
+                                include: {
+                                    item: true,
+                                }
+                            },
                             location: true,
                         }
                     }

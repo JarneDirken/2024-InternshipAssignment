@@ -101,10 +101,6 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
             }
         }
     }, [history, type]);
-
-    useEffect(() => {
-        console.log(filteredItemsUser)
-    }, [filteredItemsUser])
     
     const formatDate = (dateString: Date): string => {
         const date = new Date(dateString);
