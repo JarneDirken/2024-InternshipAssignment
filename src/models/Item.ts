@@ -1,5 +1,6 @@
 import { ItemRequest } from "./ItemRequest";
 import { Location } from "./Location";
+import { RoleItem } from "./RoleItem";
 import { Repair } from "./Repair";
 
 export interface Item {
@@ -19,6 +20,7 @@ export interface Item {
     consumable: boolean,
     amount?: number,
     ItemRequests?: ItemRequest[],
+    RoleItem?: RoleItem[],
     itemStatus?: {
         id: number;
         name: string;
