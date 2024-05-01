@@ -14,20 +14,86 @@ import { Item } from "@/models/Item";
 import Button from "@/components/states/Button";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { Checkbox, FormControl, FormGroup, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import Image from 'next/image';
 import Tooltip from '@mui/material/Tooltip';
+import { ClearIcon } from "@mui/x-date-pickers/icons";
+import { Role } from "@/models/Role";
+import { Location } from "@/models/Location";
+import { ItemStatus } from "@/models/ItemStatus";
 
 interface ModalCardProps {
     open: boolean;
     onClose: () => void;
     selectedItems?: Item[];
+    roles: Role[];
+    locations: Location[];
+    itemStatuses: ItemStatus[];
     mode: 'add' | 'edit' | 'delete';
+    userId: String | null;
 }
 
-export default function Modal({ open, onClose, selectedItems, mode }: ModalCardProps) {
+export default function Modal({ open, onClose, selectedItems, mode, userId, roles, locations, itemStatuses }: ModalCardProps) {
     const [message, setMessage] = useState<string | null>(null);  // State can be string or null
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
+
+    const items = selectedItems || [];
+
+    // File upload states
+    const [file, setFile] = useState<File | null>(null);
+    const [fileUrl, setFileUrl] = useState<string | null>(null); // file url from firebase
+    const primitiveUserId = userId ? String(userId) : null; // uid from firebase
+
+    // Item states
+    const [name, setName] = useState('');
+    const [number, setNumber] = useState('');
+    const [model, setModel] = useState('');
+    const [brand, setBrand] = useState('');
+    const [year, setYear] = useState('');
+    const [notes, setNotes] = useState('');
+    const [schoolNumber, setSchoolNumber] = useState('');
+    const [itemActive, setItemActive] = useState(true);
+    const [consumable, setConsumable] = useState(false);
+    const [amount, setAmount] = useState('');
+    const [selectedRoleId, setSelectedRoleId] = useState<number | ''>('');
+    const [selectedLocationId, setSelectedLocationId] = useState<number | ''>('');
+    const [selectedItemStatusId, setSelectedItemStatusId] = useState<number | ''>('');
+
+    useEffect(() => {
+        if (mode === 'edit' && items.length === 1) {
+            const item = items[0];
+            setFileUrl(item.image || null);
+            setName(item.name || '');
+            setNumber(item.number || '');
+            setModel(item.model || '');
+            setBrand(item.brand || '');
+            setYear(item.yearBought ? new Date(item.yearBought).getFullYear().toString() : '');
+            setNotes(item.notes || '');
+            setSchoolNumber(item.schoolNumber || '');
+            console.log(item.active);
+            setItemActive(item.active);
+            setConsumable(item.consumable || false);
+            setAmount(item.amount ? item.amount.toString() : '');
+            setSelectedItemStatusId(item.itemStatusId || '');
+            setSelectedLocationId(item.locationId || '');
+        } else if (mode === 'add') {
+            // Reset all states to default for adding new item
+            setName('');
+            setNumber('');
+            setModel('');
+            setBrand('');
+            setYear('');
+            setNotes('');
+            setSchoolNumber('');
+            setItemActive(true);
+            setConsumable(false);
+            setAmount('');
+            setSelectedRoleId('');
+            setSelectedLocationId('');
+            setSelectedItemStatusId('');
+        }
+    }, [items, mode]);
 
     // async function handOverItem() {
 
@@ -52,49 +118,6 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
     //     }
     // };
 
-    // async function receiveItem() {
-    //     if (!item) { console.error("error"); return; }
-    //     const data = {
-    //         itemId: item.id,
-    //     };
-
-    //     const response = await fetch(`/api/supervisor/pendingreturns/`, {
-    //         method: 'PUT',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify({ data: data }),
-    //     });
-
-    //     if (response.ok) {
-    //         handleSuccess();
-    //         enqueueSnackbar('Item succesfully received', { variant: 'success' })
-    //     } else {
-    //         console.error('Failed to update item request');
-    //     }
-    // };
-
-    // async function checkItem() {
-    //     if (!item) { console.error("error"); return; }
-    //     const data = {
-    //         itemId: item.id,
-    //     };
-
-    //     const response = await fetch(`/api/supervisor/itemrequest/`, {
-    //         method: 'PUT',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify({ data: data }),
-    //     });
-
-    //     if (response.ok) {
-    //         handleSuccess();
-    //     } else {
-    //         console.error('Failed to update item request');
-    //     }
-    // };
-
     const handleSuccess = () => {
         onClose();
         setMessage("");
@@ -106,6 +129,26 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
 
     const handleEdit = async () => {
         // Logic to handle edit
+    };
+
+    const handleConsumableChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setConsumable(event.target.checked);
+    };
+
+    const handleItemActiveChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setItemActive(event.target.checked);
+    }
+
+    const handleRoleChange = (event: SelectChangeEvent<number>) => {
+        setSelectedRoleId(Number(event.target.value)); // Ensure the value is a number
+    };
+
+    const handleLocationChange = (event: SelectChangeEvent<number>) => {
+        setSelectedLocationId(Number(event.target.value)); // Ensure the value is a number
+    };
+
+    const handleItemStatusChange = (event: SelectChangeEvent<number>) => {
+        setSelectedItemStatusId(Number(event.target.value)); // Ensure the value is a number
     };
 
     async function handleDelete() {
@@ -129,18 +172,124 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
         }
     };
 
+    const handleUploadToFirebase = async (file: File, userId: string) => {
+        const storage = getStorage();
+        console.log(userId);
+        // Ensure you include the authenticated user's UID in the path
+        const storageRef = ref(storage, `itemPictures/${file.name}`);
+
+        try {
+            const snapshot = await uploadBytes(storageRef, file);
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            setFileUrl(downloadURL);
+            return downloadURL;
+        } catch (error) {
+            console.error('Error uploading file:', error);
+        }
+    };
+
+    const handleDragOver = (event: React.DragEvent<HTMLLabelElement>) => {
+        event.preventDefault();
+    };
+
+    const handleDrop = async (event: React.DragEvent<HTMLLabelElement>) => {
+        event.preventDefault();
+        const files = event.dataTransfer.files;
+        if (files.length > 0) {
+            setFile(files[0]);
+            if (primitiveUserId) {
+                await handleUploadToFirebase(files[0], primitiveUserId);
+            } else {
+                console.error("User ID is null, cannot upload file.");
+            }
+        }
+    };
+
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            setFile(event.target.files[0]);
+            if (primitiveUserId) {
+                await handleUploadToFirebase(event.target.files[0], primitiveUserId);
+            } else {
+                console.error("User ID is null, cannot upload file.");
+            }
+        }
+    };
+
+    const handleClearFile = async () => {
+        if (fileUrl) {
+            const storage = getStorage();
+            const fileRef = ref(storage, `${fileUrl}`);
+
+            try {
+                await deleteObject(fileRef);
+                setFile(null);
+                setFileUrl('');
+                // Reset the file input value if necessary
+                const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+                if (fileInput) fileInput.value = '';
+            } catch (error) {
+                console.error('Error deleting file:', error);
+            }
+        }
+    };
+
     const renderContent = () => {
         switch (mode) {
             case 'add':
                 return (
                     <>
-                        <div className="mx-auto w-11/12 bg-gray-100 border-2 border-gray-300 border-dotted p-3 flex flex-col justify-center items-center rounded">
+                        {/* <div className="mx-auto w-11/12 bg-gray-100 border-2 border-gray-300 border-dotted p-3 flex flex-col justify-center items-center rounded">
                             <FileUploadOutlinedIcon className="text-gray-600 mb-1.5" />
                             <div className="text-sm">
                                 <span className="text-blue-500">Click to upload</span><span> or drag and drop</span>
                             </div>
                             <span className="text-xs text-gray-400">JPG,JPEG,PNG less then 5MB.</span>
-                        </div>
+                        </div> */}
+                        {!file && (
+                            <label
+                                htmlFor="file-upload"
+                                className="mx-auto w-11/12 bg-gray-100 border-2 border-gray-300 border-dotted p-3 flex flex-col justify-center items-center rounded"
+                                onDragOver={handleDragOver}
+                                onDrop={handleDrop}
+                            >
+                                <FileUploadOutlinedIcon className="text-gray-600 mb-1.5" />
+                                <div className="text-sm">
+                                    <span className="text-blue-500 select-none">Click to upload</span><span className="select-none"> or drag and drop</span>
+                                </div>
+                                <span className="text-xs text-gray-400 select-none">JPG,JPEG,PNG less then 5MB.</span>
+                                <input
+                                    id="file-upload"
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    className="opacity-0 w-0 h-0"
+                                    accept="image/jpeg,image/png,application/pdf"
+                                />
+                            </label>
+                        )}
+                        {file && (
+                            <div className="flex flex-row justify-around items-center gap-2">
+                                <Image 
+                                    src={fileUrl || "/assets/images/defaultImage.jpg"}
+                                    alt={name || "Default Image"}
+                                    style={{ width: '50px', height: '50px', objectFit: 'cover'}}
+                                    width={60}
+                                    height={60}
+                                    loading="lazy"
+                                />
+                                <div className="cursor-pointer" onClick={handleClearFile}>
+                                    <Button 
+                                        icon={<ClearIcon className="text-xl" />}
+                                        paddingX="px-2"
+                                        textColor="custom-gray" 
+                                        borderColor="custom-gray"
+                                        textClassName="font-semibold" 
+                                        text="Remove"
+                                    />
+                                </div>
+                                
+                            </div>
+                        )}
                         <div className="flex justify-center mt-4">
                             <TextField
                                 required
@@ -178,10 +327,14 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
                                     labelId="roles-label"
                                     id="roles"
                                     label="Roles"
+                                    value={selectedRoleId}
+                                    onChange={handleRoleChange}
                                 >
-                                    <MenuItem value={10}>Ten</MenuItem>
-                                    <MenuItem value={20}>Twenty</MenuItem>
-                                    <MenuItem value={30}>Thirty</MenuItem>
+                                    {roles.map((role) => (
+                                        <MenuItem key={role.id} value={role.id}>
+                                            {role.name}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         </div>
@@ -192,10 +345,14 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
                                     labelId="location-label"
                                     id="location"
                                     label="Location"
+                                    value={selectedLocationId}
+                                    onChange={handleLocationChange}
                                 >
-                                    <MenuItem value={10}>Ten</MenuItem>
-                                    <MenuItem value={20}>Twenty</MenuItem>
-                                    <MenuItem value={30}>Thirty</MenuItem>
+                                    {locations.map((location) => (
+                                        <MenuItem key={location.id} value={location.id}>
+                                            {location.name}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         </div>
@@ -217,30 +374,30 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
                                     labelId="status-label"
                                     id="status"
                                     label="Status"
+                                    value={selectedItemStatusId}
+                                    onChange={handleItemStatusChange}
                                 >
-                                    <MenuItem value={10}>Ten</MenuItem>
-                                    <MenuItem value={20}>Twenty</MenuItem>
-                                    <MenuItem value={30}>Thirty</MenuItem>
+                                    {itemStatuses.map((itemStatus) => (
+                                        <MenuItem key={itemStatus.id} value={itemStatus.id}>
+                                            {itemStatus.name}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         </div>
                         <div className="flex justify-center mt-4">
-                            <FormControl className="w-11/12" size="small">
-                                <InputLabel required id="availability-label">Availability</InputLabel>
-                                <Select
-                                    labelId="availability-label"
-                                    id="availability"
-                                    label="Availability"
-                                >
-                                    <MenuItem value={10}>Ten</MenuItem>
-                                    <MenuItem value={20}>Twenty</MenuItem>
-                                    <MenuItem value={30}>Thirty</MenuItem>
-                                </Select>
-                            </FormControl>
+                            <FormGroup className="w-11/12">
+                                <div className="flex items-center">
+                                    <Checkbox 
+                                        size="small" 
+                                        onChange={handleItemActiveChange} 
+                                    />
+                                    <span className="select-none">Active?</span>
+                                </div>
+                            </FormGroup>
                         </div>
                         <div className="flex justify-center mt-4">
                             <TextField
-                                required
                                 id="outlined-required"
                                 label="Notes"
                                 size="small"
@@ -250,7 +407,6 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
                         </div>
                         <div className="flex justify-center mt-4">
                             <TextField
-                                required
                                 id="outlined-required"
                                 label="School number"
                                 size="small"
@@ -258,17 +414,255 @@ export default function Modal({ open, onClose, selectedItems, mode }: ModalCardP
                                 name='school number'
                                 />
                         </div>
+                        <div className="flex justify-center mt-4">
+                            <FormGroup className="w-11/12">
+                                <div className="flex items-center">
+                                    <Checkbox 
+                                        size="small" 
+                                        onChange={handleConsumableChange} 
+                                    />
+                                    <span className="select-none">Consumable?</span>
+                                </div>
+                            </FormGroup>
+                        </div>
+                        {consumable && (
+                            <div className="flex justify-center mt-4">
+                                <TextField
+                                    required
+                                    id="outlined-required"
+                                    label="Amount"
+                                    size="small"
+                                    className='w-11/12'
+                                    name='amount'
+                                    type="number"
+                                    />
+                            </div>
+                        )}
                     </>
                 );
             case 'edit':
                 return (
                     <>
-                        <TextField
-                            label="Item Name"
-                            variant="outlined"
-                            defaultValue="Test"
-                            fullWidth
-                        />
+                        {!fileUrl  && (
+                            <label
+                                htmlFor="file-upload"
+                                className="mx-auto w-11/12 bg-gray-100 border-2 border-gray-300 border-dotted p-3 flex flex-col justify-center items-center rounded"
+                                onDragOver={handleDragOver}
+                                onDrop={handleDrop}
+                            >
+                                <FileUploadOutlinedIcon className="text-gray-600 mb-1.5" />
+                                <div className="text-sm">
+                                    <span className="text-blue-500 select-none">Click to upload</span><span className="select-none"> or drag and drop</span>
+                                </div>
+                                <span className="text-xs text-gray-400 select-none">JPG,JPEG,PNG less then 5MB.</span>
+                                <input
+                                    id="file-upload"
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    className="opacity-0 w-0 h-0"
+                                    accept="image/jpeg,image/png,application/pdf"
+                                />
+                            </label>
+                        )}
+                        {fileUrl  && (
+                            <div className="flex flex-row justify-around items-center gap-2">
+                                <Image 
+                                    src={fileUrl || "/assets/images/defaultImage.jpg"}
+                                    alt={name || "Default Image"}
+                                    style={{ width: '50px', height: '50px', objectFit: 'cover'}}
+                                    width={60}
+                                    height={60}
+                                    loading="lazy"
+                                />
+                                <div className="cursor-pointer" onClick={handleClearFile}>
+                                    <Button 
+                                        icon={<ClearIcon className="text-xl" />}
+                                        paddingX="px-2"
+                                        textColor="custom-gray" 
+                                        borderColor="custom-gray"
+                                        textClassName="font-semibold" 
+                                        text="Remove"
+                                    />
+                                </div>
+                                
+                            </div>
+                        )}
+                        <div className="flex justify-center mt-4">
+                            <TextField
+                                required
+                                id="outlined-required"
+                                label="Name"
+                                size="small"
+                                className='w-11/12'
+                                name='name'
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                />
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <TextField
+                                required
+                                id="outlined-required"
+                                label="No"
+                                size="small"
+                                className='w-11/12'
+                                name='number'
+                                value={number}
+                                onChange={(e) => setNumber(e.target.value)}
+                                />
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <TextField
+                                required
+                                id="outlined-required"
+                                label="Model"
+                                size="small"
+                                className='w-11/12'
+                                name='model'
+                                value={model}
+                                onChange={(e) => setModel(e.target.value)}
+                                />
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <TextField
+                                required
+                                id="outlined-required"
+                                label="Brand"
+                                size="small"
+                                className='w-11/12'
+                                name='brand'
+                                value={brand}
+                                onChange={(e) => setBrand(e.target.value)}
+                                />
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <FormControl className="w-11/12" size="small">
+                                <InputLabel required id="roles-label">Roles</InputLabel>
+                                <Select
+                                    labelId="roles-label"
+                                    id="roles"
+                                    label="Roles"
+                                    value={selectedRoleId}
+                                    onChange={handleRoleChange}
+                                >
+                                    {roles.map((role) => (
+                                        <MenuItem key={role.id} value={role.id}>
+                                            {role.name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <FormControl className="w-11/12" size="small">
+                                <InputLabel required id="location-label">Location</InputLabel>
+                                <Select
+                                    labelId="location-label"
+                                    id="location"
+                                    label="Location"
+                                    value={selectedLocationId}
+                                    onChange={handleLocationChange}
+                                >
+                                    {locations.map((location) => (
+                                        <MenuItem key={location.id} value={location.id}>
+                                            {location.name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <TextField
+                                required
+                                id="outlined-required"
+                                label="Year"
+                                size="small"
+                                className='w-11/12'
+                                name='year'
+                                type="number"
+                                value={year}
+                                onChange={(e) => setYear(e.target.value)}
+                                />
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <FormControl className="w-11/12" size="small">
+                                <InputLabel required id="status-label">Status</InputLabel>
+                                <Select
+                                    labelId="status-label"
+                                    id="status"
+                                    label="Status"
+                                    value={selectedItemStatusId}
+                                    onChange={handleItemStatusChange}
+                                >
+                                    {itemStatuses.map((itemStatus) => (
+                                        <MenuItem key={itemStatus.id} value={itemStatus.id}>
+                                            {itemStatus.name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <FormGroup className="w-11/12">
+                                <div className="flex items-center">
+                                    <Checkbox 
+                                        checked={itemActive}
+                                        size="small" 
+                                        onChange={handleItemActiveChange} 
+                                    />
+                                    <span className="select-none">Active?</span>
+                                </div>
+                            </FormGroup>
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <TextField
+                                id="outlined-required"
+                                label="Notes"
+                                size="small"
+                                className='w-11/12'
+                                name='notes'
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                                />
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <TextField
+                                id="outlined-required"
+                                label="School number"
+                                size="small"
+                                className='w-11/12'
+                                name='school number'
+                                value={schoolNumber}
+                                onChange={(e) => setSchoolNumber(e.target.value)}
+                                />
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <FormGroup className="w-11/12">
+                                <div className="flex items-center">
+                                    <Checkbox 
+                                        checked={consumable}
+                                        size="small" 
+                                        onChange={handleConsumableChange}
+                                    />
+                                    <span className="select-none">Consumable?</span>
+                                </div>
+                            </FormGroup>
+                        </div>
+                        {consumable && (
+                            <div className="flex justify-center mt-4">
+                                <TextField
+                                    required
+                                    id="outlined-required"
+                                    label="Amount"
+                                    size="small"
+                                    className='w-11/12'
+                                    name='amount'
+                                    type="number"
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    />
+                            </div>
+                        )}
                     </>
                 );
             case 'delete':

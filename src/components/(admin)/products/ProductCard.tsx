@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import Tooltip from '@mui/material/Tooltip';
 
 interface ProductCardProps {
-    openModal: (item: Item) => void;
+    openModal: (mode: 'add' | 'edit' | 'delete', item: Item) => void;
     items: Item[];
     itemLoading: boolean;
     selectedItems: Item[];
@@ -59,11 +59,15 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                                 />
                                 <div className="truncate">
                                     <span className="font-medium text-gray-400">Brand&nbsp;</span><br/>
-                                    <span>{item.brand}</span>
+                                    <Tooltip title={item.brand} placement="top-start">
+                                        <span>{item.brand}</span>
+                                    </Tooltip>
                                 </div>
                                 <div className="truncate">
                                     <span className="font-medium text-gray-400">Year&nbsp;</span><br/>
-                                    <span>{item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'}</span>
+                                    <Tooltip title={item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'} placement="top-start">
+                                        <span>{item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'}</span>
+                                    </Tooltip>
                                 </div>
                             </div>
 
@@ -71,15 +75,21 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                             <div className="flex-1 w-2/4">
                                 <div className="truncate">
                                     <span className="font-medium text-gray-400">No.&nbsp;</span><br/>
-                                    <span>{item.number}</span>
+                                    <Tooltip title={item.number} placement="top-start">
+                                        <span>{item.number}</span>
+                                    </Tooltip>
                                 </div>
                                 <div className="truncate">
                                     <span className="font-medium text-gray-400">Name&nbsp;</span><br/>
-                                    <span>{item.name}</span>
+                                    <Tooltip title={item.name} placement="top-start">
+                                        <span>{item.name}</span>
+                                    </Tooltip>
                                 </div>
                                 <div className="truncate">
                                     <span className="font-medium text-gray-400">Model&nbsp;</span><br/>
-                                    <span>{item.model}</span>
+                                    <Tooltip title={item.model} placement="top-start">
+                                        <span>{item.model}</span>
+                                    </Tooltip>
                                 </div>
                             </div>
                         </div>
@@ -90,15 +100,27 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                             <div className="flex-1 w-1/4">
                                 <div className="truncate">
                                     <span className="font-medium text-gray-400">Location&nbsp;</span><br/>
-                                    <span>{item.location.name}</span>
+                                    <Tooltip title={item.location.name} placement="top-start">
+                                        <span>{item.location.name}</span>
+                                    </Tooltip>
                                 </div>
                             </div>
                             <div className="w-5/12 flex justify-evenly items-end">
-                                <EditOutlinedIcon className="text-gray-400" />
-                                <DeleteOutlinedIcon className="text-custom-red" />
-                                <div className="cursor-pointer" onClick={() => viewItemHistory(item.id)}>
-                                    <HistoryOutlinedIcon className="text-custom-primary" />
-                                </div>
+                                <Tooltip title="Edit" placement="top-start">
+                                    <div className="cursor-pointer" onClick={() => openModal('edit', item)}>
+                                        <EditOutlinedIcon className="text-gray-400" />
+                                    </div>
+                                </Tooltip>
+                                <Tooltip title="Delete" placement="top-start">
+                                    <div className="cursor-pointer" onClick={() => openModal('delete', item)}>
+                                        <DeleteOutlinedIcon className="text-custom-red" />
+                                    </div>
+                                </Tooltip>
+                                <Tooltip title="Delete" placement="top-start">
+                                    <div className="cursor-pointer" onClick={() => viewItemHistory(item.id)}>
+                                        <HistoryOutlinedIcon className="text-custom-primary" />
+                                    </div>
+                                </Tooltip>
                             </div>
                         </div>
                     </div>
@@ -155,16 +177,21 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                         
                         <div className="flex justify-evenly col-span-2 xl:col-span-1 p-2 self-center">
                             <Tooltip title="Edit" placement="top">
-                                <EditOutlinedIcon className="text-gray-400" />
+                                <div className="cursor-pointer" onClick={() => openModal('edit', item)}>
+                                    <EditOutlinedIcon className="text-gray-400" />
+                                </div>
                             </Tooltip>
                             <Tooltip title="Delete" placement="top">
-                                <DeleteOutlinedIcon className="text-custom-red" />
+                                <div className="cursor-pointer" onClick={() => openModal('delete', item)}>
+                                    <DeleteOutlinedIcon className="text-custom-red" />
+                                </div>
                             </Tooltip>
-                            <div className="cursor-pointer" onClick={() => viewItemHistory(item.id)}>
-                                <Tooltip title="History" placement="top">
+                            
+                            <Tooltip title="History" placement="top">
+                                <div className="cursor-pointer" onClick={() => viewItemHistory(item.id)}>
                                     <HistoryOutlinedIcon className="text-custom-primary" />
-                                </Tooltip>
-                            </div>
+                                </div>
+                            </Tooltip>
                         </div>
                     </div>
                 </div>

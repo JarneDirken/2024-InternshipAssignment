@@ -2,6 +2,10 @@
 import { useEffect, useState } from "react";
 import Filters from "@/components/general/Filter";
 import { Item } from "@/models/Item";
+import { ItemStatus } from "@/models/ItemStatus";
+import { Role } from "@/models/Role";
+import { Location } from "@/models/Location";
+
 import { getAuth, getIdToken } from 'firebase/auth';
 import {app} from "@/services/firebase-config";
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
@@ -19,6 +23,10 @@ import { Filter } from "@/models/Filter";
 export default function Product() {
     const [active, setActive] = useState(true);
     const [items, setItems] = useState<Item[]>([]);
+    const [roles, setRoles] = useState<Role[]>([]);
+    const [locations, setLocations] = useState<Location[]>([]);
+    const [itemStatuses, setItemStatuses] = useState<ItemStatus[]>([]);
+
     const [itemLoading, setItemLoading] = useState(true);
     const [item, setItem] = useState<Item>();
     const [name, setName] = useState<string>('');
@@ -111,7 +119,11 @@ export default function Product() {
             }
     
             const data = await response.json();
-            setItems(Array.isArray(data) ? data : []);
+            console.log(data);
+            setItems(data.items || []);
+            setRoles(data.roles || []);
+            setLocations(data.locations || []);
+            setItemStatuses(data.itemStatuses || []);
 
         } catch (error) {
             console.error("Failed to fetch items:", error);
@@ -165,18 +177,17 @@ export default function Product() {
         setModalOpen(true);
     };
 
-    const openModalProduct = (item: Item) => {
-        setItem(item);
-        setModalOpen(true);
-    };
-
     return ( 
         <div>
             <Modal 
                 open={isModalOpen}
                 onClose={closeModal}
                 selectedItems={selectedItems}
+                roles={roles}
+                locations={locations}
+                itemStatuses={itemStatuses}
                 mode={mode}
+                userId={userId}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
@@ -263,7 +274,7 @@ export default function Product() {
                     <p className="text-custom-primary font-semibold px-16 py-2 border-b-2 border-b-custom-primary w-fit">PRODUCTS</p>
                 </div>
                 <div className="bg-white w-full rounded-b-xl overflow-y-auto lg:hidden" style={{ height: '50vh' }}>
-                    <ProductCard items={items} openModal={openModalProduct} itemLoading={itemLoading} selectedItems={selectedItems} onSelectItem={handleSelectItem} />
+                    <ProductCard items={items} openModal={openModal} itemLoading={itemLoading} selectedItems={selectedItems} onSelectItem={handleSelectItem} />
                 </div>
                 <div className="hidden lg:block">
                     <div className="w-full bg-gray-100 hidden lg:grid grid-cols-12">
@@ -283,7 +294,7 @@ export default function Product() {
                         <span className="text-gray-500 font-semibold col-span-2 xl:col-span-1 py-2 pl-2 truncate">ACTION</span>
                     </div>
                     <div className="bg-white w-full rounded-b-xl overflow-y-auto" style={{ height: '50vh' }}>
-                        <ProductCard items={items} openModal={openModalProduct} itemLoading={itemLoading} selectedItems={selectedItems} onSelectItem={handleSelectItem} />
+                        <ProductCard items={items} openModal={openModal} itemLoading={itemLoading} selectedItems={selectedItems} onSelectItem={handleSelectItem} />
                     </div>
                 </div>
             </div>

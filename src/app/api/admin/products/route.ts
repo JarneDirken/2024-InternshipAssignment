@@ -33,7 +33,13 @@ export async function GET(request: NextRequest) {
         },
     });
 
-    return new Response(JSON.stringify(items), {
+    const roles = await prisma.role.findMany();
+
+    const locations = await prisma.location.findMany();
+
+    const itemStatuses = await prisma.itemStatus.findMany();
+
+    return new Response(JSON.stringify({items, roles, locations, itemStatuses}), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',
