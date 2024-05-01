@@ -22,19 +22,14 @@ export async function GET(request: NextRequest) {
 
     let whereClause = {
         active: true,
-        RoleItem: {}
-    };
-
-    // Additional logic for roleId 2, 3, and 4
-    if ([2, 3, 4].includes(user.roleId)) {
-        
-    } else {
-        whereClause.RoleItem = {
+        RoleItem: {
             some: {
-                roleId: user.roleId,
+                roleId: {
+                    lte: user.roleId,
+                }
             }
-        };
-    }
+        },
+    };
 
     const items = await prisma.item.findMany({
         where: whereClause,

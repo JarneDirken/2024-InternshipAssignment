@@ -33,19 +33,14 @@ export async function GET(request: NextRequest) {
         model: { contains: modelFilter, mode: 'insensitive' as const },
         brand: { contains: brandFilter, mode: 'insensitive' as const },
         location: { name: { contains: locationFilter, mode: 'insensitive' as const } },
-        RoleItem: {}
-    };
-
-    // Additional logic for roleId 2, 3, and 4
-    if ([2, 3, 4].includes(user.roleId)) {
-        
-    } else {
-        whereClause.RoleItem = {
+        RoleItem: {
             some: {
-                roleId: user.roleId,
+                roleId: {
+                    lte: user.roleId,
+                }
             }
-        };
-    }
+        },
+    };
 
     const items = await prisma.item.findMany({
         where: whereClause,
@@ -55,15 +50,7 @@ export async function GET(request: NextRequest) {
         },
     });
     
-    const totalCount = await prisma.item.count({
-        where: {
-            active: true,
-            name: { contains: nameFilter, mode: 'insensitive' },
-            model: { contains: modelFilter, mode: 'insensitive' },
-            brand: { contains: brandFilter, mode: 'insensitive' },
-            location: { name: { contains: locationFilter, mode: 'insensitive' } }
-        }
-    });
+    const totalCount = await prisma.item.count({ where: whereClause });
 
     const groupedItems = groupItems(items as unknown as Item[]);
     const paginatedGroups = groupedItems.slice(offset, offset + limit);
