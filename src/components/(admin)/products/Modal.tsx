@@ -8,13 +8,14 @@ import TextField from "@mui/material/TextField";
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
+import OutlinedInput from '@mui/material/OutlinedInput';
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { Item } from "@/models/Item";
 import Button from "@/components/states/Button";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
-import { Checkbox, FormControl, FormGroup, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import { Checkbox, FormControl, FormGroup, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import Image from 'next/image';
 import Tooltip from '@mui/material/Tooltip';
@@ -39,6 +40,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
 
     const items = selectedItems || [];
+    console.log(selectedItems);
 
     // File upload states
     const [file, setFile] = useState<File | null>(null);
@@ -56,7 +58,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
     const [itemActive, setItemActive] = useState(true);
     const [consumable, setConsumable] = useState(false);
     const [amount, setAmount] = useState('');
-    const [selectedRoleId, setSelectedRoleId] = useState<number | ''>('');
+    const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
     const [selectedLocationId, setSelectedLocationId] = useState<number | ''>('');
     const [selectedItemStatusId, setSelectedItemStatusId] = useState<number | ''>('');
 
@@ -71,10 +73,10 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
             setYear(item.yearBought ? new Date(item.yearBought).getFullYear().toString() : '');
             setNotes(item.notes || '');
             setSchoolNumber(item.schoolNumber || '');
-            console.log(item.active);
             setItemActive(item.active);
             setConsumable(item.consumable || false);
             setAmount(item.amount ? item.amount.toString() : '');
+            setSelectedRoleIds(item.RoleItem?.map(roleItem => roleItem.roleId) || []);
             setSelectedItemStatusId(item.itemStatusId || '');
             setSelectedLocationId(item.locationId || '');
         } else if (mode === 'add') {
@@ -89,7 +91,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
             setItemActive(true);
             setConsumable(false);
             setAmount('');
-            setSelectedRoleId('');
+            setSelectedRoleIds([]);
             setSelectedLocationId('');
             setSelectedItemStatusId('');
         }
@@ -139,8 +141,10 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
         setItemActive(event.target.checked);
     }
 
-    const handleRoleChange = (event: SelectChangeEvent<number>) => {
-        setSelectedRoleId(Number(event.target.value)); // Ensure the value is a number
+    const handleRoleChange = (event: SelectChangeEvent<number[]>): void => {
+        const value = event.target.value;
+        // Setting the type of the value to string[] | number[], which will be converted to number[]
+        setSelectedRoleIds(typeof value === 'string' ? value.split(',').map(str => parseInt(str, 10)) : value);
     };
 
     const handleLocationChange = (event: SelectChangeEvent<number>) => {
@@ -233,6 +237,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
             }
         }
     };
+    
 
     const renderContent = () => {
         switch (mode) {
@@ -322,12 +327,33 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                         </div>
                         <div className="flex justify-center mt-4">
                             <FormControl className="w-11/12" size="small">
+                                <InputLabel id="roles-label" required>Roles</InputLabel>
+                                <Select
+                                    labelId="roles-label"
+                                    id="roles"
+                                    multiple
+                                    value={selectedRoleIds}
+                                    input={<OutlinedInput label="Roles.." />}
+                                    onChange={handleRoleChange}
+                                    renderValue={(selected) => selected.map(id => roles.find(role => role.id === id)?.name).join(', ')}
+                                >
+                                {roles.map((role) => (
+                                    <MenuItem key={role.id} value={role.id}>
+                                        <Checkbox checked={selectedRoleIds.includes(role.id)} />
+                                        <ListItemText primary={role.name} />
+                                    </MenuItem>
+                                ))}
+                                </Select>
+                            </FormControl>
+                        </div>
+                        {/* <div className="flex justify-center mt-4">
+                            <FormControl className="w-11/12" size="small">
                                 <InputLabel required id="roles-label">Roles</InputLabel>
                                 <Select
                                     labelId="roles-label"
                                     id="roles"
                                     label="Roles"
-                                    value={selectedRoleId}
+                                    value={selectedRoleIds}
                                     onChange={handleRoleChange}
                                 >
                                     {roles.map((role) => (
@@ -337,7 +363,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                                     ))}
                                 </Select>
                             </FormControl>
-                        </div>
+                        </div> */}
                         <div className="flex justify-center mt-4">
                             <FormControl className="w-11/12" size="small">
                                 <InputLabel required id="location-label">Location</InputLabel>
@@ -537,17 +563,19 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                         </div>
                         <div className="flex justify-center mt-4">
                             <FormControl className="w-11/12" size="small">
-                                <InputLabel required id="roles-label">Roles</InputLabel>
+                                <InputLabel id="roles-label">Roles</InputLabel>
                                 <Select
                                     labelId="roles-label"
                                     id="roles"
-                                    label="Roles"
-                                    value={selectedRoleId}
+                                    multiple
+                                    value={selectedRoleIds}
                                     onChange={handleRoleChange}
-                                >
+                                    renderValue={(selected) => selected.map(id => roles.find(role => role.id === id)?.name).join(', ')}
+                                    >
                                     {roles.map((role) => (
                                         <MenuItem key={role.id} value={role.id}>
-                                            {role.name}
+                                            <Checkbox checked={selectedRoleIds.includes(role.id)} />
+                                            <ListItemText primary={role.name} />
                                         </MenuItem>
                                     ))}
                                 </Select>
@@ -797,7 +825,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                             paddingX="px-2"
                             textColor="gray-500" 
                             borderColor="gray-500"
-                            textClassName={`font-semibold ${mode === 'delete' ? 'text-xs' : ''}`} 
+                            textClassName={`font-semibold select-none ${mode === 'delete' ? 'text-xs' : ''}`} 
                             text="Cancel"
                         />
                     </div>
@@ -807,7 +835,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                                 icon={<CheckCircleOutlineIcon className="text-xl" />}
                                 textColor="custom-green" 
                                 borderColor="custom-green"
-                                textClassName="font-semibold" 
+                                textClassName="font-semibold select-none" 
                                 text="Add"
                             />
                         </div>
@@ -818,7 +846,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                                 icon={<CheckCircleOutlineIcon className="text-xl" />}
                                 textColor="custom-green" 
                                 borderColor="custom-green"
-                                textClassName="font-semibold" 
+                                textClassName="font-semibold select-none" 
                                 text="Save"
                             />
                         </div>
@@ -830,7 +858,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                                     paddingX="px-2"
                                     textColor="custom-dark-blue" 
                                     borderColor="custom-dark-blue"
-                                    textClassName="font-semibold text-xs" 
+                                    textClassName="font-semibold text-xs select-none" 
                                     text="Soft Delete"
                                 />
                             </div>
@@ -839,7 +867,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                                     paddingX="px-2"
                                     textColor="custom-red" 
                                     borderColor="custom-red"
-                                    textClassName="font-semibold text-xs" 
+                                    textClassName="font-semibold text-xs select-none" 
                                     text="Permanent Delete"
                                 />
                             </div>

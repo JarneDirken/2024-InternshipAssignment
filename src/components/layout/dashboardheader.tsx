@@ -259,7 +259,7 @@ export default function DashboardHeader() {
             <div 
                 id="menu-overlay"
                 className={`fixed top-0 left-0 h-screen w-full md:w-auto bg-white z-10 transition-transform duration-500 ease-in-out 
-                            flex flex-col justify-between overflow-y-auto ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                            flex flex-col justify-between overflow-y-scroll ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                                 
                 <Image src={'/assets/images/logo.png'} 
                         className="overflow-hidden absolute transition-all right-9 top-6"
@@ -275,19 +275,19 @@ export default function DashboardHeader() {
                         {['Student', 'Teacher', 'Supervisor', 'Admin'].includes(userRole || '') && (
                             <>
                                 <MobileSidebarHeading>Links</MobileSidebarHeading>
-                                <Link href="/borrow">
+                                <Link href="/borrow" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
                                         icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-2xl" />} 
                                         text="Borrow" 
                                         active={pathname === "/borrow"}  />
                                 </Link>
-                                <Link href="/return">
+                                <Link href="/return" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
                                         icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-2xl" />} 
                                         text="Return" 
                                         active={pathname === "/return"}  />
                                 </Link>
-                                <Link href="/history">
+                                <Link href="/history" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
                                         icon={<HistoryOutlinedIcon fontSize="inherit" className="text-2xl" />} 
                                         text="History"  
@@ -300,19 +300,19 @@ export default function DashboardHeader() {
                                 <div className='border-b my-5'></div>
 
                                 <MobileSidebarHeading>Supervisor</MobileSidebarHeading>
-                                <Link href="/request">
+                                <Link href="/request" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
                                         icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-2xl" />} 
                                         text="Requests"  
                                         active={pathname === "/request"} />
                                 </Link>
-                                <Link href="/repair">
+                                <Link href="/repair" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
                                         icon={<HandymanOutlinedIcon fontSize="inherit" className="text-2xl" />} 
                                         text="Repairs"  
                                         active={pathname === "/repair"} />
                                 </Link>
-                                <Link href="/lending">
+                                <Link href="/lending" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
                                     icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-2xl" />} 
                                     text="Lendings"  
@@ -325,7 +325,7 @@ export default function DashboardHeader() {
                                 <div className='border-b my-5'></div>
 
                                 <MobileSidebarHeading>Admin</MobileSidebarHeading>
-                                <Link href="/product">
+                                <Link href="/product" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
                                         icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-2xl" />} 
                                         text="Products"
@@ -333,13 +333,13 @@ export default function DashboardHeader() {
                                 </Link>
                                 <MobileSidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Locations"  />
                                 <MobileSidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Users"  />
-                                <Link href="/parameter">
+                                <Link href="/parameter" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
                                     icon={<SettingsOutlinedIcon fontSize="inherit" className="text-2xl" />} 
                                     text="Parameters"  
                                     active={pathname === "/parameter"} />
                                 </Link>
-                                <Link href="/log">
+                                <Link href="/log" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
                                     icon={<ArticleOutlinedIcon fontSize="inherit" className="text-2xl" />} 
                                     text="Logs"  

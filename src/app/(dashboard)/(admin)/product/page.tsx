@@ -119,7 +119,6 @@ export default function Product() {
             }
     
             const data = await response.json();
-            console.log(data);
             setItems(data.items || []);
             setRoles(data.roles || []);
             setLocations(data.locations || []);

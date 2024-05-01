@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
                 name: { contains: nameFilter, mode: 'insensitive' },
         },
         include: { 
+            RoleItem: true,
             location: true
         },
     });

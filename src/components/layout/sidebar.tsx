@@ -35,7 +35,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                     </button>
                 </div>
                 
-                <ul className={`flex-1 px3 ${expanded ? "ml-[10.92px]" : "mx-auto"}`}>{children}</ul>
+                <ul className={`flex-1 px3 overflow-y-scroll ${expanded ? "ml-[10.92px]" : "mx-auto"}`}>{children}</ul>
 
                 <div className="border-t flex p-4">
                     <button className={`bg-gray-100 flex py-1.5 hover:bg-gray-200 overflow-hidden transition-all w-full ${expanded ? "justify-center" : "rounded-lg"}`} onClick={handleLogout}>
@@ -64,14 +64,24 @@ export function SidebarItem({icon, text, active}: SidebarItemProps) {
             transition-colors group
             ${
                 active
-                  ? "bg-orange-100 font-bold"
+                  ? "bg-orange-100"
                   : "hover:bg-orange-50 text-gray-600"
             }
         `}>
             {icon}
-            <span className={`overflow-hidden transition-all ${
-                expanded ? "w-48 ml-3" : "w-0"
-            }`}
+            <span className={`
+                overflow-hidden transition-all 
+                ${
+                    expanded 
+                        ? "w-48 ml-3" 
+                        : "w-0"
+                }
+                ${
+                    active
+                      ? "font-semibold"
+                      : ""
+                }
+            `}
             >
                 {text}
             </span>
@@ -101,12 +111,19 @@ export function MobileSidebarItem({icon, text, active}: SidebarItemProps) {
             transition-colors group
             ${
                 active
-                  ? "bg-orange-100 font-bold"
+                  ? "bg-orange-100"
                   : "hover:bg-orange-50 text-gray-600"
             }
         `}>
             {icon}
-            <span className={`overflow-hidden transition-all w-48 ml-3`}
+            <span className={`
+                overflow-hidden transition-all w-48 ml-3
+                ${
+                    active
+                      ? "font-semibold"
+                      : ""
+                }
+            `}
             >
                 {text}
             </span>

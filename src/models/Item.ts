@@ -1,5 +1,6 @@
 import { ItemRequest } from "./ItemRequest";
 import { Location } from "./Location";
+import { RoleItem } from "./RoleItem";
 
 export interface Item {
     id: number,
@@ -17,7 +18,8 @@ export interface Item {
     location: Location,
     consumable: boolean,
     amount?: number,
-    ItemRequests?: ItemRequest[]
+    ItemRequests?: ItemRequest[],
+    RoleItem?: RoleItem[]
 }
 
 export interface GroupedItem extends Item {
