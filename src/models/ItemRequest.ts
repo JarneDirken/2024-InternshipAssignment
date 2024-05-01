@@ -1,6 +1,6 @@
-import { User } from "@prisma/client";
 import { Item } from "./Item";
 import { RequestStatus } from "./RequestStatus";
+import { User } from "./User";
 
 export interface ItemRequest {
     id: number,

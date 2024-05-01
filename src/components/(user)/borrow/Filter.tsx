@@ -8,6 +8,10 @@ import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import useCart from "@/hooks/useCart";
+import Button from "@/components/states/Button";
+import { useSnackbar } from "notistack";
+import { useRecoilState } from "recoil";
+import { createRequest } from "@/services/store";
 //icons
 import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
@@ -15,10 +19,6 @@ import AppsOutlinedIcon from '@mui/icons-material/AppsOutlined';
 import ReorderOutlinedIcon from '@mui/icons-material/ReorderOutlined';
 import ClearIcon from '@mui/icons-material/Clear';
 import IconButton from "@mui/material/IconButton";
-import Button from "@/components/states/Button";
-import { useSnackbar } from "notistack";
-import { useRecoilState } from "recoil";
-import { createRequest } from "@/services/store";
 
 interface FiltersProps { // typescript moment, everthing should have a type
     active: boolean;

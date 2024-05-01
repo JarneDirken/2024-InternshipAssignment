@@ -116,7 +116,7 @@ export default function Borrow() {
         } else {
             enqueueSnackbar('All items of this type are currently in your cart.', { variant: 'error' });
         }
-    } ;
+    };
 
     useEffect(() => {
         getAllItems();

@@ -278,8 +278,9 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
     const handleClearFile = async () => {
         if (file) {
             const storage = getStorage();
-            const fileRef = ref(storage, `gs://internshipassignment-c6d15.appspot.com/files/${file.name}`);
-
+            // Include the user ID in the file reference path
+            const fileRef = ref(storage, `files/${primitiveUserId}/${file.name}`);
+    
             try {
                 await deleteObject(fileRef);
                 setFile(null);
@@ -291,7 +292,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
                 console.error('Error deleting file:', error);
             }
         }
-    };
+    };    
 
     const handleSuccess = () => {
         setRequest(!request);

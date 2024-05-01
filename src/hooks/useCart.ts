@@ -2,26 +2,34 @@ import { useEffect, useState } from "react";
 import { CartItem } from "@/models/CartItem";
 
 const CART_EVENT = "cartUpdated";
+const EXPIRATION_DURATION = 86400000; // 24 hours
 
 export default function useCart() {
     const [cart, setCart] = useState<CartItem[]>([]);
 
-    // Effect to load the initial cart from localStorage when component mounts
     useEffect(() => {
         const savedCart = localStorage.getItem("cart");
-        if (savedCart) {
+        const expiration = localStorage.getItem("cartExpiration");
+        const currentTime = Date.now();
+
+        if (savedCart && expiration && currentTime < parseInt(expiration)) {
             setCart(JSON.parse(savedCart));
+        } else {
+            localStorage.removeItem("cart");
+            localStorage.removeItem("cartExpiration");
+            setCart([]);
         }
     }, []);
 
-    // Update localStorage and dispatch event when the cart changes
     useEffect(() => {
-        localStorage.setItem("cart", JSON.stringify(cart));
-        // Dispatch the event to notify other parts of the application
-        window.dispatchEvent(new CustomEvent(CART_EVENT, { detail: cart }));
+        if (cart.length > 0) {
+            localStorage.setItem("cart", JSON.stringify(cart));
+            const expirationTime = Date.now() + EXPIRATION_DURATION;
+            localStorage.setItem("cartExpiration", expirationTime.toString());
+            window.dispatchEvent(new CustomEvent(CART_EVENT, { detail: cart }));
+        }
     }, [cart]);
 
-    // Listen for changes to the cart from other tabs or parts of the application
     useEffect(() => {
         const handleStorageChange = (event: Event) => {
             if (event.type === CART_EVENT) {
@@ -29,14 +37,20 @@ export default function useCart() {
                 setCart(customEvent.detail);
             } else {
                 const savedCart = localStorage.getItem("cart");
-                setCart(savedCart ? JSON.parse(savedCart) : []);
+                const expiration = localStorage.getItem("cartExpiration");
+                const currentTime = Date.now();
+
+                if (savedCart && expiration && currentTime < parseInt(expiration)) {
+                    setCart(JSON.parse(savedCart));
+                } else {
+                    setCart([]);
+                }
             }
         };
 
         window.addEventListener(CART_EVENT, handleStorageChange);
-        window.addEventListener('storage', handleStorageChange); // Listen to storage changes
+        window.addEventListener('storage', handleStorageChange);
 
-        // Remove event listener on cleanup
         return () => {
             window.removeEventListener(CART_EVENT, handleStorageChange);
             window.removeEventListener('storage', handleStorageChange);
@@ -54,10 +68,14 @@ export default function useCart() {
     };
 
     const removeFromCart = (itemId: number) => {
-        setCart(prevCart => prevCart.filter(cartItem => cartItem.item.id !== itemId));
+        const updatedCart = cart.filter(cartItem => cartItem.item.id !== itemId);
+        localStorage.setItem("cart", JSON.stringify(updatedCart));
+        setCart(updatedCart);
     };
-
+    
     const clearCart = () => {
+        localStorage.removeItem("cart");
+        localStorage.removeItem("cartExpiration");
         setCart([]);
     };
 

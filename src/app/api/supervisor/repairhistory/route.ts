@@ -80,6 +80,7 @@ export async function GET(request: NextRequest) {
         include: {
             item: {
                 include: {
+                    itemStatus: true,
                     location: true,
                     ItemRequests: {
                         include: {

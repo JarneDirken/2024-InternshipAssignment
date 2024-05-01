@@ -1,6 +1,7 @@
 import prisma from "@/services/db";
 import { Prisma } from "@prisma/client";
 import { NextRequest } from "next/server";
+interface WhereClause extends Prisma.ItemRequestWhereInput {}
 
 interface OrderByType {
     [key: string]: Prisma.SortOrder | OrderByRecursiveType;
@@ -15,10 +16,10 @@ function createNestedOrderBy(sortBy: string, sortDirection: Prisma.SortOrder): O
 
     fields.forEach((field, index) => {
         if (index === fields.length - 1) {
-            lastOrderBy[field] = sortDirection;  // Set the final sort direction
+            lastOrderBy[field] = sortDirection;
         } else {
-            lastOrderBy[field] = {};  // Create a nested object
-            lastOrderBy = lastOrderBy[field] as OrderByType;  // Move deeper into the object
+            lastOrderBy[field] = {}; 
+            lastOrderBy = lastOrderBy[field] as OrderByType; 
         }
     });
 
@@ -30,7 +31,16 @@ export async function GET(request: NextRequest, {params}: {params: {type: string
     const id = params.id;
     const { searchParams } = new URL(request.url);
     const uid = searchParams.get("userId") || '';
-    const nameFilter = searchParams.get('name') || '';
+    const nameFilterUser = searchParams.get('nameUser') || '';
+    const nameFilterItem = searchParams.get('nameItem') || '';
+    const borrowDateUser = searchParams.get('borrowDateUser');
+    const returnDateUser = searchParams.get('returnDateUser');
+    const borrowDateItem = searchParams.get('borrowDateItem');
+    const returnDateItem = searchParams.get('returnDateItem');
+    const sortBy = searchParams.get('sortBy') || 'requestDate';  // Default sort field
+    const sortDirection = searchParams.get('sortDirection') as Prisma.SortOrder || 'desc';  // Default sort direction
+
+    const orderBy = createNestedOrderBy(sortBy, sortDirection);
 
     const user = await prisma.user.findUnique({
         where: {
@@ -38,7 +48,7 @@ export async function GET(request: NextRequest, {params}: {params: {type: string
         },
     });
 
-    if (!user){
+    if (!user) {
         return new Response(JSON.stringify("User not found"), {
             status: 404,
             headers: {
@@ -48,7 +58,28 @@ export async function GET(request: NextRequest, {params}: {params: {type: string
     };
 
     if (type === 'user') {
-        const data = await fetchUserHistory(parseInt(id, 10), nameFilter);
+        const whereClause: WhereClause = {
+            item: {
+                name: { contains: nameFilterUser, mode: 'insensitive' },
+            },
+        };
+        // Handle date filters
+        if (borrowDateUser) {
+            const borrowDateStart = new Date(borrowDateUser);
+            borrowDateStart.setHours(0, 0, 0, 0);
+            whereClause.startBorrowDate = {
+                gte: borrowDateStart
+            };
+        }
+        
+        if (returnDateUser) {
+            const returnDateEnd = new Date(returnDateUser);
+            returnDateEnd.setHours(23, 59, 59, 999);
+            whereClause.endBorrowDate = {
+                lte: returnDateEnd
+            };
+        }
+        const data = await fetchUserHistory(parseInt(id, 10), orderBy, whereClause);
         return new Response(JSON.stringify(data), {
             status: 200,
             headers: {
@@ -56,7 +87,28 @@ export async function GET(request: NextRequest, {params}: {params: {type: string
             },
         });
     } else if (type === 'item') {
-        const data = await fetchItemHistory(parseInt(id, 10));
+        const whereClauseItem: WhereClause = {
+            borrower: {
+                firstName: { contains: nameFilterItem, mode: 'insensitive' },
+            },
+        };
+        // Handle date filters
+        if (borrowDateItem) {
+            const borrowDateStart = new Date(borrowDateItem);
+            borrowDateStart.setHours(0, 0, 0, 0);
+            whereClauseItem.startBorrowDate = {
+                gte: borrowDateStart
+            };
+        }
+        
+        if (returnDateItem) {
+            const returnDateEnd = new Date(returnDateItem);
+            returnDateEnd.setHours(23, 59, 59, 999);
+            whereClauseItem.endBorrowDate = {
+                lte: returnDateEnd
+            };
+        }
+        const data = await fetchItemHistory(parseInt(id, 10), whereClauseItem, orderBy);
         return new Response(JSON.stringify(data), {
             status: 200,
             headers: {
@@ -74,7 +126,7 @@ export async function GET(request: NextRequest, {params}: {params: {type: string
 }
 
 
-async function fetchUserHistory(userId: number, nameFilter: string) {
+async function fetchUserHistory(userId: number, orderBy: OrderByType, whereClause: WhereClause) {
     const user = await prisma.user.findUnique({
         where: {
             id: userId,
@@ -82,12 +134,13 @@ async function fetchUserHistory(userId: number, nameFilter: string) {
         include: {
             role: true,
             ItemRequestsBorrower: {
-                where: {
-                    item: {
-                        name: { contains: nameFilter, mode: 'insensitive' },
-                    }
-                },
+                where: whereClause,
                 include: {
+                    borrower: {
+                        include: {
+                            role: true,
+                        }
+                    },
                     approver: true,
                     item: {
                         include: {
@@ -95,14 +148,16 @@ async function fetchUserHistory(userId: number, nameFilter: string) {
                             Reparations: true,
                         },
                     },
-                }
+                    requestStatus: true,
+                },
+                orderBy: orderBy
             }
         }
     });
     return user;
 }
 
-async function fetchItemHistory(itemId: number) {
+async function fetchItemHistory(itemId: number, whereClause: WhereClause, orderBy: OrderByType) {
     const item = await prisma.item.findUnique({
         where: {
             id: itemId,
@@ -110,15 +165,26 @@ async function fetchItemHistory(itemId: number) {
         include: {
             location: true,
             ItemRequests: {
+                where: whereClause,
                 include: {
-                    borrower: true,
+                    borrower: {
+                        include: {
+                            role: true,
+                        }
+                    },
                     approver: true,
                     item: {
                         include: {
+                            Reparations: {
+                                include: {
+                                    item: true,
+                                }
+                            },
                             location: true,
                         }
                     }
-                }
+                },
+                orderBy: orderBy
             },
             Reparations: true,
         }

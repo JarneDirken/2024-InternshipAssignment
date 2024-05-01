@@ -187,6 +187,7 @@ export default function History() {
                     items={items}
                     calculateHistoryDate={calculateOnTime}
                     itemLoading={itemLoading}
+                    userId={userId}
                 />
             </div>
         </div>
