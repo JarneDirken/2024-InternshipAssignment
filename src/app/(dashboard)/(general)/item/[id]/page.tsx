@@ -11,6 +11,8 @@ import Image from "next/image";
 import Button from "@/components/states/Button";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Modal from "@/components/(user)/borrow/Modal";
+import ModalLendings from "@/components/(supervisor)/lendings/Modal";
+import { ItemRequest } from "@/models/ItemRequest";
 
 export default function GeneralItem({ params } : {params: {id: string}}){
     const id = params.id;
@@ -20,7 +22,11 @@ export default function GeneralItem({ params } : {params: {id: string}}){
     const [item, setItem] = useState<Item>();
     const [dataFound, setDataFound] = useState(true);
     const [isModalOpen, setModalOpen] = useState(false); // modal
+    const [isModalCheckOpen, setIsModalCheckOpen] = useState(false);
     const [itemLoading, setItemLoading] = useState(true);
+    const [checked, setChecked] = useState(false);
+    const [lastItemRequest, setLastItemRequest] = useState<ItemRequest | undefined>();
+    const [repairState, setRepairState] = useState(false);
     
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -123,12 +129,22 @@ export default function GeneralItem({ params } : {params: {id: string}}){
     
             const data = await response.json();
             setItem(data);
+            if (data.ItemRequests && data.ItemRequests.length > 0) {
+                setLastItemRequest(data.ItemRequests[data.ItemRequests.length - 1]);
+            } else {
+                setLastItemRequest(undefined);
+            }
         } catch (error) {
             console.error("Failed to fetch items:", error);
             setDataFound(false);
         } finally {
             setItemLoading(false);
         }
+    };
+
+    const isChecked = () => {
+        setChecked!(true);
+        setIsModalCheckOpen(true);
     };
 
     if (loading || isAuthorized === null || itemLoading) { return <Loading/>; }
@@ -148,6 +164,15 @@ export default function GeneralItem({ params } : {params: {id: string}}){
                 onClose={() => setModalOpen(false)}
                 item={item}
                 userId={userId}
+            />
+            <ModalLendings
+                open={isModalCheckOpen}
+                onClose={() => setIsModalCheckOpen(false)}
+                userId={userId}
+                item={lastItemRequest}
+                checked={checked}
+                repairState={repairState}
+                setRepairState={setRepairState}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <div className="p-4 flex flex-wrap font-semibold text-2xl items-center gap-1">
@@ -182,8 +207,18 @@ export default function GeneralItem({ params } : {params: {id: string}}){
                             </div>
                         </div>
                     </div>
-                    <div className="flex flex-col mt-4 md:justify-center md:items-center">
+                    <div className="flex flex-col mt-4 md:justify-center md:items-center gap-2">
                         {checkAvailability(item)}
+                        {((userRole === "Supervisor" || userRole === "Admin") && item.ItemRequests![item.ItemRequests!.length - 1].requestStatusId === 6) && (
+                            <Button 
+                                text="Checked"
+                                textColor="custom-green"
+                                borderColor="custom-green"
+                                paddingX="px-2"
+                                paddingY="py-0"
+                                onClick={isChecked}
+                            />
+                        )}
                     </div>
                 </div>
             </div>

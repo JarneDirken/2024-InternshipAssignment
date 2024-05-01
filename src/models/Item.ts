@@ -17,7 +17,7 @@ export interface Item {
     location: Location,
     consumable: boolean,
     amount?: number,
-    ItemRequests?: ItemRequest[]
+    ItemRequests?: ItemRequest[],
     itemStatus?: {
         id: number;
         name: string;

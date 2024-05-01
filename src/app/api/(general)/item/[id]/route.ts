@@ -27,7 +27,18 @@ export async function GET(request: NextRequest, {params}: {params: {id: string}}
         },
         include: {
             location: true,
-            ItemRequests: true,
+            ItemRequests: {
+                include: {
+                    item: {
+                        include: {
+                            location: true,
+                        }
+                    },
+                    approver: true,
+                    borrower: true,
+                    requestStatus: true,
+                }
+            },
         }
     });
 
