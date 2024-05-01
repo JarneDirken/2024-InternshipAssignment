@@ -222,7 +222,6 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
         XLSX.writeFile(workbook, `${filename}.xlsx`);
     };
     
-    
     const handleFilterChange = (filterType: string, value: string) => {
         if (type === 'user') {
             switch (filterType) {
@@ -353,7 +352,7 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
                 setActive={setActive}
                 onFilterChange={handleFilterChange}
                 onSortChange={handleSortChange}
-                items={type === "user" ? filteredItemsUser : filteredItemsItem}
+                items={type === "user" ? filteredItemsItem : filteredItemsUser}
                 filters={type === 'user' ? userFilters : itemFilters}
                 sortOptions={type === 'user' ? sortOptionsUser : sortOptionsItem}
                 isCardView={true}
