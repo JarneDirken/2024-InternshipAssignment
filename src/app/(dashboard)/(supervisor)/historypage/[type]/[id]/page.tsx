@@ -85,22 +85,26 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
                     const user = history[0] as User;
                     setTitle(toTitleCase(`${user.firstName} ${user.lastName}`));
                     // Assuming that `ItemRequestsBorrower` is a property that holds `ItemRequest[]`
-                    const allUserRequests = history.flatMap((entity: User | Item) =>
+                    const userRelatedItems = history.flatMap((entity: User | Item) =>
                         'ItemRequestsBorrower' in entity ? (entity as User).ItemRequestsBorrower || [] : []
                     );
-                    setFilteredItemsItem(allUserRequests);
+                    setFilteredItemsItem(userRelatedItems);
                 } else if (type === 'item') {
                     const item = history[0] as Item;
                     setTitle(toTitleCase(item.name));
                     // Assuming that `ItemRequests` is a property that holds `Users[]`
-                    const allItemRequests = history.flatMap((entity: User | Item) =>
+                    const itemRelatedUsers = history.flatMap((entity: User | Item) =>
                         'ItemRequests' in entity ? (entity as Item).ItemRequests || [] : []
                     );
-                    setFilteredItemsUser(allItemRequests);
+                    setFilteredItemsUser(itemRelatedUsers);
                 }
             }
         }
     }, [history, type]);
+
+    useEffect(() => {
+        console.log(filteredItemsUser)
+    }, [filteredItemsUser])
     
     const formatDate = (dateString: Date): string => {
         const date = new Date(dateString);
@@ -384,7 +388,7 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
                 <div>
                     <ItemCard
                         active={active}
-                        items={history}
+                        items={type === "user" ? filteredItemsItem : filteredItemsUser}
                         itemLoading={itemLoading}
                         type={type}
                     />

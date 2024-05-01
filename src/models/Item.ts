@@ -1,5 +1,6 @@
 import { ItemRequest } from "./ItemRequest";
 import { Location } from "./Location";
+import { Repair } from "./Repair";
 
 export interface Item {
     id: number,
@@ -21,7 +22,8 @@ export interface Item {
     itemStatus?: {
         id: number;
         name: string;
-    }
+    },
+    Reparations?: Repair[],
 }
 
 export interface GroupedItem extends Item {
