@@ -59,13 +59,13 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                                 />
                                 <div className="truncate">
                                     <span className="font-medium text-gray-400">Brand&nbsp;</span><br/>
-                                    <Tooltip title={item.brand} placement="top-start">
+                                    <Tooltip title={item.brand} placement="top-start" arrow>
                                         <span>{item.brand}</span>
                                     </Tooltip>
                                 </div>
                                 <div className="truncate">
                                     <span className="font-medium text-gray-400">Year&nbsp;</span><br/>
-                                    <Tooltip title={item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'} placement="top-start">
+                                    <Tooltip title={item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'} placement="top-start" arrow>
                                         <span>{item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'}</span>
                                     </Tooltip>
                                 </div>
@@ -75,19 +75,19 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                             <div className="flex-1 w-2/4">
                                 <div className="truncate">
                                     <span className="font-medium text-gray-400">No.&nbsp;</span><br/>
-                                    <Tooltip title={item.number} placement="top-start">
+                                    <Tooltip title={item.number} placement="top-start" arrow>
                                         <span>{item.number}</span>
                                     </Tooltip>
                                 </div>
                                 <div className="truncate">
                                     <span className="font-medium text-gray-400">Name&nbsp;</span><br/>
-                                    <Tooltip title={item.name} placement="top-start">
+                                    <Tooltip title={item.name} placement="top-start" arrow>
                                         <span>{item.name}</span>
                                     </Tooltip>
                                 </div>
                                 <div className="truncate">
                                     <span className="font-medium text-gray-400">Model&nbsp;</span><br/>
-                                    <Tooltip title={item.model} placement="top-start">
+                                    <Tooltip title={item.model} placement="top-start" arrow>
                                         <span>{item.model}</span>
                                     </Tooltip>
                                 </div>
@@ -100,23 +100,23 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                             <div className="flex-1 w-1/4">
                                 <div className="truncate">
                                     <span className="font-medium text-gray-400">Location&nbsp;</span><br/>
-                                    <Tooltip title={item.location.name} placement="top-start">
+                                    <Tooltip title={item.location.name} placement="top-start" arrow>
                                         <span>{item.location.name}</span>
                                     </Tooltip>
                                 </div>
                             </div>
                             <div className="w-5/12 flex justify-evenly items-end">
-                                <Tooltip title="Edit" placement="top-start">
+                                <Tooltip title="Edit" placement="top-start" arrow>
                                     <div className="cursor-pointer" onClick={() => openModal('edit', item)}>
                                         <EditOutlinedIcon className="text-gray-400" />
                                     </div>
                                 </Tooltip>
-                                <Tooltip title="Delete" placement="top-start">
+                                <Tooltip title="Delete" placement="top-start" arrow>
                                     <div className="cursor-pointer" onClick={() => openModal('delete', item)}>
                                         <DeleteOutlinedIcon className="text-custom-red" />
                                     </div>
                                 </Tooltip>
-                                <Tooltip title="Delete" placement="top-start">
+                                <Tooltip title="Delete" placement="top-start" arrow>
                                     <div className="cursor-pointer" onClick={() => viewItemHistory(item.id)}>
                                         <HistoryOutlinedIcon className="text-custom-primary" />
                                     </div>
@@ -145,49 +145,49 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                             />
                         </div>
                         <div className="truncate col-span-2 p-2 self-center">
-                            <Tooltip title={item.number} placement="top-start">
+                            <Tooltip title={item.number} placement="top-start" arrow>
                                 <span>{item.number}</span>
                             </Tooltip>
                         </div>
                         <div className="truncate col-span-2 p-2 self-center">
-                            <Tooltip title={item.name} placement="top-start">
+                            <Tooltip title={item.name} placement="top-start" arrow>
                                 <span>{item.name}</span>
                             </Tooltip>
                         </div>
                         <div className="truncate col-span-1 p-2 self-center">
-                            <Tooltip title={item.model} placement="top-start">
+                            <Tooltip title={item.model} placement="top-start" arrow>
                                 <span>{item.model}</span>
                             </Tooltip>
                         </div>
                         <div className="truncate col-span-1 p-2 self-center">
-                            <Tooltip title={item.brand} placement="top-start">
+                            <Tooltip title={item.brand} placement="top-start" arrow>
                                 <span>{item.brand}</span>
                             </Tooltip>
                         </div>
                         <div className="truncate col-span-1 xl:col-span-2 p-2 self-center">
-                            <Tooltip title={item.location.name} placement="top-start">
+                            <Tooltip title={item.location.name} placement="top-start" arrow>
                                 <span>{item.location.name}</span>
                             </Tooltip>
                         </div>
                         <div className="truncate col-span-1 p-2 self-center">
-                            <Tooltip title={item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'} placement="top-start">
+                            <Tooltip title={item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'} placement="top-start" arrow>
                                 <span>{item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'}</span>
                             </Tooltip>
                         </div>
                         
                         <div className="flex justify-evenly col-span-2 xl:col-span-1 p-2 self-center">
-                            <Tooltip title="Edit" placement="top">
+                            <Tooltip title="Edit" placement="top" arrow>
                                 <div className="cursor-pointer" onClick={() => openModal('edit', item)}>
                                     <EditOutlinedIcon className="text-gray-400" />
                                 </div>
                             </Tooltip>
-                            <Tooltip title="Delete" placement="top">
+                            <Tooltip title="Delete" placement="top" arrow>
                                 <div className="cursor-pointer" onClick={() => openModal('delete', item)}>
                                     <DeleteOutlinedIcon className="text-custom-red" />
                                 </div>
                             </Tooltip>
                             
-                            <Tooltip title="History" placement="top">
+                            <Tooltip title="History" placement="top" arrow>
                                 <div className="cursor-pointer" onClick={() => viewItemHistory(item.id)}>
                                     <HistoryOutlinedIcon className="text-custom-primary" />
                                 </div>

@@ -6,13 +6,9 @@ import { ItemStatus } from "@/models/ItemStatus";
 import { Role } from "@/models/Role";
 import { Location } from "@/models/Location";
 
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { getAuth, getIdToken } from 'firebase/auth';
 import {app} from "@/services/firebase-config";
-import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
-import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import Button from "@/components/states/Button";
 import Checkbox from '@mui/material/Checkbox';
 import ProductCard from "@/components/(admin)/products/ProductCard";
@@ -20,7 +16,34 @@ import Modal from "@/components/(admin)/products/Modal";
 import { SortOptions } from "@/models/SortOptions";
 import { Filter } from "@/models/Filter";
 
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
+import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
+
+
 export default function Product() {
+    const theme = createTheme({
+        components: {
+            MuiCheckbox: {
+                styleOverrides: {
+                    root: {
+                        '&.Mui-checked': {
+                            color: '#FFA500', // Checkbox color when checked
+                        },
+                        '&.MuiCheckbox-indeterminate': {
+                            color: '#FFA500', // Checkbox color in indeterminate state
+                        },
+                        '&:hover': {
+                            backgroundColor: 'rgba(255, 165, 0, 0.04)', // Light orange background on hover
+                        },
+                    },
+                },
+            },
+        },
+    });
+
     const [active, setActive] = useState(true);
     const [items, setItems] = useState<Item[]>([]);
     const [roles, setRoles] = useState<Role[]>([]);
@@ -178,125 +201,130 @@ export default function Product() {
 
     return ( 
         <div>
-            <Modal 
-                open={isModalOpen}
-                onClose={closeModal}
-                selectedItems={selectedItems}
-                roles={roles}
-                locations={locations}
-                itemStatuses={itemStatuses}
-                mode={mode}
-                userId={userId}
-            />
-            <div className="bg-white mb-4 rounded-xl">
-                <Filters
-                    active={active}
-                    setActive={setActive}
-                    title="Products"
-                    icon={<Inventory2OutlinedIcon fontSize="large" />}
-                    onFilterChange={handleFilterChange}
-                    onSortChange={handleSortChange}
-                    filters={filters}
-                    items={items}
-                    sortOptions={sortOptions}
+            <ThemeProvider theme={theme}>
+                <Modal 
+                    open={isModalOpen}
+                    onClose={closeModal}
+                    selectedItems={selectedItems}
+                    roles={roles}
+                    locations={locations}
+                    itemStatuses={itemStatuses}
+                    mode={mode}
+                    userId={userId}
                 />
-            </div>
-            <div className="rounded-xl">
-                <div className="flex flex-wrap justify-center md:justify-start bg-white gap-1 sm:gap-2 lg:gap-4 rounded-tl-xl rounded-tr-xl z-0 p-4">
-                    <div onClick={() => openModal('add')}>
+                <div className="bg-white mb-4 rounded-xl">
+                    <Filters
+                        active={active}
+                        setActive={setActive}
+                        title="Products"
+                        icon={<Inventory2OutlinedIcon fontSize="large" />}
+                        onFilterChange={handleFilterChange}
+                        onSortChange={handleSortChange}
+                        filters={filters}
+                        items={items}
+                        sortOptions={sortOptions}
+                    />
+                </div>
+                <div className="rounded-xl">
+                    <div className="flex flex-wrap justify-center md:justify-start bg-white gap-1 sm:gap-2 lg:gap-4 rounded-tl-xl rounded-tr-xl z-0 p-4">
+                        <div onClick={() => {
+                            openModal('add');
+                            setSelectedItems([]);
+                        }}>
+                            <Button 
+                                icon={<AddIcon />} 
+                                textColor="custom-primary" 
+                                borderColor="custom-primary" 
+                                fillColor="orange-100" 
+                                paddingX="px-2.5"
+                                paddingY="py-0.5"
+                                textClassName="font-semibold" 
+                                text="Add"
+                            />
+                        </div>
+                        <div onClick={() => openModal('delete')}>
+                            <Button 
+                                icon={<DeleteOutlinedIcon />} 
+                                textColor="custom-red"
+                                borderColor="custom-red" 
+                                fillColor="red-100" 
+                                paddingX="px-2.5"
+                                paddingY="py-0.5"
+                                buttonClassName="bg-red-100"
+                                textClassName="font-semibold" 
+                                text="Delete" 
+                                disabled={selectedItems.length === 0}
+                            />
+                        </div>
                         <Button 
-                            icon={<AddIcon />} 
-                            textColor="custom-primary" 
-                            borderColor="custom-primary" 
-                            fillColor="orange-100" 
+                            icon={<QrCode2RoundedIcon />} 
+                            textColor="custom-dark-blue" 
+                            borderColor="custom-dark-blue" 
+                            fillColor="blue-100" 
                             paddingX="px-2.5"
                             paddingY="py-0.5"
-                            textClassName="font-semibold" 
-                            text="Add"
+                            buttonClassName="bg-blue-100 border-custom-dark-blue" 
+                            textClassName="font-semibold text-custom-dark-blue" 
+                            text="QR-Code" 
+                            disabled={selectedItems.length === 0}
                         />
-                    </div>
-                    <div onClick={() => openModal('delete')}>
                         <Button 
-                            icon={<DeleteOutlinedIcon />} 
-                            textColor="custom-red"
-                            borderColor="custom-red" 
-                            fillColor="red-100" 
+                            icon={<InsertDriveFileOutlinedIcon />} 
+                            textColor="custom-dark-blue" 
+                            borderColor="custom-dark-blue" 
+                            fillColor="blue-100" 
                             paddingX="px-2.5"
                             paddingY="py-0.5"
-                            buttonClassName="bg-red-100"
                             textClassName="font-semibold" 
-                            text="Delete" 
+                            text="Export EXCEL" 
+                            disabled={selectedItems.length === 0}
+                        />
+                        <Button 
+                            icon={<InsertDriveFileOutlinedIcon />} 
+                            textColor="custom-dark-blue" 
+                            borderColor="custom-dark-blue" 
+                            fillColor="blue-100" 
+                            paddingX="px-2.5"
+                            paddingY="py-0.5"
+                            textClassName="font-semibold" 
+                            text="Import EXCEL" 
                             disabled={selectedItems.length === 0}
                         />
                     </div>
-                    <Button 
-                        icon={<QrCode2RoundedIcon />} 
-                        textColor="custom-dark-blue" 
-                        borderColor="custom-dark-blue" 
-                        fillColor="blue-100" 
-                        paddingX="px-2.5"
-                        paddingY="py-0.5"
-                        buttonClassName="bg-blue-100 border-custom-dark-blue" 
-                        textClassName="font-semibold text-custom-dark-blue" 
-                        text="QR-Code" 
-                        disabled={selectedItems.length === 0}
-                    />
-                    <Button 
-                        icon={<InsertDriveFileOutlinedIcon />} 
-                        textColor="custom-dark-blue" 
-                        borderColor="custom-dark-blue" 
-                        fillColor="blue-100" 
-                        paddingX="px-2.5"
-                        paddingY="py-0.5"
-                        textClassName="font-semibold" 
-                        text="Export EXCEL" 
-                        disabled={selectedItems.length === 0}
-                    />
-                    <Button 
-                        icon={<InsertDriveFileOutlinedIcon />} 
-                        textColor="custom-dark-blue" 
-                        borderColor="custom-dark-blue" 
-                        fillColor="blue-100" 
-                        paddingX="px-2.5"
-                        paddingY="py-0.5"
-                        textClassName="font-semibold" 
-                        text="Import EXCEL" 
-                        disabled={selectedItems.length === 0}
-                    />
-                </div>
-                <div className="w-full border-b border-b-gray-300 bg-white flex items-center relative lg:hidden">
-                    <Checkbox 
-                        className="absolute left-3 top-1/2 transform -translate-y-1/2" 
-                        checked={selectedItems.length === items.length && items.length > 0}
-                        onChange={toggleSelectAll}
-                    />
-                    <p className="text-custom-primary font-semibold px-16 py-2 border-b-2 border-b-custom-primary w-fit">PRODUCTS</p>
-                </div>
-                <div className="bg-white w-full rounded-b-xl overflow-y-auto lg:hidden" style={{ height: '50vh' }}>
-                    <ProductCard items={items} openModal={openModal} itemLoading={itemLoading} selectedItems={selectedItems} onSelectItem={handleSelectItem} />
-                </div>
-                <div className="hidden lg:block">
-                    <div className="w-full bg-gray-100 hidden lg:grid grid-cols-12">
-                        <div className="col-span-1 mx-auto">
-                            <Checkbox 
-                                checked={selectedItems.length === items.length && items.length > 0}
-                                onChange={toggleSelectAll}
-                            />
-                        </div>
-                        <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 truncate">IMAGE</span>
-                        <span className="text-gray-500 border-r-4 border-white font-semibold col-span-2 py-2 pl-2 truncate">NO.</span>
-                        <span className="text-gray-500 border-r-4 border-white font-semibold col-span-2 py-2 pl-2 truncate">NAME</span>
-                        <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">MODEL</span>
-                        <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">BRAND</span>
-                        <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 xl:col-span-2 py-2 pl-2 truncate">LOCATION</span>
-                        <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">YEAR</span>
-                        <span className="text-gray-500 font-semibold col-span-2 xl:col-span-1 py-2 pl-2 truncate">ACTION</span>
+                    <div className="w-full border-b border-b-gray-300 bg-white flex items-center relative lg:hidden">
+                        <Checkbox 
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2" 
+                            checked={selectedItems.length === items.length && items.length > 0}
+                            onChange={toggleSelectAll}
+                        />
+                        <p className="text-custom-primary font-semibold px-16 py-2 border-b-2 border-b-custom-primary w-fit">PRODUCTS</p>
                     </div>
-                    <div className="bg-white w-full rounded-b-xl overflow-y-auto" style={{ height: '50vh' }}>
+                    <div className="bg-white w-full rounded-b-xl overflow-y-auto lg:hidden" style={{ height: '50vh' }}>
                         <ProductCard items={items} openModal={openModal} itemLoading={itemLoading} selectedItems={selectedItems} onSelectItem={handleSelectItem} />
                     </div>
+                    <div className="hidden lg:block">
+                        <div className="w-full bg-gray-100 hidden lg:grid grid-cols-12">
+                            <div className="col-span-1 mx-auto">
+                                <Checkbox 
+                                    checked={selectedItems.length === items.length && items.length > 0}
+                                    onChange={toggleSelectAll}
+                                />
+                            </div>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 truncate">IMAGE</span>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-2 py-2 pl-2 truncate">NO.</span>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-2 py-2 pl-2 truncate">NAME</span>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">MODEL</span>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">BRAND</span>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 xl:col-span-2 py-2 pl-2 truncate">LOCATION</span>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">YEAR</span>
+                            <span className="text-gray-500 font-semibold col-span-2 xl:col-span-1 py-2 pl-2 truncate">ACTION</span>
+                        </div>
+                        <div className="bg-white w-full rounded-b-xl overflow-y-auto" style={{ height: '50vh' }}>
+                            <ProductCard items={items} openModal={openModal} itemLoading={itemLoading} selectedItems={selectedItems} onSelectItem={handleSelectItem} />
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </ThemeProvider>
         </div>
     );
 }
