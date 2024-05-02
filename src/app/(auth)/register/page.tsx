@@ -252,7 +252,7 @@ export default function Register() {
                         </div>
                         <div className='mb-5'>
                         <FormControl variant="outlined" size='small' fullWidth className='bg-white' required>
-                            <InputLabel htmlFor="outlined-adornment-password">Comfirm</InputLabel>
+                            <InputLabel htmlFor="outlined-adornment-password">Confirm</InputLabel>
                             <OutlinedInput
                                 id="outlined-adornment-password"
                                 name='confpassword'
