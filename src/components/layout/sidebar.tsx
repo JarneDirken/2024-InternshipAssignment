@@ -85,7 +85,6 @@ export function SidebarItem({icon, text, active}: SidebarItemProps) {
             >
                 {text}
             </span>
-
             {!expanded && (
                 <div 
                     className={`

@@ -141,8 +141,8 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
         const dataToExport: ExportDataUser[] = filteredItemsItem.map(item => ({
             RequestID: item.id,
             ItemName: item.item.name, // Item name
-            Borrower: `${item.borrower.firstName} ${item.borrower.lastName}`,
-            Approver: `${item.approver!.firstName} ${item.approver!.lastName}`, // Combining first name and last name
+            Borrower: `${item.borrower?.firstName} ${item.borrower?.lastName}`,
+            Approver: `${item.approver?.firstName} ${item.approver?.lastName}`,
             Location: item.item.location.name,
             RequestDate: formatDate(item.requestDate),
             StartBorrowDate: formatDate(item.startBorrowDate),
