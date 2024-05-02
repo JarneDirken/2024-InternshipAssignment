@@ -164,10 +164,6 @@ export default function UserItemView({ active, item}: BorrowCardProps) {
         router.push(`/historypage/${type}/${itemId}`);
     };
 
-    useEffect(() => {
-        console.log(item)
-    }, [item])
-
     return (
         <div>
             {active ?  
