@@ -57,9 +57,11 @@ export default function DashboardHeader() {
     }, []);
 
     useEffect(() => {
-        if (profile && userRole!.length > 0 && !loading) {
-            const unsubscribe = listenForNotifications();
-            return () => unsubscribe();
+        if (userRole) {
+            if (profile && userRole.length > 0 && !loading) {
+                const unsubscribe = listenForNotifications();
+                return () => unsubscribe();
+            }
         }
     }, [profile, userRole, loading]);
 
