@@ -45,7 +45,12 @@ export default function Register() {
         const confpassword = form.get('confpassword') as string;
         const tel = form.get('tel') as string;
         const thaiTelRegex = /^0[6-9]{1}\d{8}$/; // 0812345678
+        const emailRegex = /@kmitl.ac.th$/; // Email must end with "@kmitl.ac.th"
 
+        if (!emailRegex.test(email)) {
+            setErrorMessage("Not valid school email. Email must end with '@kmitl.ac.th'");
+            return;
+        }
         if (password.length < 6 || confpassword.length < 6) {
             setErrorMessage('Passwords must have at least 6 characters');
             return;
@@ -110,8 +115,6 @@ export default function Register() {
                 setErrorMessage(error.message);
             }
         }
-
-        // redirect to /borrow page
     };
 
     const theme = createTheme({
