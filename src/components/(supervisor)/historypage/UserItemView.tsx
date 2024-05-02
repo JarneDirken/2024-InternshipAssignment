@@ -7,6 +7,8 @@ import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import { useRouter } from 'next/navigation';
 import RestoreOutlinedIcon from '@mui/icons-material/RestoreOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
+import { useEffect } from "react";
+import { Item } from "@/models/Item";
 
 interface BorrowCardProps {
     active: boolean;
@@ -29,83 +31,6 @@ export default function UserItemView({ active, item}: BorrowCardProps) {
             day: 'numeric'
         };
         return dateObj.toLocaleDateString('en-US', options);
-    };
-
-    const checkRequestStatusId = (statusId: number) => {
-        switch(statusId) {
-            case 1:
-                return (
-                    <div className="flex truncate items-center text-custom-primary gap-1 text-sm sm:text-base">
-                        <AccessTimeIcon fontSize="small"/>
-                        <span>Pending approval</span>
-                    </div>
-                );
-            case 2:
-                return (
-                    <div className="flex truncate items-center text-custom-green gap-1 text-sm sm:text-base">
-                        <CheckCircleOutlineOutlinedIcon fontSize="small"/>
-                        <span>Accepted</span>
-                    </div>
-                );
-            case 3:
-                return (
-                    <div className="flex truncate items-center text-custom-red gap-1 text-sm sm:text-base">
-                        <CancelOutlinedIcon fontSize="small"/>
-                        <span>Rejected</span>
-                    </div>
-                );
-            case 4:
-                return (
-                    <div className="flex truncate items-center text-custom-green gap-1 text-sm sm:text-base">
-                        <CheckCircleOutlineOutlinedIcon fontSize="small"/>
-                        <span>Handed over</span>
-                    </div>
-                );
-            case 5:
-                return (
-                    <div className="flex truncate items-center text-custom-primary gap-1 text-sm sm:text-base">
-                        <AccessTimeIcon fontSize="small"/>
-                        <span>Pending return</span>
-                    </div>
-                );
-            case 6:
-                return (
-                    <div className="flex truncate items-center text-custom-green gap-1 text-sm sm:text-base">
-                        <CheckCircleOutlineOutlinedIcon fontSize="small"/>
-                        <span>Returned</span>
-                    </div>
-                );
-            case 7:
-                return (
-                    <div className="flex truncate items-center text-custom-green gap-1 text-sm sm:text-base">
-                        <CheckCircleOutlineOutlinedIcon fontSize="small"/>
-                        <span>Checked</span>
-                    </div>
-                );
-            default:
-                return <div>Unknown status</div>;
-        }
-    };
-
-    const checkItemStatusId = (statusId: number) => {
-        switch(statusId) {
-            case 5:
-                return (
-                    <div className="flex truncate items-center text-custom-primary gap-1 text-sm sm:text-base">
-                        <AccessTimeIcon fontSize="small"/>
-                        <span>Pending return</span>
-                    </div>
-                );
-            case 6: 
-                return (
-                    <div className="flex truncate items-center text-custom-red gap-1 text-sm sm:text-base">
-                            <DoNotTouchOutlinedIcon fontSize="small"/>
-                            <span>Broken</span>
-                        </div>
-                )
-            default:
-                return <div>Unknown status</div>
-        }
     };
 
     const calculateOnTime = (expectedReturnDate?: Date | string, actualReturnDate?: Date | string) => {
@@ -142,10 +67,106 @@ export default function UserItemView({ active, item}: BorrowCardProps) {
         );
     };
 
+    const getStatusDisplay = (item: ItemRequest) => {
+        // Check the most recent reparation first
+        const recentRepair = item.item.Reparations && item.item.Reparations.length > 0 ? item.item.Reparations[item.item.Reparations.length - 1] : null;
+    
+        if (recentRepair) {
+            if (recentRepair.returnDate) {
+                return (
+                    <div className="flex truncate items-center text-custom-green gap-1 text-sm sm:text-base">
+                        <DoNotTouchOutlinedIcon fontSize="small"/>
+                        <span>Repaired</span>
+                    </div>
+                );
+            } else {
+                if (item.item.itemStatusId === 4) {
+                    return (
+                        <div className="flex truncate items-center text-custom-primary gap-1 text-sm sm:text-base">
+                            <AccessTimeIcon fontSize="small"/>
+                            <span>Pending return</span>
+                        </div>
+                    );
+                } else if (item.item.itemStatusId === 6) {
+                    return (
+                        <div className="flex truncate items-center text-custom-red gap-1 text-sm sm:text-base">
+                            <DoNotTouchOutlinedIcon fontSize="small"/>
+                            <span>Broken</span>
+                        </div>
+                    );
+                }
+                return (
+                    <div className="flex truncate items-center text-custom-primary gap-1 text-sm sm:text-base">
+                        <AccessTimeIcon fontSize="small"/>
+                        <span>In repair</span>
+                    </div>
+                );
+            }
+        } else {
+            switch (item.requestStatusId) {
+                case 1:
+                    return (
+                        <div className="flex truncate items-center text-custom-primary gap-1 text-sm sm:text-base">
+                            <AccessTimeIcon fontSize="small"/>
+                            <span>Pending approval</span>
+                        </div>
+                    );
+                case 2:
+                    return (
+                        <div className="flex truncate items-center text-custom-green gap-1 text-sm sm:text-base">
+                            <CheckCircleOutlineOutlinedIcon fontSize="small"/>
+                            <span>Accepted</span>
+                        </div>
+                    );
+                case 3:
+                    return (
+                        <div className="flex truncate items-center text-custom-red gap-1 text-sm sm:text-base">
+                            <CancelOutlinedIcon fontSize="small"/>
+                            <span>Rejected</span>
+                        </div>
+                    );
+                case 4:
+                    return (
+                        <div className="flex truncate items-center text-custom-green gap-1 text-sm sm:text-base">
+                            <CheckCircleOutlineOutlinedIcon fontSize="small"/>
+                            <span>Handed over</span>
+                        </div>
+                    );
+                case 5:
+                    return (
+                        <div className="flex truncate items-center text-custom-primary gap-1 text-sm sm:text-base">
+                            <AccessTimeIcon fontSize="small"/>
+                            <span>Pending return</span>
+                        </div>
+                    );
+                case 6:
+                    return (
+                        <div className="flex truncate items-center text-custom-green gap-1 text-sm sm:text-base">
+                            <CheckCircleOutlineOutlinedIcon fontSize="small"/>
+                            <span>Returned</span>
+                        </div>
+                    );
+                case 7:
+                    return (
+                        <div className="flex truncate items-center text-custom-green gap-1 text-sm sm:text-base">
+                            <CheckCircleOutlineOutlinedIcon fontSize="small"/>
+                            <span>Checked</span>
+                        </div>
+                    );
+                default:
+                    return <div>Unknown status</div>;
+            }
+        }
+    };    
+
     const viewItemHistory = (itemId: number) => {
         const type="item"
         router.push(`/historypage/${type}/${itemId}`);
     };
+
+    useEffect(() => {
+        console.log(item)
+    }, [item])
 
     return (
         <div>
@@ -181,11 +202,7 @@ export default function UserItemView({ active, item}: BorrowCardProps) {
                                 </div>
                         </div>
                         <div className="flex flex-col w-1/3">
-                            {(item.item.itemStatusId === 5 || item.item.itemStatusId === 6) ? (
-                                checkItemStatusId(item.item.itemStatusId)
-                            ) : (
-                                checkRequestStatusId(item.requestStatusId)
-                            )}
+                            {getStatusDisplay(item)}
                             <div className="flex truncate items-center gap-1">
                                 <span className="font-semibold">{item.requestStatusId===3 ? <span>Reject</span> : <span>Approve</span>}&nbsp;date:</span>
                                 <span>{formatDate(item.decisionDate)}</span>
@@ -244,11 +261,7 @@ export default function UserItemView({ active, item}: BorrowCardProps) {
                                     )}
                                 </div>
                                 <div className="flex truncate items-center text-gray-400 gap-1 text-xs sm:text-sm">
-                                    {(item.item.itemStatusId === 5 || item.item.itemStatusId === 6) ? (
-                                        checkItemStatusId(item.item.itemStatusId)
-                                    ) : (
-                                        checkRequestStatusId(item.requestStatusId)
-                                    )}
+                                    {getStatusDisplay(item)}
                                 </div>
                             </div>
                         </div>
