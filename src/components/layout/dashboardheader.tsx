@@ -36,6 +36,7 @@ import MenuItem from "@mui/material/MenuItem";
 import ClearIcon from '@mui/icons-material/Clear';
 import IconButton from "@mui/material/IconButton";
 import { useSnackbar } from 'notistack';
+import Button from '../states/Button';
 
 export default function DashboardHeader() {
     const [isOpen, setIsOpen] = useState(false);
@@ -205,13 +206,16 @@ export default function DashboardHeader() {
                     >
                         {notifications.length > 0 ? (
                             notifications.map((item) => (
+                                <div>
                                 <MenuItem key={item.id} onClick={handleMenuClose}>
                                     <div className="flex justify-between items-center w-full">
-                                        <span onClick={(e) => {
-                                            e.stopPropagation();
-                                        }}>
-                                            {item.message} - {item.timeStamp.toLocaleDateString()}
-                                        </span>
+                                        <Link href={"/log"}>
+                                            <span onClick={(e) => {
+                                                e.stopPropagation();
+                                            }}>
+                                                {item.message} - {item.timeStamp.toLocaleDateString()}
+                                            </span>
+                                        </Link>
                                         <IconButton
                                             edge="end"
                                             aria-label="remove"
@@ -226,10 +230,25 @@ export default function DashboardHeader() {
                                         </IconButton>
                                     </div>
                                 </MenuItem>
+                                </div>
                             ))
                         ) : (
-                            <MenuItem onClick={handleMenuClose}>No notifications</MenuItem>
+                            <MenuItem onClick={handleMenuClose}>
+                                No notifications
+                            </MenuItem>
                         )}
+                        <MenuItem className='flex justify-center items-center'>
+                            <Link href="/log">
+                                <Button 
+                                    text="View all"
+                                    fillColor="custom-primary"
+                                    borderColor="custom-primary"
+                                    textColor="white"
+                                    paddingX='px-1'
+                                    paddingY='py-0'
+                                />
+                            </Link>
+                        </MenuItem>
                     </Menu>
                 </div>
                 {!profile ? (
