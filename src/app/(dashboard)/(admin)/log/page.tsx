@@ -40,10 +40,6 @@ export default function Log() {
             if (unsubscribe) return () => unsubscribe();
         }
     }, [loading, isAuthorized, userId, userRole]);
-    
-    useEffect(() => {
-        console.log(notificationsAdmin);
-    }, [notificationsAdmin])
 
     const listenForNotificationsAdmin = () => {
         
@@ -62,9 +58,7 @@ export default function Log() {
                 targets: doc.data().targets,
                 timeStamp: new Date(doc.data().timeStamp.seconds * 1000),
             }));
-            
-            console.log("New Notifications Fetched:", newNotifications.length);
-            
+                        
             if (newNotifications.length > 0) {
                 setNotificationsAdmin(prev => [...prev, ...newNotifications]);
             } 
