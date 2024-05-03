@@ -1,7 +1,32 @@
 import prisma from "@/services/db";
 import { db } from "@/services/firebase-config";
+import { Prisma } from "@prisma/client";
 import { addDoc, collection } from "firebase/firestore";
 import { NextRequest } from "next/server";
+interface WhereClause extends Prisma.ItemWhereInput {}
+
+interface OrderByType {
+    [key: string]: Prisma.SortOrder | OrderByRecursiveType;
+}
+
+interface OrderByRecursiveType extends Record<string, Prisma.SortOrder | OrderByType> {}
+
+function createNestedOrderBy(sortBy: string, sortDirection: Prisma.SortOrder): OrderByType {
+    const fields = sortBy.split('.');
+    let currentOrderBy: OrderByType = {};
+    let lastOrderBy = currentOrderBy;
+
+    fields.forEach((field, index) => {
+        if (index === fields.length - 1) {
+            lastOrderBy[field] = sortDirection;  // Set the final sort direction
+        } else {
+            lastOrderBy[field] = {};  // Create a nested object
+            lastOrderBy = lastOrderBy[field] as OrderByType;  // Move deeper into the object
+        }
+    });
+
+    return currentOrderBy;
+}
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -10,6 +35,12 @@ export async function GET(request: NextRequest) {
     const modelFilter = searchParams.get('model') || '';
     const brandFilter = searchParams.get('brand') || '';
     const locationFilter = searchParams.get('location') || '';
+    const yearBoughtFilter = searchParams.get('year') || '';
+    const availabilityFilter = searchParams.get('availability') || '';
+    const sortBy = searchParams.get('sortBy') || 'id';
+    const sortDirection = searchParams.get('sortDirection') as Prisma.SortOrder || 'desc';
+
+    const orderBy = createNestedOrderBy(sortBy, sortDirection);
 
     const user = await prisma.user.findUnique({
         where: {
@@ -26,14 +57,23 @@ export async function GET(request: NextRequest) {
         });
     };
 
-    const items = await prisma.item.findMany({
-        where: {
-                name: { contains: nameFilter, mode: 'insensitive' },
+    const whereClause: WhereClause = {
+        name: { contains: nameFilter, mode: 'insensitive' },
+        model: { contains: modelFilter, mode: 'insensitive' },
+        brand: { contains: brandFilter, mode: 'insensitive' },
+        location: { 
+            name: {contains: locationFilter, mode: 'insensitive'}
         },
+        active: { equals: availabilityFilter === 'Active' }
+    };
+
+    const items = await prisma.item.findMany({
+        where: whereClause,
         include: { 
             RoleItem: true,
             location: true
         },
+        orderBy: orderBy, 
     });
 
     const roles = await prisma.role.findMany();

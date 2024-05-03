@@ -17,6 +17,8 @@ import InputLabel from '@mui/material/InputLabel';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Checkbox from '@mui/material/Checkbox';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import ListItemText from '@mui/material/ListItemText';
 import React from "react";
 import DateRangePicker from "@/components/states/DateRangePicker";
@@ -264,12 +266,35 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                     />
                                 )}
                                 {filter.inputType === 'multipleSelect' && (
-                                    <MultipleSelectCheckmarks
-                                        label={filter.label}
-                                        options={filter.options || []} // Pass options from the filter
-                                        selected={Array.isArray(filter.state[0]) ? filter.state[0] : [filter.state[0]]}
-                                        onChange={(selected) => handleFilterChange(filter.label, selected.join(', '))}
-                                    />
+                                    <>
+                                        {/* <MultipleSelectCheckmarks
+                                            label={filter.label}
+                                            options={filter.options || []} // Pass options from the filter
+                                            selected={Array.isArray(filter.state[0]) ? filter.state[0] : [filter.state[0]]}
+                                            onChange={(selected) => handleFilterChange(filter.label, selected.join(', '))}
+                                        /> */}
+                                        <Autocomplete
+                                            size="small"
+                                            multiple
+                                            options={filter.options || []}
+                                            disableCloseOnSelect
+                                            getOptionLabel={(option) => option}
+                                            renderOption={(props, option, { selected }) => (
+                                                <li {...props}>
+                                                <Checkbox
+                                                    icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                    checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                    style={{ marginRight: 8 }}
+                                                    checked={selected}
+                                                />
+                                                {option}
+                                                </li>
+                                            )}
+                                            renderInput={(params) => (
+                                                <TextField {...params} label="Checkboxes" placeholder="Favorites"  />
+                                            )}
+                                        />
+                                    </>
                                 )}
                             </div>
                         ))}

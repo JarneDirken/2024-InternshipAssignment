@@ -15,6 +15,7 @@ import ProductCard from "@/components/(admin)/products/ProductCard";
 import Modal from "@/components/(admin)/products/Modal";
 import { SortOptions } from "@/models/SortOptions";
 import { Filter } from "@/models/Filter";
+import { useMemo } from 'react';
 
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import AddIcon from '@mui/icons-material/Add';
@@ -50,7 +51,7 @@ export default function Product() {
     const [locations, setLocations] = useState<Location[]>([]);
     const [itemStatuses, setItemStatuses] = useState<ItemStatus[]>([]);
 
-    const [itemLoading, setItemLoading] = useState(true);
+    const [itemLoading, setItemLoading] = useState(false);
     const [item, setItem] = useState<Item>();
     const [name, setName] = useState<string>('');
     const [model, setModel] = useState<string>('');
@@ -123,10 +124,28 @@ export default function Product() {
         }
     };
 
-    async function getAllItems() {
+    async function getAllItems(sortBy = 'id', sortDirection = 'desc') {
+        setItemLoading(true);
         const params: Record<string, string> = {
             name: name,
+            model: model,
+            brand: brand,
+            location: location,
+            sortBy: sortBy || 'id',
+            sortDirection: sortDirection || 'desc',
         };
+
+        // if (year) {
+        //     const extractedYear = new Date(year).getFullYear(); // Extract the year from the ISO string
+        //     params.set('yearBought_gte', `${extractedYear}-01-01T00:00:00.000Z`);
+        //     params.set('yearBought_lte', `${extractedYear}-12-31T23:59:59.999Z`);
+        // }
+    
+        // if (availability === 'Active') {
+        //     params.append('active', 'true');
+        // } else if (availability === 'Inactive') {
+        //     params.append('active', 'false');
+        // }
     
         // Only add userId to the query if it is not null
         if (userId !== null) {
@@ -199,18 +218,37 @@ export default function Product() {
         setModalOpen(true);
     };
 
+    const uniqueNames = useMemo(() => {
+        const nameSet = new Set(items.map(item => item.name));
+        return Array.from(nameSet);
+    }, [items]);
+    
+    const uniqueModels = useMemo(() => {
+        const modelSet = new Set(items.map(item => item.model));
+        return Array.from(modelSet);
+    }, [items]);
+    
+    const uniqueBrands = useMemo(() => {
+        const brandSet = new Set(items.map(item => item.brand));
+        return Array.from(brandSet);
+    }, [items]);
+
     return ( 
         <div>
             <ThemeProvider theme={theme}>
                 <Modal 
                     open={isModalOpen}
                     onClose={closeModal}
+                    onItemsUpdated={getAllItems}
                     selectedItems={selectedItems}
                     roles={roles}
                     locations={locations}
                     itemStatuses={itemStatuses}
                     mode={mode}
                     userId={userId}
+                    uniqueNames={uniqueNames}  
+                    uniqueModels={uniqueModels}
+                    uniqueBrands={uniqueBrands}
                 />
                 <div className="bg-white mb-4 rounded-xl">
                     <Filters

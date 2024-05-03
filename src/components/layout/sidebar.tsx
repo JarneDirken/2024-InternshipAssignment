@@ -35,7 +35,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                     </button>
                 </div>
                 
-                <ul className={`flex-1 px3 overflow-y-scroll ${expanded ? "ml-[10.92px]" : "mx-auto"}`}>{children}</ul>
+                <ul className={`flex-1 px3 overflow-y-auto overflow-x-hidden ${expanded ? "ml-[10.92px]" : "mx-auto"}`}>{children}</ul>
 
                 <div className="border-t flex p-4">
                     <button className={`bg-gray-100 flex py-1.5 hover:bg-gray-200 overflow-hidden transition-all w-full ${expanded ? "justify-center" : "rounded-lg"}`} onClick={handleLogout}>
@@ -71,16 +71,8 @@ export function SidebarItem({icon, text, active}: SidebarItemProps) {
             {icon}
             <span className={`
                 overflow-hidden transition-all 
-                ${
-                    expanded 
-                        ? "w-48 ml-3" 
-                        : "w-0"
-                }
-                ${
-                    active
-                      ? "font-semibold"
-                      : ""
-                }
+                ${expanded ? "w-48 ml-3" : "w-0"}
+                ${active ? "font-semibold" : ""}
             `}
             >
                 {text}
@@ -89,11 +81,11 @@ export function SidebarItem({icon, text, active}: SidebarItemProps) {
             {!expanded && (
                 <div 
                     className={`
-                    absolute left-full rounded-md px-2 py-1 ml-6
-                    bg-orange-50 text-sm font-semibold
-                    invisible opacity-20 -translate-x-3 transition-all
-                    group-hover:visible group-hover:opacity-100 group-hover:translate-x-0
-            `}
+                        absolute left-full rounded-md px-2 py-1 ml-6
+                        bg-orange-50 text-sm font-semibold
+                        invisible opacity-20 -translate-x-3 transition-all
+                        group-hover:visible group-hover:opacity-100 group-hover:translate-x-0
+                    `}
                 >
                     {text}
                 </div>
