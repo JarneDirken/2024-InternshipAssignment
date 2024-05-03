@@ -21,7 +21,7 @@
     "@mui/x-date-pickers": "^7.1.0",
     "@prisma/client": "^5.11.0",
     "clsx": "^2.1.0",
-    "dayjs": "^1.11.10",
+    "dayjs": "^1.11.11",
     "firebase": "^10.9.0",
     "firebase-admin": "^12.0.0",
     "next": "14.1.4",
@@ -31,7 +31,8 @@
     "react-intersection-observer": "^9.8.2",
     "recoil": "^0.7.7",
     "socket.io": "^4.7.5",
-    "socket.io-client": "^4.7.5"
+    "socket.io-client": "^4.7.5",
+    "utc": "^0.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",
