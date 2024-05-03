@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import '../../../services/firebase-config';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -13,8 +13,10 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
+import useAuth from '@/hooks/useAuth';
 
 export default function Register() {
+    const { isAuthorized } = useAuth(['Student','Teacher','Supervisor','Admin']);
     const [errorMessage, setErrorMessage] = useState('');
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
@@ -45,7 +47,12 @@ export default function Register() {
         const confpassword = form.get('confpassword') as string;
         const tel = form.get('tel') as string;
         const thaiTelRegex = /^0[6-9]{1}\d{8}$/; // 0812345678
+        const emailRegex = /@kmitl.ac.th$/; // Email must end with "@kmitl.ac.th"
 
+        if (!emailRegex.test(email)) {
+            setErrorMessage("Not valid school email. Email must end with '@kmitl.ac.th'");
+            return;
+        }
         if (password.length < 6 || confpassword.length < 6) {
             setErrorMessage('Passwords must have at least 6 characters');
             return;
@@ -110,8 +117,6 @@ export default function Register() {
                 setErrorMessage(error.message);
             }
         }
-
-        // redirect to /borrow page
     };
 
     const theme = createTheme({
@@ -139,6 +144,13 @@ export default function Register() {
           },
         },
       });
+
+    useEffect(() => {
+        if (isAuthorized) {
+            router.push('/borrow');
+        }
+    }, [isAuthorized, router]);
+    
 
     return (
         <div className="md:mx-12 flex flex-row justify-center overflow-hidden" style={{ height: 'calc(100% - 1rem)' }}>

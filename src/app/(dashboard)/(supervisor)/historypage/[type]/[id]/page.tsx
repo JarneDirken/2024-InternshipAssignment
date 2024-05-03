@@ -133,7 +133,7 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
         Status: string;
         Urgency: string;
         Description: string;
-    }
+    };
 
     const exportUserHistoryToExcel = (filename: string, worksheetName: string) => {
         if (!filteredItemsItem || !filteredItemsItem.length) return;
@@ -186,9 +186,19 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
         Picture?: string;
         Role: string;
         CreatedAt: string;
-    }
+    };
+
+    interface ExportReparationData {
+        [key: string]: number | string | undefined;
+        ItemID: number;
+        ReparationID: number;
+        RepairDate: string;
+        ReturnDate?: string;
+        Notes?: string;
+        Status: string;
+    };
     
-    const exportItemHistoryToExcel = (filename: string, worksheetName: string) => {
+    const exportItemHistoryToExcel = (filename: string, itemsWorksheetName: string, reparationsWorksheetName: string) => {
         if (!filteredItemsUser || !filteredItemsUser.length) return;
     
         const dataToExport: ExportDataItem[] = filteredItemsUser.map(item => ({
@@ -202,25 +212,62 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
             CreatedAt: formatDate(item.borrower.createdAt),
         }));
     
-        // Create a worksheet from the data
-        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    
-        // Create a new workbook and append the worksheet
+        // Create a workbook
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, worksheetName);
     
-        // Adjust column widths
-        const colWidths = Object.keys(dataToExport[0]).map(key => ({
+        // Create and append the item history worksheet
+        const itemsWorksheet = XLSX.utils.json_to_sheet(dataToExport);
+        // Adjust column widths for the item history worksheet
+        itemsWorksheet['!cols'] = Object.keys(dataToExport[0]).map(key => ({
             wch: Math.max(
                 ...dataToExport.map(item => item[key] ? item[key]!.toString().length : 0),
-                key.length  // Include the length of the header in the calculation
+                key.length
             )
         }));
-        worksheet['!cols'] = colWidths;
+        XLSX.utils.book_append_sheet(workbook, itemsWorksheet, itemsWorksheetName);
+    
+        // Collect reparation data if available
+        const reparationData: ExportReparationData[] = [];
+        filteredItemsUser.forEach(item => {
+            if (item.item.Reparations) {
+                item.item.Reparations.forEach(reparation => {
+                    let status = '';  // Initialize status variable
+                    if (reparation.returnDate) {
+                        status = 'Repaired';  // Has a return date means it's repaired
+                    } else if (item.item.itemStatusId === 6) {
+                        status = 'Broken';  // Item status ID 6 means the item is broken
+                    } else {
+                        status = 'In repair';  // No return date and not broken means it's still in repair
+                    }
+
+                    reparationData.push({
+                        ItemID: item.id,
+                        ReparationID: reparation.id,
+                        RepairDate: formatDate(reparation.repairDate),
+                        ReturnDate: reparation.returnDate ? formatDate(reparation.returnDate) : undefined,
+                        Notes: reparation.notes,
+                        Status: status,  // Use the determined status
+                    });
+                });
+            }
+        });
+    
+        // Check and append the reparations worksheet if data exists
+        if (reparationData.length > 0) {
+            const reparationsWorksheet = XLSX.utils.json_to_sheet(reparationData);
+            // Adjust column widths for the reparations worksheet
+            reparationsWorksheet['!cols'] = Object.keys(reparationData[0]).map(key => ({
+                wch: Math.max(
+                    ...reparationData.map(data => data[key] ? data[key]!.toString().length : 0),
+                    key.length
+                )
+            }));
+            XLSX.utils.book_append_sheet(workbook, reparationsWorksheet, reparationsWorksheetName);
+        }
     
         // Write the workbook to a file
         XLSX.writeFile(workbook, `${filename}.xlsx`);
-    };
+    };    
     
     const handleFilterChange = (filterType: string, value: string) => {
         if (type === 'user') {
@@ -377,7 +424,7 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
                             paddingY="py-0.5"
                             textClassName="font-semibold"
                             text="Export EXCEL"
-                            onClick={type === "user" ? () => exportUserHistoryToExcel(`${type}-History`, 'HistoryData') : () => exportItemHistoryToExcel(`${type}-History`, 'HistoryData')}
+                            onClick={type === "user" ? () => exportUserHistoryToExcel(`${type}-History`, 'HistoryData') : () => exportItemHistoryToExcel(`${type}-History`, 'HistoryData', "ReparationData")}
                         />
                     </div>
                 </div>

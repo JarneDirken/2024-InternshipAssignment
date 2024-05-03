@@ -56,6 +56,7 @@ export async function GET(request: NextRequest) {
     const whereClause: WhereClause = {
         item: {
             name: { contains: nameFilter, mode: 'insensitive' },
+            itemStatusId: { not: 5 }
         },
     };
     

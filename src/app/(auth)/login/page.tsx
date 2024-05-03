@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import Link from "next/link";
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail  } from "firebase/auth";
 import '../../../services/firebase-config';
 import { useRouter } from 'next/navigation';
@@ -13,8 +13,10 @@ import IconButton from '@mui/material/IconButton';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import FormControl from '@mui/material/FormControl';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import useAuth from '@/hooks/useAuth';
 
 export default function Login() {
+    const { isAuthorized } = useAuth(['Student','Teacher','Supervisor','Admin']);
     const [errorMessage, setErrorMessage] = useState('');
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
@@ -43,7 +45,7 @@ export default function Login() {
                 setErrorMessage(error.message);
             }
         }
-    }
+    };
 
     const theme = createTheme({
         components: {
@@ -85,8 +87,13 @@ export default function Login() {
             .catch((error) => {
                 setErrorMessage(error.message);
             });
-    }
-      
+    };
+    
+    useEffect(() => {
+        if (isAuthorized) {
+            router.push('/borrow');
+        }
+    }, [isAuthorized, router]);
 
     return (
         <div className="md:mx-12 flex flex-row justify-center" style={{ height: 'calc(100% - 1rem)' }}>
