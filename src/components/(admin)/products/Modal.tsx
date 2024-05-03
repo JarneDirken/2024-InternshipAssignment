@@ -3,7 +3,7 @@ import { useSnackbar } from "notistack";
 import MaterialUIModal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import TextField from "@mui/material/TextField";
+import { TextField, Popover } from '@mui/material';
 //icons
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
@@ -11,19 +11,16 @@ import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import { ClearIcon } from "@mui/x-date-pickers/icons";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { YearCalendar } from '@mui/x-date-pickers/YearCalendar';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
 import { Item } from "@/models/Item";
 import Button from "@/components/states/Button";
-import { Checkbox, FormControl, FormGroup, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import { Checkbox, FormGroup } from "@mui/material";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import Image from 'next/image';
 import Tooltip from '@mui/material/Tooltip';
@@ -35,15 +32,19 @@ import { ItemStatus } from "@/models/ItemStatus";
 interface ModalCardProps {
     open: boolean;
     onClose: () => void;
+    onItemsUpdated: () => void;
     selectedItems?: Item[];
     roles: Role[];
     locations: Location[];
     itemStatuses: ItemStatus[];
     mode: 'add' | 'edit' | 'delete';
     userId: String | null;
+    uniqueNames: string[];
+    uniqueModels: string[];
+    uniqueBrands: string[];  
 }
 
-export default function Modal({ open, onClose, selectedItems, mode, userId, roles, locations, itemStatuses }: ModalCardProps) {
+export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mode, userId, roles, locations, itemStatuses, uniqueNames, uniqueModels, uniqueBrands }: ModalCardProps) {
     const theme = createTheme({
         palette: {
             primary: {
@@ -114,77 +115,153 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
         },
     });
 
-    const [message, setMessage] = useState<string | null>(null);  // State can be string or null
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
-
     const items = selectedItems || [];
+    const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
+    const openDatePicker = Boolean(anchorEl);
 
     // File upload states
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null); // file url from firebase
+    const [originalFileUrl, setOriginalFileUrl] = useState<string | null>(null);
     const primitiveUserId = userId ? String(userId) : null; // uid from firebase
 
+    // Item error states
+    const [nameError, setNameError] = useState('');
+    const [numberError, setNumberError] = useState('');
+    const [modelError, setModelError] = useState('');
+    const [brandError, setBrandError] = useState('');
+    const [roleError, setRoleError] = useState('');
+    const [locationError, setLocationError] = useState('');
+    const [statusError, setStatusError] = useState('');
+    const [consumableError, setConsumableError] = useState('');
+
     // Item states
-    const [name, setName] = useState('');
-    const [number, setNumber] = useState('');
-    const [model, setModel] = useState('');
-    const [brand, setBrand] = useState('');
+    const [name, setName] = useState<string | null>(null);
+    const [number, setNumber] = useState<string | null>(null);
+    const [model, setModel] = useState<string | null>(null);
+    const [brand, setBrand] = useState<string | null>(null);
     const [year, setYear] = useState<Dayjs | null>(dayjs());
-    const [notes, setNotes] = useState('');
+    const [notes, setNotes] = useState<string | null>(null);
     const [schoolNumber, setSchoolNumber] = useState<string | null>(null);
     const [itemActive, setItemActive] = useState(true);
     const [consumable, setConsumable] = useState(false);
-    const [amount, setAmount] = useState<string | null>(null);
-    const [selectedRoleId, setSelectedRoleId] = useState<number | ''>('');
+    const [amount, setAmount] = useState<number | null>(null);
+    const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
     const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
-    const [selectedItemStatusId, setSelectedItemStatusId] = useState<number | ''>('');
+    const [selectedItemStatusId, setSelectedItemStatusId] = useState<number | null>(null);
+
+    const resetErrors = () => {
+        setNameError('');
+        setNumberError('');
+        setModelError('');
+        setBrandError('');
+        setRoleError('');
+        setLocationError('');
+        setStatusError('');
+        setConsumableError('');
+    }
 
     const resetFields = () => {
         setFileUrl(null);
         setFile(null);
-        setName('');
-        setNumber('');
-        setModel('');
-        setBrand('');
+        setName(null);
+        setNumber(null);
+        setModel(null);
+        setBrand(null);
         setYear(dayjs());
-        setNotes('');
+        setNotes(null);
         setSchoolNumber(null);
         setItemActive(true);
         setConsumable(false);
         setAmount(null);
-        setSelectedRoleId('');
+        setSelectedRoleId(null);
         setSelectedLocation(null);
-        setSelectedItemStatusId('');
+        setSelectedItemStatusId(null);
+        resetErrors();
     };
 
     useEffect(() => {
         if (mode === 'edit' && items.length === 1) {
             const item = items[0];
+            setOriginalFileUrl(item.image || null);
             setFileUrl(item.image || null);
-            setName(item.name || '');
-            setNumber(item.number || '');
-            setModel(item.model || '');
-            setBrand(item.brand || '');
+            setName(item.name || null);
+            setNumber(item.number || null);
+            setModel(item.model || null);
+            setBrand(item.brand || null);
             setYear(item.yearBought ? dayjs(item.yearBought) : dayjs());
-            setNotes(item.notes || '');
+            setNotes(item.notes || null);
             setSchoolNumber(item.schoolNumber || null);
             setItemActive(item.active);
             setConsumable(item.consumable);
-            setAmount(item.amount ? item.amount.toString() : null);
-            setSelectedRoleId(item.RoleItem && item.RoleItem.length > 0 ? item.RoleItem[0].roleId : '');
-            setSelectedItemStatusId(item.itemStatusId || '');
+            setAmount(item.amount ? item.amount : null);
+            setSelectedRoleId(item.RoleItem && item.RoleItem.length > 0 ? item.RoleItem[0].roleId : null);
+            setSelectedItemStatusId(item.itemStatusId || null);
             setSelectedLocation(item.location || null);
         } else if (mode === 'add') {
             // Reset all states to default for adding new item
             resetFields();
+            const availableStatus = itemStatuses.find(status => status.name === 'Available');
+            if (availableStatus) {
+                setSelectedItemStatusId(availableStatus.id);
+            }
         }
     }, [items, mode]);
 
     const handleSuccess = () => {
+        onItemsUpdated();
         onClose();
     };
 
+    const validateFields = () => {
+        let isValid = true;
+        resetErrors();
+
+        if (!name) {
+            setNameError('Name is required.');
+            isValid = false;
+        }
+        if (!number) {
+            setNumberError('Number is required.');
+            isValid = false;
+        } else if (number.length < 19 || number.length > 22) {
+            setNumberError('Number must be between 19 and 22 characters.');
+            isValid = false;
+        }
+        if (!model) {
+            setModelError('Model is required.');
+            isValid = false;
+        }
+        if (!brand) {
+            setBrandError('Brand is required.');
+            isValid = false;
+        }
+        if (!selectedRoleId) {
+            setRoleError('Role is required.');
+            isValid = false;
+        }
+        if (!selectedLocation) {
+            setLocationError('Location is required.');
+            isValid = false;
+        }
+        if (!selectedItemStatusId) {
+            setStatusError('Status is required.');
+            isValid = false;
+        }
+        if (consumable && amount == null) {
+            setConsumableError('Amount is required when item is a consumable.');
+            isValid = false;
+        }
+
+        return isValid;
+    };
+
     const handleAdd = async () => {
+        if (!validateFields()) {
+            enqueueSnackbar('Please fill in all required fields.', { variant: 'error' });
+            return;
+        }
         // Logic to handle add
         const data = {
             locationId: selectedLocation?.id,
@@ -225,6 +302,10 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
     };
 
     const handleEdit = async () => {
+        if (!validateFields()) {
+            enqueueSnackbar('Please fill in all required fields.', { variant: 'error' });
+            return;
+        }
         // Logic to handle edit
         const data = {
             id: items[0].id,
@@ -241,6 +322,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
             image: fileUrl,
             consumable: consumable,
             amount: amount,
+            roleItemId: items[0]?.RoleItem?.[0].id,
             roleId: selectedRoleId,
             userId: primitiveUserId,
         };
@@ -254,8 +336,21 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
         });
 
         if (response.ok) {
+            if (originalFileUrl && originalFileUrl !== fileUrl) {
+                const storage = getStorage();
+                const imageRef = ref(storage, originalFileUrl);
+    
+                try {
+                    await deleteObject(imageRef);
+                    console.log('Original image successfully deleted from Firebase Storage');
+                } catch (error) {
+                    console.error('Failed to delete original image from Firebase:', error);
+                }
+            }
+
             setFile(null);
             setFileUrl('');
+            setOriginalFileUrl(null);
             const fileInput = document.getElementById('file-upload') as HTMLInputElement;
             if (fileInput) fileInput.value = '';
             handleSuccess();
@@ -415,23 +510,46 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
 
     const handleConsumableChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setConsumable(event.target.checked);
+        if (!event.target.checked) {
+            setAmount(null);  // Reset amount to null when consumable is unchecked
+        }
     };
+    
+    const handleNotesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        setNotes(value ? value : null);
+    };
+    
+    const handleSchoolNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        setSchoolNumber(value ? value : null);
+    };
+
+    const handleYearChange = (newYear: Dayjs | null) => {
+        setYear(newYear);
+        console.log(year);
+        setAnchorEl(null); // Close popover on year selection
+    };
+
 
     const handleItemActiveChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setItemActive(event.target.checked);
     }
 
     const handleRoleChange = (event: React.ChangeEvent<{}>, value: Role | null) => {
-        setSelectedRoleId(value ? value.id : '');
+        setSelectedRoleId(value ? value.id : null);
+        setRoleError('');
     };
 
     const handleLocationChange = (event: React.ChangeEvent<{}>, value: Location | null) => {
         setSelectedLocation(value); // Set the selected location
+        setLocationError(''); // Reset the location error
     };
 
     const handleItemStatusChange = (event: React.ChangeEvent<{}>, value: ItemStatus | null) => {
         // Set the selected item status ID
-        setSelectedItemStatusId(value ? value.id : '');
+        setSelectedItemStatusId(value ? value.id : null);
+        setStatusError(''); // Reset the status error
     };
 
     const handleUploadToFirebase = async (file: File) => {
@@ -477,22 +595,55 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
     };
 
     const handleClearFile = async () => {
-        if (fileUrl) {
+    if (fileUrl) {
+        // In edit mode, check if there's an original image and if the current file URL is different
+        if (mode === 'edit' && originalFileUrl && fileUrl !== originalFileUrl) {
+            // Delete the newly uploaded image that was not saved
             const storage = getStorage();
             const fileRef = ref(storage, `${fileUrl}`);
 
             try {
                 await deleteObject(fileRef);
-                setFile(null);
-                setFileUrl('');
-                // Reset the file input value if necessary
-                const fileInput = document.getElementById('file-upload') as HTMLInputElement;
-                if (fileInput) fileInput.value = '';
+                console.log('New image deleted as it was not saved');
+            } catch (error) {
+                console.error('Error deleting new image:', error);
+            }
+        } else if (mode === 'add') {
+            const storage = getStorage();
+            const fileRef = ref(storage, `${fileUrl}`);
+
+            try {
+                await deleteObject(fileRef);
             } catch (error) {
                 console.error('Error deleting file:', error);
             }
         }
-    };
+
+        // Reset state but keep the original image URL intact if in edit mode
+        setFile(null);
+        setFileUrl(null);
+
+        // Reset the file input value
+        const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+    }
+};
+
+    const cancelModal = async () => {
+        if (mode === 'add' && fileUrl || mode === 'edit' && originalFileUrl && fileUrl !== originalFileUrl) {
+            const storage = getStorage();
+            const fileRef = ref(storage, `${fileUrl}`);
+
+            try {
+                await deleteObject(fileRef);
+            } catch (error) {
+                console.error('Error deleting file:', error);
+            }
+            const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+            if (fileInput) fileInput.value = '';
+        }
+        onClose();
+    }
     
 
     const renderContent = () => {
@@ -546,16 +697,18 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                             </div>
                         )}
                         <div className="flex justify-center mt-4">
-                            <TextField
-                                required
-                                id="outlined-required"
-                                label="Name"
+                            <Autocomplete
                                 size="small"
-                                className='w-11/12 sm:w-10/12'
-                                name='name'
+                                className="w-11/12 sm:w-10/12"
+                                freeSolo  // Allows users to type their own entries
+                                options={uniqueNames}  // Use the unique names passed via props
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                />
+                                onChange={(event, newValue) => {
+                                    setName(newValue || '');
+                                    setNameError('');
+                                }}
+                                renderInput={(params) => <TextField {...params} label="Name" required error={!!nameError} helperText={nameError} />}
+                            />
                         </div>
                         <div className="flex justify-center mt-4">
                             <TextField
@@ -566,32 +719,41 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                                 className='w-11/12 sm:w-10/12'
                                 name='number'
                                 value={number}
-                                onChange={(e) => setNumber(e.target.value)}
+                                error={!!numberError}
+                                helperText={numberError}
+                                onChange={(e) => {
+                                    setNumber(e.target.value);
+                                    setNumberError('');
+                                }}
                                 />
                         </div>
                         <div className="flex justify-center mt-4">
-                            <TextField
-                                required
-                                id="outlined-required"
-                                label="Model"
+                            <Autocomplete
                                 size="small"
-                                className='w-11/12 sm:w-10/12'
-                                name='model'
+                                className="w-11/12 sm:w-10/12"
+                                freeSolo  // Allows users to type their own entries
+                                options={uniqueModels}  // Use the unique names passed via props
                                 value={model}
-                                onChange={(e) => setModel(e.target.value)}
-                                />
+                                onChange={(event, newValue) => {
+                                    setModel(newValue || '');
+                                    setModelError('');
+                                }}
+                                renderInput={(params) => <TextField {...params} label="Model" required error={!!modelError} helperText={modelError} />}
+                            />
                         </div>
                         <div className="flex justify-center mt-4">
-                            <TextField
-                                required
-                                id="outlined-required"
-                                label="Brand"
+                            <Autocomplete
                                 size="small"
-                                className='w-11/12 sm:w-10/12'
-                                name='brand'
+                                className="w-11/12 sm:w-10/12"
+                                freeSolo  // Allows users to type their own entries
+                                options={uniqueBrands}  // Use the unique names passed via props
                                 value={brand}
-                                onChange={(e) => setBrand(e.target.value)}
-                                />
+                                onChange={(event, newValue) => {
+                                    setBrand(newValue || '');
+                                    setBrandError('');
+                                }}
+                                renderInput={(params) => <TextField {...params} label="Brand" required error={!!brandError} helperText={brandError} />}
+                            />
                         </div>
                         <div className="flex justify-center mt-4">
                             <Autocomplete
@@ -602,7 +764,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                                 getOptionLabel={(role) => role.name}
                                 value={roles.find(role => role.id === selectedRoleId) || null}
                                 onChange={handleRoleChange}
-                                renderInput={(params) => <TextField {...params} label="Role" required />}
+                                renderInput={(params) => <TextField {...params} label="Role" required error={!!roleError} helperText={roleError} />}
                             />
                         </div>
                         <div className="flex justify-center mt-4">
@@ -614,22 +776,40 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                                 getOptionLabel={(location) => location.name}
                                 value={selectedLocation}
                                 onChange={handleLocationChange}
-                                renderInput={(params) => <TextField {...params} label="Location" required />}
+                                renderInput={(params) => <TextField {...params} label="Location" required error={!!locationError} helperText={locationError} />}
                             />
                         </div>
                         <div className="flex justify-center mt-4">
+                            <TextField
+                                label="Year"
+                                size="small"
+                                name="year"
+                                required
+                                className='w-11/12 sm:w-10/12'
+                                onClick={(event) => setAnchorEl(event.currentTarget)}
+                                value={year ? year.format('YYYY') : ''}
+                                InputProps={{ readOnly: true }}
+                            />
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker
-                                    label="Year *"
-                                    views={['year']}
-                                    value={year}
-                                    onChange={(newValue: Dayjs | null) => {
-                                        if (newValue !== null) {
-                                            setYear(newValue);
-                                        }
+                                <Popover
+                                    open={openDatePicker}
+                                    anchorEl={anchorEl}
+                                    onClose={() => setAnchorEl(null)}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'center',
                                     }}
-                                    className="w-11/12 sm:w-10/12"
-                                />
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'center',
+                                    }}
+                                >
+                                    <YearCalendar
+                                        value={year}
+                                        onChange={handleYearChange}
+                                        disableFuture
+                                    />
+                                </Popover>
                             </LocalizationProvider>
                         </div>
                         <div className="flex justify-center mt-4">
@@ -641,29 +821,27 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                                 getOptionLabel={(itemStatus) => itemStatus.name}
                                 value={itemStatuses.find(itemStatus => itemStatus.id === selectedItemStatusId) || null}
                                 onChange={handleItemStatusChange}
-                                renderInput={(params) => <TextField {...params} label="Status" required />}
+                                renderInput={(params) => <TextField {...params} label="Status" required error={!!statusError} helperText={statusError} />}
                             />
                         </div>
                         <div className="flex justify-center mt-4">
                             <TextField
-                                id="outlined-required"
                                 label="Notes"
                                 size="small"
                                 className='w-11/12 sm:w-10/12'
                                 name='notes'
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
+                                value={notes || ''}
+                                onChange={handleNotesChange}
                                 />
                         </div>
                         <div className="flex justify-center mt-4">
                             <TextField
-                                id="outlined-required"
                                 label="School number"
                                 size="small"
                                 className='w-11/12 sm:w-10/12'
                                 name='school number'
-                                value={schoolNumber}
-                                onChange={(e) => setSchoolNumber(e.target.value)}
+                                value={schoolNumber || ''}
+                                onChange={handleSchoolNumberChange}
                                 />
                         </div>
                         <div className="flex justify-center mt-4">
@@ -694,14 +872,15 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                             <div className="flex justify-center mt-4">
                                 <TextField
                                     required
-                                    id="outlined-required"
                                     label="Amount"
                                     size="small"
                                     className='w-11/12 sm:w-10/12'
                                     name='amount'
                                     type="number"
                                     value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
+                                    error={!!consumableError}
+                                    helperText={consumableError}
+                                    onChange={(e) => setAmount(e.target.value ? parseInt(e.target.value) : null)}
                                     />
                             </div>
                         )}
@@ -800,7 +979,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
     return (
         <MaterialUIModal
             open={open}
-            onClose={onClose}
+            onClose={cancelModal}
             aria-labelledby="modal-title"
             aria-describedby="modal-description"
         >
@@ -815,7 +994,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                                 "Delete products"}
                             </span>
                         </div>
-                        <div onClick={onClose}>
+                        <div onClick={cancelModal}>
                             <span><CloseOutlinedIcon /></span>
                         </div>
                     </div>
@@ -823,7 +1002,7 @@ export default function Modal({ open, onClose, selectedItems, mode, userId, role
                         {renderContent()}
                     </div>
                     <div className="flex justify-around py-3 px-4 border-t-2 border-gray-200">
-                        <div onClick={onClose}>
+                        <div onClick={cancelModal}>
                             <Button 
                                 paddingX="px-2"
                                 textColor="gray-500" 

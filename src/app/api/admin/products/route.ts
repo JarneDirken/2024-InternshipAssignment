@@ -1,7 +1,32 @@
 import prisma from "@/services/db";
 import { db } from "@/services/firebase-config";
+import { Prisma } from "@prisma/client";
 import { addDoc, collection } from "firebase/firestore";
 import { NextRequest } from "next/server";
+interface WhereClause extends Prisma.ItemWhereInput {}
+
+interface OrderByType {
+    [key: string]: Prisma.SortOrder | OrderByRecursiveType;
+}
+
+interface OrderByRecursiveType extends Record<string, Prisma.SortOrder | OrderByType> {}
+
+function createNestedOrderBy(sortBy: string, sortDirection: Prisma.SortOrder): OrderByType {
+    const fields = sortBy.split('.');
+    let currentOrderBy: OrderByType = {};
+    let lastOrderBy = currentOrderBy;
+
+    fields.forEach((field, index) => {
+        if (index === fields.length - 1) {
+            lastOrderBy[field] = sortDirection;  // Set the final sort direction
+        } else {
+            lastOrderBy[field] = {};  // Create a nested object
+            lastOrderBy = lastOrderBy[field] as OrderByType;  // Move deeper into the object
+        }
+    });
+
+    return currentOrderBy;
+}
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -10,6 +35,12 @@ export async function GET(request: NextRequest) {
     const modelFilter = searchParams.get('model') || '';
     const brandFilter = searchParams.get('brand') || '';
     const locationFilter = searchParams.get('location') || '';
+    const yearBoughtFilter = searchParams.get('year') || '';
+    const availabilityFilter = searchParams.get('availability') || '';
+    const sortBy = searchParams.get('sortBy') || 'id';
+    const sortDirection = searchParams.get('sortDirection') as Prisma.SortOrder || 'desc';
+
+    const orderBy = createNestedOrderBy(sortBy, sortDirection);
 
     const user = await prisma.user.findUnique({
         where: {
@@ -26,14 +57,43 @@ export async function GET(request: NextRequest) {
         });
     };
 
-    const items = await prisma.item.findMany({
-        where: {
-                name: { contains: nameFilter, mode: 'insensitive' },
+    const availabilityOptions = availabilityFilter.split(', ').filter(Boolean);
+    let activeCondition;
+
+    if (availabilityOptions.length === 2) {
+        // If both 'Active' and 'Inactive' are selected, do not filter by active status.
+        activeCondition = undefined;
+    } else if (availabilityOptions.includes('Active') && !availabilityOptions.includes('Inactive')) {
+        // If only 'Active' is selected
+        activeCondition = true;
+    } else if (availabilityOptions.includes('Inactive') && !availabilityOptions.includes('Active')) {
+        // If only 'Inactive' is selected
+        activeCondition = false;
+    }
+
+    const whereClause: WhereClause = {
+        name: { contains: nameFilter, mode: 'insensitive' },
+        model: { contains: modelFilter, mode: 'insensitive' },
+        brand: { contains: brandFilter, mode: 'insensitive' },
+        location: { 
+            name: {contains: locationFilter, mode: 'insensitive'}
         },
+        ...(yearBoughtFilter && {
+            yearBought: {
+                gte: new Date(`${yearBoughtFilter}-01-01T00:00:00.000Z`),
+                lte: new Date(`${yearBoughtFilter}-12-31T23:59:59.999Z`)
+            }
+        }),
+        ...(activeCondition !== undefined && { active: { equals: activeCondition } })
+    };
+
+    const items = await prisma.item.findMany({
+        where: whereClause,
         include: { 
             RoleItem: true,
             location: true
         },
+        orderBy: orderBy, 
     });
 
     const roles = await prisma.role.findMany();
@@ -154,10 +214,10 @@ export async function PUT(req: NextRequest) {
                     amount: data.amount,
                 },
             });
-    
+
             const updateRoleItem = await prisma.roleItem.update({
                 where: {
-                    id: data.roleId,
+                    id: data.roleItemId,
                 },
                 data: {
                     roleId: data.roleId,

@@ -57,7 +57,7 @@ export default function ItemCard({ active, openModal, items, itemLoading, setApp
         }
     
         const dateObj = new Date(date);
-        const year = dateObj.getFullYear();
+        const year = dateObj.getUTCFullYear();
     
         return (
                 <span>{year}</span>

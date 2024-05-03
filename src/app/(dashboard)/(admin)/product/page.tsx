@@ -15,6 +15,7 @@ import ProductCard from "@/components/(admin)/products/ProductCard";
 import Modal from "@/components/(admin)/products/Modal";
 import { SortOptions } from "@/models/SortOptions";
 import { Filter } from "@/models/Filter";
+import { useMemo } from 'react';
 
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import AddIcon from '@mui/icons-material/Add';
@@ -50,7 +51,7 @@ export default function Product() {
     const [locations, setLocations] = useState<Location[]>([]);
     const [itemStatuses, setItemStatuses] = useState<ItemStatus[]>([]);
 
-    const [itemLoading, setItemLoading] = useState(true);
+    const [itemLoading, setItemLoading] = useState(false);
     const [item, setItem] = useState<Item>();
     const [name, setName] = useState<string>('');
     const [model, setModel] = useState<string>('');
@@ -75,10 +76,11 @@ export default function Product() {
     const [mode, setMode] = useState<'add' | 'edit' | 'delete'>('add');
 
     const sortOptions: SortOptions[] = [
-        { label: 'Name', optionsKey: 'item.name' },
-        { label: 'Model', optionsKey: 'item.model' },
-        { label: 'Brand', optionsKey: 'item.brand' },
-        { label: 'Location', optionsKey: 'item.location.name' }
+        { label: 'Id', optionsKey: 'id'},
+        { label: 'Name', optionsKey: 'name' },
+        { label: 'Model', optionsKey: 'model' },
+        { label: 'Brand', optionsKey: 'brand' },
+        { label: 'Location', optionsKey: 'location.name' }
     ]; 
 
     useEffect(() => {
@@ -96,36 +98,44 @@ export default function Product() {
         if(userId) {
             getAllItems();
         }
-    }, [userId]);
+    }, [userId, name, model, brand, location, year, availability]);
 
-    const handleFilterChange = (filterType: string, value: string) => {
+    const handleFilterChange = (filterType: string, value: string | string[]) => {
         switch (filterType) {
             case 'name':
-                setName(value);
+                setName(value as string);
                 break;
             case 'model':
-                setModel(value);
+                setModel(value as string);
                 break;
             case 'brand':
-                setBrand(value);
+                setBrand(value as string);
                 break;
             case 'location':
-                setLocation(value);
+                setLocation(value as string);
                 break;
             case 'year':
-                setYear(value);
+                setYear(value as string);
                 break;
             case 'availability':
-                setAvailability(value);
+                setAvailability(value as string);
                 break;
             default:
                 break;
         }
     };
 
-    async function getAllItems() {
+    async function getAllItems(sortBy = 'id', sortDirection = 'desc') {
+        setItemLoading(true);
         const params: Record<string, string> = {
             name: name,
+            model: model,
+            brand: brand,
+            location: location,
+            year: year,
+            availability: availability,
+            sortBy: sortBy || 'id',
+            sortDirection: sortDirection || 'desc',
         };
     
         // Only add userId to the query if it is not null
@@ -156,7 +166,7 @@ export default function Product() {
 
     const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
         // Implement sorting logic here
-        console.log(`Sorting by ${sortBy} in ${sortDirection} order`);
+        getAllItems(sortBy, sortDirection);
     };
 
     const toggleSelectAll = () => {
@@ -199,18 +209,37 @@ export default function Product() {
         setModalOpen(true);
     };
 
+    const uniqueNames = useMemo(() => {
+        const nameSet = new Set(items.map(item => item.name));
+        return Array.from(nameSet);
+    }, [items]);
+    
+    const uniqueModels = useMemo(() => {
+        const modelSet = new Set(items.map(item => item.model));
+        return Array.from(modelSet);
+    }, [items]);
+    
+    const uniqueBrands = useMemo(() => {
+        const brandSet = new Set(items.map(item => item.brand));
+        return Array.from(brandSet);
+    }, [items]);
+
     return ( 
         <div>
             <ThemeProvider theme={theme}>
                 <Modal 
                     open={isModalOpen}
                     onClose={closeModal}
+                    onItemsUpdated={getAllItems}
                     selectedItems={selectedItems}
                     roles={roles}
                     locations={locations}
                     itemStatuses={itemStatuses}
                     mode={mode}
                     userId={userId}
+                    uniqueNames={uniqueNames}  
+                    uniqueModels={uniqueModels}
+                    uniqueBrands={uniqueBrands}
                 />
                 <div className="bg-white mb-4 rounded-xl">
                     <Filters
