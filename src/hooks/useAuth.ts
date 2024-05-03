@@ -14,7 +14,7 @@ function useAuth(allowedRoles: string[] = []) {
       const auth = getAuth();
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
           if (!user) {
-              router.push('/login');
+            setTimeout(() => router.push('/login'), 0);
           } else {
               try {
                   const response = await fetch('/api/auth', {
@@ -28,11 +28,11 @@ function useAuth(allowedRoles: string[] = []) {
                       setUserRole(role);
                       setIsAuthorized(allowedRoles.includes(role));
                   } else {
-                      router.push('/login');
+                    setTimeout(() => router.push('/login'), 0);
                   }
               } catch (error) {
                   console.error('Authorization check failed:', error);
-                  router.push('/login');
+                  setTimeout(() => router.push('/login'), 0);
               }
           }
           setLoading(false);

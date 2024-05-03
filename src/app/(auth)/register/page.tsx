@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import '../../../services/firebase-config';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -13,8 +13,10 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
+import useAuth from '@/hooks/useAuth';
 
 export default function Register() {
+    const { isAuthorized } = useAuth(['Student','Teacher','Supervisor','Admin']);
     const [errorMessage, setErrorMessage] = useState('');
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
@@ -142,6 +144,13 @@ export default function Register() {
           },
         },
       });
+
+    useEffect(() => {
+        if (isAuthorized) {
+            router.push('/borrow');
+        }
+    }, [isAuthorized, router]);
+    
 
     return (
         <div className="md:mx-12 flex flex-row justify-center overflow-hidden" style={{ height: 'calc(100% - 1rem)' }}>
