@@ -76,10 +76,11 @@ export default function Product() {
     const [mode, setMode] = useState<'add' | 'edit' | 'delete'>('add');
 
     const sortOptions: SortOptions[] = [
-        { label: 'Name', optionsKey: 'item.name' },
-        { label: 'Model', optionsKey: 'item.model' },
-        { label: 'Brand', optionsKey: 'item.brand' },
-        { label: 'Location', optionsKey: 'item.location.name' }
+        { label: 'Id', optionsKey: 'id'},
+        { label: 'Name', optionsKey: 'name' },
+        { label: 'Model', optionsKey: 'model' },
+        { label: 'Brand', optionsKey: 'brand' },
+        { label: 'Location', optionsKey: 'location.name' }
     ]; 
 
     useEffect(() => {
@@ -97,27 +98,27 @@ export default function Product() {
         if(userId) {
             getAllItems();
         }
-    }, [userId]);
+    }, [userId, name, model, brand, location, year, availability]);
 
-    const handleFilterChange = (filterType: string, value: string) => {
+    const handleFilterChange = (filterType: string, value: string | string[]) => {
         switch (filterType) {
             case 'name':
-                setName(value);
+                setName(value as string);
                 break;
             case 'model':
-                setModel(value);
+                setModel(value as string);
                 break;
             case 'brand':
-                setBrand(value);
+                setBrand(value as string);
                 break;
             case 'location':
-                setLocation(value);
+                setLocation(value as string);
                 break;
             case 'year':
-                setYear(value);
+                setYear(value as string);
                 break;
             case 'availability':
-                setAvailability(value);
+                setAvailability(value as string);
                 break;
             default:
                 break;
@@ -131,21 +132,11 @@ export default function Product() {
             model: model,
             brand: brand,
             location: location,
+            year: year,
+            availability: availability,
             sortBy: sortBy || 'id',
             sortDirection: sortDirection || 'desc',
         };
-
-        // if (year) {
-        //     const extractedYear = new Date(year).getFullYear(); // Extract the year from the ISO string
-        //     params.set('yearBought_gte', `${extractedYear}-01-01T00:00:00.000Z`);
-        //     params.set('yearBought_lte', `${extractedYear}-12-31T23:59:59.999Z`);
-        // }
-    
-        // if (availability === 'Active') {
-        //     params.append('active', 'true');
-        // } else if (availability === 'Inactive') {
-        //     params.append('active', 'false');
-        // }
     
         // Only add userId to the query if it is not null
         if (userId !== null) {
@@ -175,7 +166,7 @@ export default function Product() {
 
     const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
         // Implement sorting logic here
-        console.log(`Sorting by ${sortBy} in ${sortDirection} order`);
+        getAllItems(sortBy, sortDirection);
     };
 
     const toggleSelectAll = () => {

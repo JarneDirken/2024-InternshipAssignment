@@ -65,8 +65,8 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                                 </div>
                                 <div className="truncate">
                                     <span className="font-medium text-gray-400">Year&nbsp;</span><br/>
-                                    <Tooltip title={item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'} placement="top-start" arrow>
-                                        <span>{item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'}</span>
+                                    <Tooltip title={item.yearBought ? new Date(item.yearBought).getUTCFullYear() : 'N/A'} placement="top-start" arrow>
+                                        <span>{item.yearBought ? new Date(item.yearBought).getUTCFullYear() : 'N/A'}</span>
                                     </Tooltip>
                                 </div>
                             </div>
@@ -170,8 +170,8 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                             </Tooltip>
                         </div>
                         <div className="truncate col-span-1 p-2 self-center">
-                            <Tooltip title={item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'} placement="top-start" arrow>
-                                <span>{item.yearBought ? new Date(item.yearBought).getFullYear() : 'N/A'}</span>
+                            <Tooltip title={item.yearBought ? new Date(item.yearBought).getUTCFullYear() : 'N/A'} placement="top-start" arrow>
+                                <span>{item.yearBought ? new Date(item.yearBought).getUTCFullYear() : 'N/A'}</span>
                             </Tooltip>
                         </div>
                         

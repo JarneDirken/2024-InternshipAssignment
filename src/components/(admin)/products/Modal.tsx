@@ -3,7 +3,7 @@ import { useSnackbar } from "notistack";
 import MaterialUIModal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import TextField from "@mui/material/TextField";
+import { TextField, Popover } from '@mui/material';
 //icons
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
@@ -13,7 +13,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { YearCalendar } from '@mui/x-date-pickers/YearCalendar';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -117,6 +117,8 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
 
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
     const items = selectedItems || [];
+    const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
+    const openDatePicker = Boolean(anchorEl);
 
     // File upload states
     const [file, setFile] = useState<File | null>(null);
@@ -223,6 +225,9 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
         if (!number) {
             setNumberError('Number is required.');
             isValid = false;
+        } else if (number.length < 19 || number.length > 22) {
+            setNumberError('Number must be between 19 and 22 characters.');
+            isValid = false;
         }
         if (!model) {
             setModelError('Model is required.');
@@ -317,6 +322,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
             image: fileUrl,
             consumable: consumable,
             amount: amount,
+            roleItemId: items[0]?.RoleItem?.[0].id,
             roleId: selectedRoleId,
             userId: primitiveUserId,
         };
@@ -518,6 +524,13 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
         const value = event.target.value;
         setSchoolNumber(value ? value : null);
     };
+
+    const handleYearChange = (newYear: Dayjs | null) => {
+        setYear(newYear);
+        console.log(year);
+        setAnchorEl(null); // Close popover on year selection
+    };
+
 
     const handleItemActiveChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setItemActive(event.target.checked);
@@ -767,18 +780,36 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
                             />
                         </div>
                         <div className="flex justify-center mt-4">
+                            <TextField
+                                label="Year"
+                                size="small"
+                                name="year"
+                                required
+                                className='w-11/12 sm:w-10/12'
+                                onClick={(event) => setAnchorEl(event.currentTarget)}
+                                value={year ? year.format('YYYY') : ''}
+                                InputProps={{ readOnly: true }}
+                            />
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker
-                                    label="Year *"
-                                    views={['year']}
-                                    value={year}
-                                    onChange={(newValue: Dayjs | null) => {
-                                        if (newValue !== null) {
-                                            setYear(newValue);
-                                        }
+                                <Popover
+                                    open={openDatePicker}
+                                    anchorEl={anchorEl}
+                                    onClose={() => setAnchorEl(null)}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'center',
                                     }}
-                                    className="w-11/12 sm:w-10/12"
-                                />
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'center',
+                                    }}
+                                >
+                                    <YearCalendar
+                                        value={year}
+                                        onChange={handleYearChange}
+                                        disableFuture
+                                    />
+                                </Popover>
                             </LocalizationProvider>
                         </div>
                         <div className="flex justify-center mt-4">
@@ -810,7 +841,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
                                 className='w-11/12 sm:w-10/12'
                                 name='school number'
                                 value={schoolNumber || ''}
-                                onChange={(e) => setSchoolNumber(e.target.value)}
+                                onChange={handleSchoolNumberChange}
                                 />
                         </div>
                         <div className="flex justify-center mt-4">

@@ -49,6 +49,7 @@ interface FiltersProps {
 export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, sortOptions, isCardView }: FiltersProps) {
     const prevWidthRef = useRef<number | null>(null);
     const lastActiveRef = useRef<boolean | null>(null);
+    const [resetKeys, setResetKeys] = useState<Record<string, number>>({});
     const [sortBy, setSortBy] = useState('');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -89,6 +90,17 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
         }
     }, [setActive]);
 
+    useEffect(() => {
+        // Initialize reset keys for all filters
+        const keys: Record<string, number> = {};
+        filters.forEach(filter => {
+            if (filter.inputType === 'multipleSelect') {
+                keys[filter.label] = 0;  // Initialize reset key for each filter
+            }
+        });
+        setResetKeys(keys);
+    }, [filters]);
+
     const handleSortClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
     };
@@ -124,20 +136,36 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
         filters.find(filter => filter.label === label)?.state[1](value || '');
     };
 
+    const handleMultiSelectFilterChange = (label: string, values: string[]) => {
+        // Update the filter state specifically designed to handle string arrays
+        const filter = filters.find(f => f.label === label);
+        if (filter) {
+            filter.state[1](values.join(', ')); // Directly use the array
+        }
+        onFilterChange(label, values.join(', ')); // Assuming your backend can handle comma-separated values
+    };
+
     const [resetKey, setResetKey] = useState(0);
 
     const handleReset = (label: string) => {
         const filter = filters.find(filter => filter.label === label);
         if (filter) {
-            if (filter.inputType === 'dateRange') {
+            if (filter.inputType === 'multipleSelect') {
+                setResetKeys(prevKeys => ({
+                    ...prevKeys,
+                    [label]: prevKeys[label] + 1
+                }));
+                filter.state[1](null);  // Set the state to an empty array for multiple selects
+            } else if (filter.inputType === 'dateRange') {
                 // Special handling for date range resets
                 setBorrowDate(null);
                 setReturnDate(null);
                 setResetKey(oldKey => oldKey + 1);
+            } else {
+                filter.state[1]('');
+                onFilterChange(label, '');
             }
             // Reset the filter state
-            filter.state[1]('');
-            onFilterChange(label, '');
         }
     };
 
@@ -147,6 +175,13 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
         setSortDirection('desc');  // Reset to default sort direction or choose a reasonable default
         onSortChange('', 'desc');  // Notify the system that sorting has been reset
     };
+    
+    const getYearOrString = (value: string | null): string | null => {
+        if (!value) return null;
+        const date = new Date(value);
+        // Check if the date conversion is valid by checking the time value for NaN
+        return !isNaN(date.getTime()) ? date.getUTCFullYear().toString() : value;
+    }
 
     const theme = createTheme({
         components: {
@@ -188,6 +223,30 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                     },
                     endIcon: {
                         fontWeight: 'normal', // Set the font weight for end icon to normal
+                    },
+                },
+            },
+            MuiCheckbox: {
+                styleOverrides: {
+                    root: {
+                        '&.Mui-checked': {
+                            color: 'orange', // Set checkbox color to orange when checked
+                        },
+                    },
+                },
+            },
+            MuiMenuItem: {
+                styleOverrides: {
+                    root: {
+                        '&.Mui-selected': {
+                            backgroundColor: '#FFF7E0', // Change background color to a slightly darker orange when selected
+                        },
+                        '&.Mui-selected:hover': {
+                            backgroundColor: '#FFE4B5', // Change background color to a slightly darker orange when selected
+                        },
+                        '&.Mui-selected.Mui-focusVisible': {
+                            backgroundColor: '#FFE4B5', // Change background color to a slightly darker orange when selected
+                        },
                     },
                 },
             },
@@ -239,7 +298,7 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                                     result = result && result[key] ? result[key] : null;
                                                     if (result === null) break;
                                                 }
-                                                return result;
+                                                return result ? getYearOrString(result) : null;
                                             }).filter(option => option !== null && option !== undefined))
                                         ]}
                                         isOptionEqualToValue={(option, value) => option === value}
@@ -267,31 +326,27 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                 )}
                                 {filter.inputType === 'multipleSelect' && (
                                     <>
-                                        {/* <MultipleSelectCheckmarks
-                                            label={filter.label}
-                                            options={filter.options || []} // Pass options from the filter
-                                            selected={Array.isArray(filter.state[0]) ? filter.state[0] : [filter.state[0]]}
-                                            onChange={(selected) => handleFilterChange(filter.label, selected.join(', '))}
-                                        /> */}
                                         <Autocomplete
+                                            key={resetKeys[filter.label]}
                                             size="small"
                                             multiple
                                             options={filter.options || []}
+                                            onChange={(event, value) => handleMultiSelectFilterChange(filter.label, value)}
                                             disableCloseOnSelect
                                             getOptionLabel={(option) => option}
                                             renderOption={(props, option, { selected }) => (
-                                                <li {...props}>
-                                                <Checkbox
-                                                    icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                                                    checkedIcon={<CheckBoxIcon fontSize="small" />}
-                                                    style={{ marginRight: 8 }}
-                                                    checked={selected}
-                                                />
-                                                {option}
+                                                <li {...props} key={option}>
+                                                    <Checkbox
+                                                        icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                        checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                        style={{ marginRight: 8 }}
+                                                        checked={selected}
+                                                    />
+                                                    {option}
                                                 </li>
                                             )}
                                             renderInput={(params) => (
-                                                <TextField {...params} label="Checkboxes" placeholder="Favorites"  />
+                                                <TextField {...params} label="Availability" placeholder="Select" InputLabelProps={{ shrink: true }}  />
                                             )}
                                         />
                                     </>
@@ -313,7 +368,7 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                     paddingTop: "6px" // Ensure padding is sufficient but not too large
                                 }} 
                             >
-                            Sort by {getSortLabelFromKey(sortBy)} {sortDirection === 'asc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
+                            Sort by {getSortLabelFromKey(sortBy)} {sortDirection === 'desc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
                             </Button>
                             <Menu
                                 anchorEl={anchorEl}
@@ -432,118 +487,5 @@ function DateRangePickerWrapper({ label, borrowDate, returnDate, setBorrowDate, 
                 />
             </div>
         </div>
-    );
-}
-
-interface MultipleSelectCheckmarksProps {
-    label: string;
-    options: string[];
-    selected: string[];
-    onChange: (selected: string[]) => void;
-}
-
-function MultipleSelectCheckmarks({ label, options, selected, onChange }: MultipleSelectCheckmarksProps) {
-    const [option, setOption] = useState<string[]>([]);
-
-    const handleChange = (event: SelectChangeEvent<typeof option>) => {
-        const {
-          target: { value },
-        } = event;
-        setOption(
-          // On autofill we get a stringified value.
-          typeof value === 'string' ? value.split(',') : value,
-        );
-      };
-
-    useEffect(() => {
-        onChange(option);
-    }, [option, onChange]);
-
-    const theme = createTheme({
-        components: {
-            MuiOutlinedInput: {
-                styleOverrides: {
-                    root: {
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                            borderColor: 'orange',
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: 'orange',
-                        },
-                    },
-                },
-            },
-            MuiInputLabel: {
-                styleOverrides: {
-                    root: {
-                        '&.Mui-focused': {
-                            color: 'orange',
-                        },
-                    },
-                },
-            },
-            MuiCheckbox: {
-                styleOverrides: {
-                    root: {
-                        '&.Mui-checked': {
-                            color: 'orange', // Set checkbox color to orange when checked
-                        },
-                    },
-                },
-            },
-            MuiMenuItem: {
-                styleOverrides: {
-                    root: {
-                        '&.Mui-selected': {
-                            backgroundColor: '#FFF7E0', // Change background color to a slightly darker orange when selected
-                        },
-                        '&.Mui-selected:hover': {
-                            backgroundColor: '#FFE4B5', // Change background color to a slightly darker orange when selected
-                        },
-                        '&.Mui-selected.Mui-focusVisible': {
-                            backgroundColor: '#FFE4B5', // Change background color to a slightly darker orange when selected
-                        },
-                    },
-                },
-            },
-        },
-    });
-
-    return (
-        
-            <div>
-                <ThemeProvider theme={theme}>
-                    <FormControl sx={{ width: '100%' }}>
-                        <InputLabel id={`multiple-select-label-${label}`} shrink={true}>{label}</InputLabel>
-                        <Select
-                            labelId={`multiple-select-label-${label}`}
-                            id={`multiple-select-${label}`}
-                            multiple
-                            displayEmpty
-                            size="small"
-                            value={option}
-                            onChange={handleChange}
-                            input={<OutlinedInput label={label} />}
-                            renderValue={(selected) => {
-                                if (selected.length === 0) {
-                                    return 'Select';
-                                } else {
-                                    return selected.join(', '); // No need to replace leading comma and space
-                                }
-                            }}
-                            style={{ color: option.length > 0 ? 'black' : '#b0b0b0', fontWeight: 'normal' }}
-                        >
-                            {options.map((name) => (
-                                <MenuItem 
-                                    key={name} 
-                                    value={name}>
-                                    <Checkbox checked={option.indexOf(name) > -1} />
-                                    <ListItemText primary={name} />
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </ThemeProvider>
-            </div>
     );
 }
