@@ -3,7 +3,7 @@ import useAuth from "@/hooks/useAuth";
 import { Filter } from "@/models/Filter";
 import {app} from "@/services/firebase-config";
 import { getAuth } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Unauthorized from "../../(error)/unauthorized/page";
 import Loading from "@/components/states/Loading";
 import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
@@ -17,6 +17,7 @@ import { SortOptions } from "@/models/SortOptions";
 import Button from "@/components/states/Button";
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import * as XLSX from 'xlsx';
+import { useInView } from "react-intersection-observer";
 
 export default function Reparation() {
     const { isAuthorized, loading } = useAuth(['Supervisor', 'Admin']);
@@ -46,7 +47,13 @@ export default function Reparation() {
         { label: 'Name', optionsKey: 'item.name' },
         { label: 'Repair Date', optionsKey: 'repairDate' },
         { label: 'Location', optionsKey: 'item.location.name' }
-    ]; 
+    ];
+    // infinate scroll load
+    const [offset, setOffset] = useState(0);
+    const [hasMore, setHasMore] = useState(true);     
+    const NUMBER_OF_ITEMS_TO_FETCH = 10;
+    const listRef = useRef<HTMLDivElement>(null);
+    const { ref, inView } = useInView();
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -61,16 +68,16 @@ export default function Reparation() {
 
     useEffect(() => {
         if(userId) {
-            getRepairs();
+            getRepairs(true);
             if(selectedTab === "history"){
-                getHistory();
+                getHistory(true);
             }
         }
     }, [userId, nameFilter, borrowDateFilter, repairRecoilValue]);
 
     useEffect(() => {
         if(selectedTab === "history"){
-            getHistory();
+            getHistory(true);
         }
     }, [selectedTab]);
 
@@ -86,6 +93,31 @@ export default function Reparation() {
                 setCurrentItems([]);
         }
     }, [selectedTab, repairs, history]);
+
+    // infinate loading scroll
+    useEffect(() => {
+        if (inView && hasMore && !loading) {
+            const currentScrollPosition = listRef.current ? listRef.current.scrollTop : 0;
+            if(selectedTab === "repair"){
+                getRepairs().then(() => {
+                    requestAnimationFrame(() => {
+                        if (listRef.current) {
+                            listRef.current.scrollTop = currentScrollPosition;
+                        }
+                    });
+                });
+            }
+            if(selectedTab === "history"){
+                getHistory().then(() => {
+                    requestAnimationFrame(() => {
+                        if (listRef.current) {
+                            listRef.current.scrollTop = currentScrollPosition;
+                        }
+                    });
+                });
+            }
+        }
+    }, [inView, loading, hasMore]);
 
     const closeModal = () => {
         setModalOpen(false);
@@ -107,8 +139,8 @@ export default function Reparation() {
     };
 
     const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
-        if(selectedTab === "repair") { getRepairs(sortBy, sortDirection); }
-        if(selectedTab === "history") { getHistory(sortBy, sortDirection); }
+        if(selectedTab === "repair") { getRepairs(true, sortBy, sortDirection); }
+        if(selectedTab === "history") { getHistory(true, sortBy, sortDirection); }
     };
 
     const parseDateFilter = (dateFilter: string) => {
@@ -188,13 +220,17 @@ export default function Reparation() {
         XLSX.writeFile(workbook, `${filename}.xlsx`);
     };
 
-    async function getRepairs(sortBy = 'repairDate', sortDirection = 'desc') {
+    async function getRepairs(initialLoad = false, sortBy = 'repairDate', sortDirection = 'desc') {
+        if (!hasMore && !initialLoad) return; // infinate loading
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
+        const currentOffset = initialLoad ? 0 : offset; // infinate loading
         const params: Record<string, string> = {
             name: nameFilter,
             sortBy: sortBy || 'repairDate',
-            sortDirection: sortDirection || 'desc'
+            sortDirection: sortDirection || 'desc',
+            offset: currentOffset.toString(), // infinate loading 
+            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
         };
 
         // Include dates in the query only if they are defined
@@ -220,8 +256,16 @@ export default function Reparation() {
             const fetchedItems = data.repairs || [];
             const itemCount = data.totalCount || 0;
 
-            setRepairs(fetchedItems);
             setRepairCount(itemCount);
+
+            // infinate loading
+            if (initialLoad) {
+                setRepairs(fetchedItems);
+            } else {
+                setRepairs(prevItems => [...prevItems, ...fetchedItems]);
+            }
+            setOffset(currentOffset + fetchedItems.length);
+            setHasMore(fetchedItems.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -229,13 +273,17 @@ export default function Reparation() {
         }
     };
 
-    async function getHistory(sortBy = 'repairDate', sortDirection = 'desc') {
+    async function getHistory(initialLoad = false, sortBy = 'repairDate', sortDirection = 'desc') {
+        if (!hasMore && !initialLoad) return; // infinate loading
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
+        const currentOffset = initialLoad ? 0 : offset; // infinate loading
         const params: Record<string, string> = {
             name: nameFilter,
             sortBy: sortBy || 'repairDate',
-            sortDirection: sortDirection || 'desc'
+            sortDirection: sortDirection || 'desc',
+            offset: currentOffset.toString(), // infinate loading 
+            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
         };
 
         // Include dates in the query only if they are defined
@@ -258,7 +306,15 @@ export default function Reparation() {
             }
     
             const data = await response.json();
-            setHistory(data);
+
+            // infinate loading
+            if (initialLoad) {
+                setHistory(data);
+            } else {
+                setHistory(prevItems => [...prevItems, ...data]);
+            }
+            setOffset(currentOffset + data.length);
+            setHasMore(data.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -340,6 +396,9 @@ export default function Reparation() {
                         items={repairs}
                         itemLoading={itemLoading}
                         selectedTab={selectedTab}
+                        listRef={listRef}
+                        hasMore={hasMore}
+                        innerRef={ref}
                     />
                 )}
                 {selectedTab === "history" && (
@@ -349,6 +408,9 @@ export default function Reparation() {
                     items={history}
                     itemLoading={itemLoading}
                     selectedTab={selectedTab}
+                    listRef={listRef}
+                    hasMore={hasMore}
+                    innerRef={ref}
                 />
                 )}
             </div>
