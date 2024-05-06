@@ -14,9 +14,11 @@ interface ProductCardProps {
     itemLoading: boolean;
     selectedItems: Item[];
     onSelectItem: (id: number) => void;
+    hasMore: boolean;
+    innerRef: React.Ref<HTMLDivElement>;
 };
 
-export default function ProductCard({ openModal, onSelectItem, selectedItems, items, itemLoading }: ProductCardProps) {
+export default function ProductCard({ openModal, onSelectItem, selectedItems, items, itemLoading, hasMore, innerRef }: ProductCardProps) {
     const router = useRouter();
 
     const viewItemHistory = (itemId: number) => {
@@ -196,6 +198,7 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                     </div>
                 </div>
             ))}
+            {hasMore && <div ref={innerRef}>Loading more items...</div>}
         </>
     );
 }
