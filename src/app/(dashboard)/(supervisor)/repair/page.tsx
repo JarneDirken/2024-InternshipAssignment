@@ -183,7 +183,7 @@ export default function Reparation() {
         RepairDate: string;
         ReturnDate: string;
         Status: string | undefined;
-    }
+    };
 
     const exportRepairHistoryToExcel = (filename: string, worksheetName: string) => {
         if (!allHistory || !allHistory.length) return;

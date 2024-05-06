@@ -16,7 +16,7 @@ import Modal from "@/components/(admin)/products/Modal";
 import { SortOptions } from "@/models/SortOptions";
 import { Filter } from "@/models/Filter";
 import { useMemo } from 'react';
-
+import * as XLSX from 'xlsx';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
@@ -265,6 +265,64 @@ export default function Product() {
         return Array.from(brandSet);
     }, [items]);
 
+    const formatDate = (dateString: Date): string => {
+        const date = new Date(dateString);
+        const options: Intl.DateTimeFormatOptions = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            hour12: true
+        };
+        return date.toLocaleString('en-US', options);
+    };
+
+    interface ExportDataItem {
+        [key: string]: number | string | undefined;
+        itemId: number;
+        ItemName: string;
+        ItemBrand: string;
+        ItemModel: string;
+        ItemYear: string | undefined;
+        Location: string;
+        Status: string | undefined;
+    };
+
+    const exportRepairHistoryToExcel = (filename: string, worksheetName: string) => {
+        if (!selectedItems || !selectedItems.length) return;
+    
+        const dataToExport: ExportDataItem[] = selectedItems.map(item => ({
+            itemId: item.id,
+            ItemName: item.name,
+            ItemBrand: item.brand,
+            ItemModel: item.model,
+            ItemYear: formatDate(item.yearBought!),
+            Location: item.location.name,
+            Status: item.itemStatus?.name,
+        }));
+    
+        // Create a worksheet from the data
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    
+        // Create a new workbook and append the worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, worksheetName);
+    
+        // Adjust column widths
+        const colWidths = Object.keys(dataToExport[0]).map(key => ({
+            wch: Math.max(
+                ...dataToExport.map(item => item[key] ? item[key]!.toString().length : 0),
+                key.length  // Include the length of the header in the calculation
+            )
+        }));
+        worksheet['!cols'] = colWidths;
+    
+        // Write the workbook to a file
+        XLSX.writeFile(workbook, `${filename}.xlsx`);
+    };
+
     if (loading || isAuthorized === null) { return <Loading/>; }
 
     if (!isAuthorized) { return <Unauthorized />; }
@@ -343,7 +401,7 @@ export default function Product() {
                                 disabled={selectedItems.length === 0}
                             />
                         </div>
-                        <div>
+                        <div onClick={() => exportRepairHistoryToExcel(`Item-Data`, 'ItemData')}>
                             <Button 
                                 icon={<InsertDriveFileOutlinedIcon />} 
                                 textColor="custom-dark-blue" 
@@ -389,7 +447,7 @@ export default function Product() {
                         />
                     </div>
                     <div className="hidden lg:block">
-                        <div className="w-full bg-gray-100 hidden lg:grid grid-cols-12">
+                        <div className="w-full bg-gray-200 hidden lg:grid grid-cols-12">
                             <div className="col-span-1 mx-auto">
                                 <Checkbox 
                                     checked={selectedItems.length === items.length && items.length > 0}
