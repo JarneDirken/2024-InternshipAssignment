@@ -98,7 +98,25 @@ export async function GET(request: NextRequest) {
         take: limit // infinate scroll
     });
 
-    return new Response(JSON.stringify(repairs), {
+    const allRepairs = await prisma.reparation.findMany({
+        where: whereClause,
+        include: {
+            item: {
+                include: {
+                    itemStatus: true,
+                    location: true,
+                    ItemRequests: {
+                        include: {
+                            borrower: true
+                        }
+                    }
+                }
+            },
+        },
+        orderBy: orderBy,
+    });
+
+    return new Response(JSON.stringify({repairs, allRepairs}), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',

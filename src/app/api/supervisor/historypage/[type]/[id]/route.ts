@@ -152,7 +152,7 @@ async function fetchUserHistory(userId: number, orderBy: OrderByType, whereClaus
                 },
                 orderBy: orderBy
             }
-        }
+        },
     });
     return user;
 }
@@ -187,7 +187,7 @@ async function fetchItemHistory(itemId: number, whereClause: WhereClause, orderB
                 orderBy: orderBy
             },
             Reparations: true,
-        }
+        },
     });
     return item;
 }

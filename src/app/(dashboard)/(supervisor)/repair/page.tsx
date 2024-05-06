@@ -30,6 +30,7 @@ export default function Reparation() {
     const [repair, setRepair] = useState<Repair>();
     const [repairs, setRepairs] = useState<Repair[]>([]);
     const [history, setHistory] = useState<Repair[]>([]);
+    const [allHistory, setAllHistory] = useState<Repair[]>([]);
     const [repairCount, setRepairCount] = useState(0);
     const [currentItems, setCurrentItems] = useState(repairs);
     const repairRecoilValue = useRecoilValue(repariState);
@@ -185,9 +186,9 @@ export default function Reparation() {
     }
 
     const exportRepairHistoryToExcel = (filename: string, worksheetName: string) => {
-        if (!history || !history.length) return;
+        if (!allHistory || !allHistory.length) return;
     
-        const dataToExport: ExportDataRepair[] = history.map(item => ({
+        const dataToExport: ExportDataRepair[] = allHistory.map(item => ({
             RepairId: item.id,
             ItemName: item.item.name,
             ItemBrand: item.item.brand,
@@ -306,15 +307,17 @@ export default function Reparation() {
             }
     
             const data = await response.json();
-
+            const infinateLoadHistory = data.repairs;
+            const allHistory = data.allRepairs;
+            setAllHistory(allHistory);
             // infinate loading
             if (initialLoad) {
-                setHistory(data);
+                setHistory(infinateLoadHistory);
             } else {
-                setHistory(prevItems => [...prevItems, ...data]);
+                setHistory(prevItems => [...prevItems, ...infinateLoadHistory]);
             }
-            setOffset(currentOffset + data.length);
-            setHasMore(data.length === NUMBER_OF_ITEMS_TO_FETCH);
+            setOffset(currentOffset + infinateLoadHistory.length);
+            setHasMore(infinateLoadHistory.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
