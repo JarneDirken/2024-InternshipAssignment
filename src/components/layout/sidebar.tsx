@@ -35,7 +35,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                     </button>
                 </div>
                 
-                <ul className={`flex-1 px3 overflow-y-auto overflow-x-hidden ${expanded ? "ml-[10.92px]" : "mx-auto"}`}>{children}</ul>
+                <ul className={`flex-1 px3 ${expanded ? "ml-[10.92px] overflow-y-auto" : "mx-auto"}`}>{children}</ul>
 
                 <div className="border-t flex p-4">
                     <button className={`bg-gray-100 flex py-1.5 hover:bg-gray-200 overflow-hidden transition-all w-full ${expanded ? "justify-center" : "rounded-lg"}`} onClick={handleLogout}>

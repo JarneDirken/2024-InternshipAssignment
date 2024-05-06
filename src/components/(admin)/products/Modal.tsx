@@ -983,8 +983,8 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
             aria-labelledby="modal-title"
             aria-describedby="modal-description"
         >
-            <ThemeProvider theme={theme}>
-                <Box className="modal-box bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80%] md:w-[60%] lg:w-[50%] rounded-lg shadow-lg max-h-[70%] flex flex-col">
+            <Box className="modal-box bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80%] md:w-[60%] lg:w-[50%] rounded-lg shadow-lg max-h-[70%] flex flex-col">
+                <ThemeProvider theme={theme}>
                     <div className="flex justify-between items-center py-3 px-4 border-b-2 border-gray-200">
                         <div className="flex items-center gap-2">
                             <span className="font-bold my-auto">{mode === 'add'? <Inventory2OutlinedIcon /> : mode === 'edit' ? <Inventory2OutlinedIcon /> : <WarningAmberRoundedIcon className="text-custom-red text-3xl" />}</span>
@@ -1068,8 +1068,8 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
                             </>
                         )}
                     </div>
-                </Box>
-            </ThemeProvider>
+                </ThemeProvider>
+            </Box>
         </MaterialUIModal>
     );
 }

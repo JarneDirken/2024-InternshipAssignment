@@ -39,13 +39,13 @@ export default function DashboardLayout({
             {['Student', 'Teacher', 'Supervisor', 'Admin'].includes(userRole || '') && (
               <>
                 <Link href="/borrow">
-                  <SidebarItem icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Borrow" active={pathname === "/borrow"} />
+                  <SidebarItem icon={<PersonAddAltOutlinedIcon fontSize="medium" />} text="Borrow" active={pathname === "/borrow"} />
                 </Link>
                 <Link href="/return">
-                  <SidebarItem icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Return" active={pathname === "/return"} />
+                  <SidebarItem icon={<KeyboardReturnOutlinedIcon fontSize="medium" />} text="Return" active={pathname === "/return"} />
                 </Link>
                 <Link href="/history">
-                  <SidebarItem icon={<HistoryOutlinedIcon fontSize="inherit" className="text-3xl" />} text="History" active={pathname === "/history"} />
+                  <SidebarItem icon={<HistoryOutlinedIcon fontSize="medium" />} text="History" active={pathname === "/history"} />
                 </Link>
               </>
             )}
@@ -54,13 +54,13 @@ export default function DashboardLayout({
               <>
                 <SidebarHeading>Supervisor</SidebarHeading>
                 <Link href="/request">
-                  <SidebarItem icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Requests" active={pathname === "/request"} />
-                </Link>
-                <Link href="/repair">
-                  <SidebarItem icon={<HandymanOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Repairs" active={pathname === "/repair"} />
+                  <SidebarItem icon={<ContentPasteOutlinedIcon fontSize="medium" />} text="Requests" active={pathname === "/request"} />
                 </Link>
                 <Link href="/lending">
-                  <SidebarItem icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Lendings" active={pathname === "/lending"} />
+                  <SidebarItem icon={<HandshakeOutlinedIcon fontSize="medium" />} text="Lendings" active={pathname === "/lending"} />
+                </Link>
+                <Link href="/repair">
+                  <SidebarItem icon={<HandymanOutlinedIcon fontSize="medium" />} text="Repairs" active={pathname === "/repair"} />
                 </Link>
               </>
             )}
@@ -69,15 +69,15 @@ export default function DashboardLayout({
               <>
                 <SidebarHeading>Admin</SidebarHeading>
                 <Link href="/product">
-                  <SidebarItem icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-3xl" />} text="Products" active={pathname === "/product"} />
+                  <SidebarItem icon={<Inventory2OutlinedIcon fontSize="medium" />} text="Products" active={pathname === "/product"} />
                 </Link>
-                <SidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Locations" />
-                <SidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Users" />
+                <SidebarItem icon={<LocationOnOutlinedIcon fontSize="medium" />} text="Locations" />
+                <SidebarItem icon={<PeopleAltOutlinedIcon fontSize="medium" />} text="Users" />
                 <Link href="/parameter">
-                  <SidebarItem icon={<SettingsOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Parameters" active={pathname === "/parameter"} />
+                  <SidebarItem icon={<SettingsOutlinedIcon fontSize="medium" />} text="Parameters" active={pathname === "/parameter"} />
                 </Link>
                 <Link href="/log">
-                  <SidebarItem icon={<ArticleOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Logs" active={pathname === "/log"} />
+                  <SidebarItem icon={<ArticleOutlinedIcon fontSize="medium" />} text="Logs" active={pathname === "/log"} />
                 </Link>
               </>
             )}
