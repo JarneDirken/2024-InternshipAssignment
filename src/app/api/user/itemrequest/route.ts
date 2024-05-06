@@ -111,6 +111,8 @@ export async function GET(request: NextRequest) {
     const modelFilter = searchParams.get('model') || '';
     const brandFilter = searchParams.get('brand') || '';
     const locationFilter = searchParams.get('location') || '';
+    const offset = parseInt(searchParams.get('offset') || '0');
+    const limit = parseInt(searchParams.get('limit') || '10');
 
     const user = await prisma.user.findUnique({
         where: {
@@ -152,7 +154,9 @@ export async function GET(request: NextRequest) {
         },
         orderBy: {
             requestDate: "desc"
-        }
+        },
+        skip: offset, // infinate scroll
+        take: limit // infinate scroll
     });
 
     const totalCount = await prisma.itemRequest.count({

@@ -3,7 +3,7 @@ import Button from "@/components/states/Button";
 import Loading from "@/components/states/Loading";
 import { requestsState } from "@/services/store";
 import { useSnackbar } from "notistack";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Image from 'next/image';
@@ -11,6 +11,7 @@ import { ItemRequest } from "@/models/ItemRequest";
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import { useInView } from "react-intersection-observer";
 
 interface PendingBorrowProps {
     active: boolean;
@@ -28,21 +29,47 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
     const [requests, setRequests] = useRecoilState(requestsState);
     const [canceled, setCanceled] = useState(false);
     const { enqueueSnackbar } = useSnackbar();
-    
+    // infinate scroll load
+    const [offset, setOffset] = useState(0);
+    const [hasMore, setHasMore] = useState(true);     
+    const NUMBER_OF_ITEMS_TO_FETCH = 10;
+    const listRef = useRef<HTMLDivElement>(null);
+    const { ref, inView } = useInView();
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
+
+    useEffect(() => {
+        getPendingBorrows(nameFilter, modelFilter, brandFilter, locationFilter, true);
+    }, [nameFilter, modelFilter, brandFilter, locationFilter, canceled]);
+
+    // infinate loading scroll
+    useEffect(() => {
+        if (inView && hasMore && !loading) {
+            const currentScrollPosition = listRef.current ? listRef.current.scrollTop : 0;
+            getPendingBorrows().then(() => {
+                requestAnimationFrame(() => {
+                    if (listRef.current) {
+                        listRef.current.scrollTop = currentScrollPosition;
+                    }
+                });
+            });
+        }
+    }, [inView, loading, hasMore]);
     
-    // get item requests with pagination and filter on SERVER SIDE
-    async function getPendingBorrows(nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '') {
+    async function getPendingBorrows(nameFilter = '', modelFilter = '', brandFilter = '', locationFilter = '', initialLoad = false) {
+        if (!hasMore && !initialLoad) return; // infinate loading
         setLoading(true);
         try {
             if (!userId) { return; }
+            const currentOffset = initialLoad ? 0 : offset; // infinate loading
             const queryString = new URLSearchParams({
                 userId: userId,
                 name: nameFilter,
                 model: modelFilter,
                 brand: brandFilter,
-                location: locationFilter
+                location: locationFilter,
+                offset: currentOffset.toString(), // infinate loading 
+                limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
             }).toString();
             const response = await fetch(`/api/user/itemrequest?${queryString}`);
 
@@ -50,7 +77,16 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const data = await response.json();
-            setRequests(data.itemRequests);
+            const pendingRequests = data.itemRequests
+
+            // infinate loading
+            if (initialLoad) {
+                setRequests(pendingRequests);
+            } else {
+                setRequests(prevItems => [...prevItems, ...pendingRequests]);
+            }
+            setOffset(currentOffset + pendingRequests.length);
+            setHasMore(pendingRequests.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch item requests:", error);
         } finally {
@@ -118,10 +154,6 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
         setMessage(message);
     };
 
-    useEffect(() => {
-        getPendingBorrows(nameFilter, modelFilter, brandFilter, locationFilter);
-    }, [nameFilter, modelFilter, brandFilter, locationFilter, canceled]);
-
     function formatDate(date: Date): string {
         const options: Intl.DateTimeFormatOptions = {
           year: 'numeric',
@@ -139,7 +171,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
 
     return (
         <div>
-            <div className={active ? listViewClass : gridViewClass} style={{maxHeight: "60vh"}}>
+            <div ref={listRef} className={active ? listViewClass : gridViewClass} style={{maxHeight: "60vh"}}>
                 {requests.map((request) => (
                     <div key={request.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
@@ -298,6 +330,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                         )}
                     </div>
                 ))}
+                {hasMore && <div ref={ref}>Loading more items...</div>}
             </div>
         </div>
     );
