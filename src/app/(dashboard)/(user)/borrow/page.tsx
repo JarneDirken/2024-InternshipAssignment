@@ -126,10 +126,6 @@ export default function Borrow() {
         setTotalItemCount(items.length);
     },[items]);
 
-    useEffect(()=> {
-        setTotalRequestCount(requests.length);
-    }, [requests]);
-
     useEffect(() => {
         if (userId) {
             getPendingBorrowCount();

@@ -39,6 +39,8 @@ export async function GET(request: NextRequest) {
     const availabilityFilter = searchParams.get('availability') || '';
     const sortBy = searchParams.get('sortBy') || 'id';
     const sortDirection = searchParams.get('sortDirection') as Prisma.SortOrder || 'desc';
+    const offset = parseInt(searchParams.get('offset') || '0');
+    const limit = parseInt(searchParams.get('limit') || '10');
 
     const orderBy = createNestedOrderBy(sortBy, sortDirection);
 
@@ -93,7 +95,18 @@ export async function GET(request: NextRequest) {
             RoleItem: true,
             location: true
         },
-        orderBy: orderBy, 
+        orderBy: orderBy,
+        skip: offset, // infinate scroll
+        take: limit // infinate scroll
+    });
+
+    const itemsAll = await prisma.item.findMany({
+        where: whereClause,
+        include: { 
+            RoleItem: true,
+            location: true
+        },
+        orderBy: orderBy,
     });
 
     const roles = await prisma.role.findMany();
@@ -102,7 +115,7 @@ export async function GET(request: NextRequest) {
 
     const itemStatuses = await prisma.itemStatus.findMany();
 
-    return new Response(JSON.stringify({items, roles, locations, itemStatuses}), {
+    return new Response(JSON.stringify({items, roles, locations, itemStatuses, itemsAll}), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',

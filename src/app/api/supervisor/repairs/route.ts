@@ -34,6 +34,8 @@ export async function GET(request: NextRequest) {
     const returnDate = searchParams.get('returnDate');
     const sortBy = searchParams.get('sortBy') || 'repairDate';  // Default sort field
     const sortDirection = searchParams.get('sortDirection') as Prisma.SortOrder || 'desc';  // Default sort direction
+    const offset = parseInt(searchParams.get('offset') || '0');
+    const limit = parseInt(searchParams.get('limit') || '10');
 
     const orderBy = createNestedOrderBy(sortBy, sortDirection);
 
@@ -89,7 +91,9 @@ export async function GET(request: NextRequest) {
                 }
             },
         },
-        orderBy: orderBy
+        orderBy: orderBy,
+        skip: offset, // infinate scroll
+        take: limit // infinate scroll
     });
 
     const totalCount = await prisma.reparation.count({

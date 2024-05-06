@@ -19,6 +19,7 @@ import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import PollOutlinedIcon from '@mui/icons-material/PollOutlined';
 import { usePathname } from 'next/navigation';
 import { MobileSidebarItem } from './sidebar';
 import MobileSidebarHeading from './sidebarheading';
@@ -207,29 +208,29 @@ export default function DashboardHeader() {
                         {notifications.length > 0 ? (
                             notifications.map((item) => (
                                 <div key={item.id}>
-                                    <MenuItem onClick={handleMenuClose}>
-                                        <div className="flex justify-between items-center w-full">
-                                            <Link href={"/log"}>
-                                                <span onClick={(e) => {
-                                                    e.stopPropagation();
-                                                }}>
-                                                    {item.message} - {item.timeStamp.toLocaleDateString()}
-                                                </span>
-                                            </Link>
-                                            <IconButton
-                                                edge="end"
-                                                aria-label="remove"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    removeNotification(item.id);
-                                                }}
-                                                size="small"
-                                                className="justify-end" 
-                                            >
-                                                <ClearIcon fontSize="small" />
-                                            </IconButton>
-                                        </div>
-                                    </MenuItem>
+                                  <MenuItem onClick={handleMenuClose}>
+                                      <div className="flex justify-between items-center w-full">
+                                          <Link href={"/log"}>
+                                              <span onClick={(e) => {
+                                                  e.stopPropagation();
+                                              }}>
+                                                  {item.message} - {item.timeStamp.toLocaleDateString()}
+                                              </span>
+                                          </Link>
+                                          <IconButton
+                                              edge="end"
+                                              aria-label="remove"
+                                              onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  removeNotification(item.id);
+                                              }}
+                                              size="small"
+                                              className="justify-end" 
+                                          >
+                                              <ClearIcon fontSize="small" />
+                                          </IconButton>
+                                      </div>
+                                  </MenuItem>
                                 </div>
                             ))
                         ) : (
@@ -370,6 +371,12 @@ export default function DashboardHeader() {
                                     icon={<ArticleOutlinedIcon fontSize="medium" />} 
                                     text="Logs"  
                                     active={pathname === "/log"} />
+                                </Link>
+                                <Link href="/analytics" onClick={() => setIsOpen(false)}>
+                                    <MobileSidebarItem 
+                                    icon={<PollOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    text="Analytics"  
+                                    active={pathname === "/analytics"} />
                                 </Link>
                             </>
                         )}

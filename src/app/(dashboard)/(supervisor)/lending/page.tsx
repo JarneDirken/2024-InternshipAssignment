@@ -1,7 +1,7 @@
 'use client';
 import Unauthorized from "@/app/(dashboard)/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAuth } from 'firebase/auth';
 import {app} from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
@@ -14,6 +14,7 @@ import { updateRequest } from "@/services/store";
 import { Filter } from "@/models/Filter";
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 import { SortOptions } from "@/models/SortOptions";
+import { useInView } from "react-intersection-observer";
 
 export default function Lending() {
     const { isAuthorized, loading } = useAuth(['Supervisor', 'Admin']);
@@ -53,7 +54,13 @@ export default function Lending() {
         { label: 'Name', optionsKey: 'item.name' },
         { label: 'End Borrow Date', optionsKey: 'returnDate' },
         { label: 'Location', optionsKey: 'item.location.name' }
-    ]; 
+    ];
+    // infinate scroll load
+    const [offset, setOffset] = useState(0);
+    const [hasMore, setHasMore] = useState(true);     
+    const NUMBER_OF_ITEMS_TO_FETCH = 10;
+    const listRef = useRef<HTMLDivElement>(null);
+    const { ref, inView } = useInView();
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -68,25 +75,25 @@ export default function Lending() {
 
     useEffect(() => {
         if(userId) {
-            getBorrows();
+            getBorrows(true);
             if(selectedTab === "returns"){
-                getReturns();
+                getReturns(true);
             }
             if(selectedTab === "checkitem"){
-                getCheckItem();
+                getCheckItem(true);
             }
         }
     }, [userId, requests, nameFilter, borrowDateFilter, requestor, location]);
 
     useEffect(() => {
         if(selectedTab === "returns"){
-            getReturns();
+            getReturns(true);
         }
         if(selectedTab === "checkitem"){
-            getCheckItem();
+            getCheckItem(true);
         }
         if(selectedTab === "history"){
-            getAllRequests();
+            getAllRequests(true);
         }
     }, [selectedTab]);
 
@@ -109,6 +116,49 @@ export default function Lending() {
         }
     }, [selectedTab, borrows, returns, checkItem, allRequests]);
 
+    // infinate loading scroll
+    useEffect(() => {
+        if (inView && hasMore && !loading) {
+            const currentScrollPosition = listRef.current ? listRef.current.scrollTop : 0;
+            if(selectedTab === "borrows"){
+                getBorrows().then(() => {
+                    requestAnimationFrame(() => {
+                        if (listRef.current) {
+                            listRef.current.scrollTop = currentScrollPosition;
+                        }
+                    });
+                });
+            }
+            if(selectedTab === "returns"){
+                getReturns().then(() => {
+                    requestAnimationFrame(() => {
+                        if (listRef.current) {
+                            listRef.current.scrollTop = currentScrollPosition;
+                        }
+                    });
+                });
+            }
+            if(selectedTab === "checkitem"){
+                getCheckItem().then(() => {
+                    requestAnimationFrame(() => {
+                        if (listRef.current) {
+                            listRef.current.scrollTop = currentScrollPosition;
+                        }
+                    });
+                });
+            }
+            if(selectedTab === "history"){
+                getAllRequests().then(() => {
+                    requestAnimationFrame(() => {
+                        if (listRef.current) {
+                            listRef.current.scrollTop = currentScrollPosition;
+                        }
+                    });
+                });
+            }
+        }
+    }, [inView, loading, hasMore]);
+
     const handleFilterChange = (filterType: string, value: string) => {
         switch (filterType) {
             case 'name':
@@ -129,10 +179,10 @@ export default function Lending() {
     };
 
     const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
-        if(selectedTab === "borrows") { getBorrows(sortBy, sortDirection); }
-        if(selectedTab === "returns") { getReturns(sortBy, sortDirection); }
-        if(selectedTab === "checkitem") { getCheckItem(sortBy, sortDirection); }
-        if(selectedTab === "history") { getAllRequests(sortBy, sortDirection); }
+        if(selectedTab === "borrows") { getBorrows(true, sortBy, sortDirection); }
+        if(selectedTab === "returns") { getReturns(true, sortBy, sortDirection); }
+        if(selectedTab === "checkitem") { getCheckItem(true, sortBy, sortDirection); }
+        if(selectedTab === "history") { getAllRequests(true, sortBy, sortDirection); }
     };
 
     const parseDateFilter = (dateFilter: string) => {
@@ -148,15 +198,19 @@ export default function Lending() {
         setModalOpen(true);
     };
 
-    async function getBorrows(sortBy = 'requestDate', sortDirection = 'desc') {
+    async function getBorrows(initialLoad = false, sortBy = 'requestDate', sortDirection = 'desc') {
+        if (!hasMore && !initialLoad) return; // infinate loading
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
+        const currentOffset = initialLoad ? 0 : offset; // infinate loading
         const params: Record<string, string> = {
             name: nameFilter,
             location: location,
             requestor: requestor,
             sortBy: sortBy || 'requestDate',
-            sortDirection: sortDirection || 'desc'
+            sortDirection: sortDirection || 'desc',
+            offset: currentOffset.toString(), // infinate loading 
+            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
         };
 
         // Include dates in the query only if they are defined
@@ -184,10 +238,18 @@ export default function Lending() {
             const itemCountReturn = data.totalCountReturns || 0;
             const itemCountCheckItem = data.totalCountCheckItem || 0;
 
-            setBorrows(fetchedItems);
             setTotalBorrowsCount(itemCount);
             setTotalReturnCount(itemCountReturn);
             setTotalCheckItemCount(itemCountCheckItem);
+
+            // infinate loading
+            if (initialLoad) {
+                setBorrows(fetchedItems);
+            } else {
+                setBorrows(prevItems => [...prevItems, ...fetchedItems]);
+            }
+            setOffset(currentOffset + fetchedItems.length);
+            setHasMore(fetchedItems.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -195,15 +257,19 @@ export default function Lending() {
         }
     };
 
-    async function getReturns(sortBy = 'requestDate', sortDirection = 'desc') {
+    async function getReturns(initialLoad = false, sortBy = 'requestDate', sortDirection = 'desc') {
+        if (!hasMore && !initialLoad) return; // infinate loading
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
+        const currentOffset = initialLoad ? 0 : offset; // infinate loading
         const params: Record<string, string> = {
             name: nameFilter,
             location: location,
             requestor: requestor,
             sortBy: sortBy || 'requestDate',
-            sortDirection: sortDirection || 'desc'
+            sortDirection: sortDirection || 'desc',
+            offset: currentOffset.toString(), // infinate loading 
+            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
         };
 
         // Include dates in the query only if they are defined
@@ -226,8 +292,15 @@ export default function Lending() {
             }
             
             const data = await response.json();
-            
-            setReturns(data);
+
+            // infinate loading
+            if (initialLoad) {
+                setReturns(data);
+            } else {
+                setReturns(prevItems => [...prevItems, ...data]);
+            }
+            setOffset(currentOffset + data.length);
+            setHasMore(data.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -235,15 +308,19 @@ export default function Lending() {
         }
     };
 
-    async function getCheckItem(sortBy = 'requestDate', sortDirection = 'desc'){
+    async function getCheckItem(initialLoad = false, sortBy = 'requestDate', sortDirection = 'desc'){
+        if (!hasMore && !initialLoad) return; // infinate loading
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
+        const currentOffset = initialLoad ? 0 : offset; // infinate loading
         const params: Record<string, string> = {
             name: nameFilter,
             location: location,
             requestor: requestor,
             sortBy: sortBy || 'requestDate',
-            sortDirection: sortDirection || 'desc'
+            sortDirection: sortDirection || 'desc',
+            offset: currentOffset.toString(), // infinate loading 
+            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
         };
 
         // Include dates in the query only if they are defined
@@ -267,7 +344,14 @@ export default function Lending() {
             
             const data = await response.json();
             
-            setCheckItem(data);
+            // infinate loading
+            if (initialLoad) {
+                setCheckItem(data);
+            } else {
+                setCheckItem(prevItems => [...prevItems, ...data]);
+            }
+            setOffset(currentOffset + data.length);
+            setHasMore(data.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -275,15 +359,19 @@ export default function Lending() {
         }
     };
 
-    async function getAllRequests(sortBy = 'decisionDate', sortDirection = 'desc') {
+    async function getAllRequests(initialLoad = false, sortBy = 'decisionDate', sortDirection = 'desc') {
+        if (!hasMore && !initialLoad) return; // infinate loading
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
+        const currentOffset = initialLoad ? 0 : offset; // infinate loading
         const params: Record<string, string> = {
             name: nameFilter,
             location: location,
             requestor: requestor,
             sortBy: sortBy || 'decisionDate',
-            sortDirection: sortDirection || 'desc'
+            sortDirection: sortDirection || 'desc',
+            offset: currentOffset.toString(), // infinate loading 
+            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
         };
 
         // Include dates in the query only if they are defined
@@ -306,8 +394,15 @@ export default function Lending() {
             }
     
             const data = await response.json();
-            setAllRequests(data);
-
+            
+            // infinate loading
+            if (initialLoad) {
+                setAllRequests(data);
+            } else {
+                setAllRequests(prevItems => [...prevItems, ...data]);
+            }
+            setOffset(currentOffset + data.length);
+            setHasMore(data.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -334,6 +429,9 @@ export default function Lending() {
                         itemLoading={itemLoading}
                         selectedTab={selectedTab}
                         setHandover={setHandover}
+                        listRef={listRef}
+                        hasMore={hasMore}
+                        innerRef={ref}
                     />
                 );
             case "returns":
@@ -345,6 +443,9 @@ export default function Lending() {
                         itemLoading={itemLoading}
                         selectedTab={selectedTab}
                         setReceive={setReceive}
+                        listRef={listRef}
+                        hasMore={hasMore}
+                        innerRef={ref}
                     />
                 );
             case "checkitem":
@@ -356,6 +457,9 @@ export default function Lending() {
                         itemLoading={itemLoading}
                         selectedTab={selectedTab}
                         setChecked={setChecked}
+                        listRef={listRef}
+                        hasMore={hasMore}
+                        innerRef={ref}
                     />
                 );
             case "history":
@@ -366,6 +470,9 @@ export default function Lending() {
                         items={allRequests}
                         itemLoading={itemLoading}
                         selectedTab={selectedTab}
+                        listRef={listRef}
+                        hasMore={hasMore}
+                        innerRef={ref}
                     />
                 );
         }

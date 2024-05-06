@@ -1,7 +1,7 @@
 'use client';
 import Unauthorized from "@/app/(dashboard)/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAuth } from 'firebase/auth';
 import {app} from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
@@ -15,6 +15,7 @@ import MessageModal from "@/components/(user)/borrow/MessageModal";
 import { Filter } from "@/models/Filter";
 import ContentPasteOutlinedIcon from '@mui/icons-material/ContentPasteOutlined';
 import { SortOptions } from "@/models/SortOptions";
+import { useInView } from "react-intersection-observer";
 
 export default function Requests() {
     const { isAuthorized, loading } = useAuth(['Supervisor', 'Admin']);
@@ -53,7 +54,13 @@ export default function Requests() {
         { label: 'Name', optionsKey: 'item.name' },
         { label: 'Request Date', optionsKey: 'requestDate' },
         { label: 'Location', optionsKey: 'item.location.name' }
-    ]; 
+    ];
+    // infinate scroll load
+    const [offset, setOffset] = useState(0);
+    const [hasMore, setHasMore] = useState(true);     
+    const NUMBER_OF_ITEMS_TO_FETCH = 10;
+    const listRef = useRef<HTMLDivElement>(null);
+    const { ref, inView } = useInView();
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -66,24 +73,58 @@ export default function Requests() {
         return () => unsubscribe();
     }, [userId]);
 
+    // infinate loading scroll
     useEffect(() => {
-        if(userId) {
-            getBorrows();
+        if (inView && hasMore && !loading) {
+            const currentScrollPosition = listRef.current ? listRef.current.scrollTop : 0;
+            if(selectedTab === "normalBorrows"){
+                getBorrows().then(() => {
+                    requestAnimationFrame(() => {
+                        if (listRef.current) {
+                            listRef.current.scrollTop = currentScrollPosition;
+                        }
+                    });
+                });
+            }
             if(selectedTab === "urgentBorrows"){
-                getUrgentBorrows();
+                getUrgentBorrows().then(() => {
+                    requestAnimationFrame(() => {
+                        if (listRef.current) {
+                            listRef.current.scrollTop = currentScrollPosition;
+                        }
+                    });
+                });
             }
             if(selectedTab === "requestedBorrows"){
-                getAllRequests();
+                getAllRequests().then(() => {
+                    requestAnimationFrame(() => {
+                        if (listRef.current) {
+                            listRef.current.scrollTop = currentScrollPosition;
+                        }
+                    });
+                });
+            }
+        }
+    }, [inView, loading, hasMore]);
+
+    useEffect(() => {
+        if(userId) {
+            getBorrows(true);
+            if(selectedTab === "urgentBorrows"){
+                getUrgentBorrows(true);
+            }
+            if(selectedTab === "requestedBorrows"){
+                getAllRequests(true);
             }
         }
     }, [userId, requests, nameFilter, borrowDateFilter, requestor, location]);
 
     useEffect(() => {
         if(selectedTab === "urgentBorrows"){
-            getUrgentBorrows();
+            getUrgentBorrows(true);
         }
         if(selectedTab === "requestedBorrows"){
-            getAllRequests();
+            getAllRequests(true);
         }
     }, [selectedTab]);
 
@@ -123,9 +164,9 @@ export default function Requests() {
     };
 
     const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
-        if(selectedTab === "normalBorrows") { getBorrows(sortBy, sortDirection); }
-        if(selectedTab === "urgentBorrows") { getUrgentBorrows(sortBy, sortDirection); }
-        if(selectedTab === "requestedBorrows") { getAllRequests(sortBy, sortDirection); }
+        if(selectedTab === "normalBorrows") { getBorrows(true, sortBy, sortDirection); }
+        if(selectedTab === "urgentBorrows") { getUrgentBorrows(true, sortBy, sortDirection); }
+        if(selectedTab === "requestedBorrows") { getAllRequests(true, sortBy, sortDirection); }
     };
 
     const parseDateFilter = (dateFilter: string) => {
@@ -141,15 +182,19 @@ export default function Requests() {
         setModalOpen(true);
     };
 
-    async function getBorrows(sortBy = 'requestDate', sortDirection = 'desc') {
+    async function getBorrows(initialLoad = false, sortBy = 'requestDate', sortDirection = 'desc') {
+        if (!hasMore && !initialLoad) return; // infinate loading
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
+        const currentOffset = initialLoad ? 0 : offset; // infinate loading
         const params: Record<string, string> = {
             name: nameFilter,
             location: location,
             requestor: requestor,
             sortBy: sortBy || 'requestDate',
-            sortDirection: sortDirection || 'desc'
+            sortDirection: sortDirection || 'desc',
+            offset: currentOffset.toString(), // infinate loading 
+            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
         };
 
         // Include dates in the query only if they are defined
@@ -176,9 +221,17 @@ export default function Requests() {
             const itemCount = data.totalCount || 0;
             const itemCountUrgent = data.totalCountUrgent || 0;
 
-            setNormalBorrows(fetchedItems);
             setTotalNormalBorrowsCount(itemCount);
             setUrgentBorrowsCount(itemCountUrgent);
+
+            // infinate loading
+            if (initialLoad) {
+                setNormalBorrows(fetchedItems);
+            } else {
+                setNormalBorrows(prevItems => [...prevItems, ...fetchedItems]);
+            }
+            setOffset(currentOffset + fetchedItems.length);
+            setHasMore(fetchedItems.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -186,15 +239,19 @@ export default function Requests() {
         }
     };
 
-    async function getUrgentBorrows(sortBy = 'requestDate', sortDirection = 'desc') {
+    async function getUrgentBorrows(initialLoad = false, sortBy = 'requestDate', sortDirection = 'desc') {
+        if (!hasMore && !initialLoad) return; // infinate loading
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
+        const currentOffset = initialLoad ? 0 : offset; // infinate loading
         const params: Record<string, string> = {
             name: nameFilter,
             location: location,
             requestor: requestor,
             sortBy: sortBy || 'requestDate',
-            sortDirection: sortDirection || 'desc'
+            sortDirection: sortDirection || 'desc',
+            offset: currentOffset.toString(), // infinate loading 
+            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
         };
 
         // Include dates in the query only if they are defined
@@ -219,7 +276,14 @@ export default function Requests() {
             const data = await response.json();
             const fetchedItems = data.itemRequests || [];
 
-            setUrgentBorrows(fetchedItems);
+            // infinate loading
+            if (initialLoad) {
+                setUrgentBorrows(fetchedItems);
+            } else {
+                setUrgentBorrows(prevItems => [...prevItems, ...fetchedItems]);
+            }
+            setOffset(currentOffset + fetchedItems.length);
+            setHasMore(fetchedItems.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -227,16 +291,19 @@ export default function Requests() {
         }
     };
 
-    async function getAllRequests(sortBy = 'decisionDate', sortDirection = 'desc') {
+    async function getAllRequests(initialLoad = false, sortBy = 'decisionDate', sortDirection = 'desc') {
+        if (!hasMore && !initialLoad) return; // infinate loading
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
+        const currentOffset = initialLoad ? 0 : offset; // infinate loading
         const params: Record<string, string> = {
             name: nameFilter,
             location: location,
             requestor: requestor,
             sortBy: sortBy || 'decisionDate',
-            sortDirection: sortDirection || 'desc'
-            
+            sortDirection: sortDirection || 'desc',
+            offset: currentOffset.toString(), // infinate loading 
+            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
         };
 
         // Include dates in the query only if they are defined
@@ -259,7 +326,15 @@ export default function Requests() {
             }
     
             const data = await response.json();
-            setAllRequests(data);
+
+            // infinate loading
+            if (initialLoad) {
+                setAllRequests(data);
+            } else {
+                setAllRequests(prevItems => [...prevItems, ...data]);
+            }
+            setOffset(currentOffset + data.length);
+            setHasMore(data.length === NUMBER_OF_ITEMS_TO_FETCH);
 
         } catch (error) {
             console.error("Failed to fetch items:", error);
@@ -289,6 +364,9 @@ export default function Requests() {
                         setApproved={setApproved}
                         setRequestStatusId={setRequestStatusId}
                         selectedTab={selectedTab}
+                        listRef={listRef}
+                        hasMore={hasMore}
+                        innerRef={ref}
                     />
                 );
             case "urgentBorrows":
@@ -302,6 +380,9 @@ export default function Requests() {
                         setApproved={setApproved}
                         setRequestStatusId={setRequestStatusId}
                         selectedTab={selectedTab}
+                        listRef={listRef}
+                        hasMore={hasMore}
+                        innerRef={ref}
                     />
                 );
             case "requestedBorrows":
@@ -316,6 +397,9 @@ export default function Requests() {
                         setRequestStatusId={setRequestStatusId}
                         openMessageModal={setMessageModalOpen}
                         setMessage={setMessage}
+                        listRef={listRef}
+                        hasMore={hasMore}
+                        innerRef={ref}
                     />
                 );
         }

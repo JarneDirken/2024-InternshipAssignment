@@ -36,6 +36,8 @@ export async function GET(request: NextRequest) {
     const requestorFilter = searchParams.get('requestor') || '';
     const sortBy = searchParams.get('sortBy') || 'decisionDate';  // Default sort field
     const sortDirection = searchParams.get('sortDirection') as Prisma.SortOrder || 'desc';  // Default sort direction
+    const offset = parseInt(searchParams.get('offset') || '0');
+    const limit = parseInt(searchParams.get('limit') || '10');
 
     const orderBy = createNestedOrderBy(sortBy, sortDirection);
 
@@ -97,7 +99,9 @@ export async function GET(request: NextRequest) {
             borrower: true,
             approver: true,
         },
-        orderBy: orderBy
+        orderBy: orderBy,
+        skip: offset, // infinate scroll
+        take: limit // infinate scroll
     });
 
     return new Response(JSON.stringify(itemRequests), {

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Filters from "@/components/general/Filter";
 import { Item } from "@/models/Item";
 import { ItemStatus } from "@/models/ItemStatus";
@@ -16,15 +16,20 @@ import Modal from "@/components/(admin)/products/Modal";
 import { SortOptions } from "@/models/SortOptions";
 import { Filter } from "@/models/Filter";
 import { useMemo } from 'react';
-
+import * as XLSX from 'xlsx';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import { useInView } from "react-intersection-observer";
+import useAuth from "@/hooks/useAuth";
+import Loading from "@/components/states/Loading";
+import Unauthorized from "../../(error)/unauthorized/page";
 
 
 export default function Product() {
+    const { isAuthorized, loading } = useAuth(['Admin']);
     const theme = createTheme({
         components: {
             MuiCheckbox: {
@@ -47,6 +52,7 @@ export default function Product() {
 
     const [active, setActive] = useState(true);
     const [items, setItems] = useState<Item[]>([]);
+    const [itemsAll, setItemsAll] = useState<Item[]>([]);
     const [roles, setRoles] = useState<Role[]>([]);
     const [locations, setLocations] = useState<Location[]>([]);
     const [itemStatuses, setItemStatuses] = useState<ItemStatus[]>([]);
@@ -80,7 +86,14 @@ export default function Product() {
         { label: 'Model', optionsKey: 'model' },
         { label: 'Brand', optionsKey: 'brand' },
         { label: 'Location', optionsKey: 'location.name' }
-    ]; 
+    ];
+
+    // infinate scroll load
+    const [offset, setOffset] = useState(0);
+    const [hasMore, setHasMore] = useState(true);     
+    const NUMBER_OF_ITEMS_TO_FETCH = 20;
+    const listRef = useRef<HTMLDivElement>(null);
+    const { ref, inView } = useInView();
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -95,9 +108,23 @@ export default function Product() {
 
     useEffect(() => {
         if(userId) {
-            getAllItems();
+            getAllItems(true);
         }
     }, [userId, name, model, brand, location, year, availability]);
+
+    // infinate loading scroll
+    useEffect(() => {
+        if (inView && hasMore && !loading) {
+            const currentScrollPosition = listRef.current ? listRef.current.scrollTop : 0;
+            getAllItems().then(() => {
+                requestAnimationFrame(() => {
+                    if (listRef.current) {
+                        listRef.current.scrollTop = currentScrollPosition;
+                    }
+                });
+            });
+        }
+    }, [inView, loading, hasMore]);
 
     const handleFilterChange = (filterType: string, value: string | string[]) => {
         switch (filterType) {
@@ -124,7 +151,9 @@ export default function Product() {
         }
     };
 
-    async function getAllItems(sortBy = 'id', sortDirection = 'desc') {
+    async function getAllItems(initialLoad = false, sortBy = 'id', sortDirection = 'desc') {
+        if (!hasMore && !initialLoad) return; // infinate loading
+        const currentOffset = initialLoad ? 0 : offset; // infinate loading
         setItemLoading(true);
         const params: Record<string, string> = {
             name: name,
@@ -135,6 +164,8 @@ export default function Product() {
             availability: availability,
             sortBy: sortBy || 'id',
             sortDirection: sortDirection || 'desc',
+            offset: currentOffset.toString(), // infinate loading 
+            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
         };
     
         // Only add userId to the query if it is not null
@@ -151,11 +182,21 @@ export default function Product() {
             }
     
             const data = await response.json();
-            setItems(data.items || []);
+            const fetchedItems = data.items || [];
+            const fetchedItemsAll = data.itemsAll || [];
             setRoles(data.roles || []);
             setLocations(data.locations || []);
             setItemStatuses(data.itemStatuses || []);
+            setItemsAll(fetchedItemsAll);
 
+            // infinate loading
+            if (initialLoad) {
+                setItems(fetchedItems);
+            } else {
+                setItems(prevItems => [...prevItems, ...fetchedItems]);
+            }
+            setOffset(currentOffset + fetchedItems.length);
+            setHasMore(fetchedItems.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -165,15 +206,15 @@ export default function Product() {
 
     const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
         // Implement sorting logic here
-        getAllItems(sortBy, sortDirection);
+        getAllItems(true, sortBy, sortDirection);
     };
 
     const toggleSelectAll = () => {
-        if (selectedItems.length === items.length) {
+        if (selectedItems.length === itemsAll.length) {
             setSelectedItems([]); // Deselect all if all are selected
         } else {
-            const newSelectedItems = new Set(items.map(item => item.id));
-            setSelectedItems([...items]); // Select all
+            const newSelectedItems = new Set(itemsAll.map(item => item.id));
+            setSelectedItems([...itemsAll]); // Select all
         }
     };
 
@@ -222,6 +263,68 @@ export default function Product() {
         const brandSet = new Set(items.map(item => item.brand));
         return Array.from(brandSet);
     }, [items]);
+
+    const formatDate = (dateString: Date): string => {
+        const date = new Date(dateString);
+        const options: Intl.DateTimeFormatOptions = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            hour12: true
+        };
+        return date.toLocaleString('en-US', options);
+    };
+
+    interface ExportDataItem {
+        [key: string]: number | string | undefined;
+        itemId: number;
+        ItemName: string;
+        ItemBrand: string;
+        ItemModel: string;
+        ItemYear: string | undefined;
+        Location: string;
+        Status: string | undefined;
+    };
+
+    const exportRepairHistoryToExcel = (filename: string, worksheetName: string) => {
+        if (!selectedItems || !selectedItems.length) return;
+    
+        const dataToExport: ExportDataItem[] = selectedItems.map(item => ({
+            itemId: item.id,
+            ItemName: item.name,
+            ItemBrand: item.brand,
+            ItemModel: item.model,
+            ItemYear: formatDate(item.yearBought!),
+            Location: item.location.name,
+            Status: item.itemStatus?.name,
+        }));
+    
+        // Create a worksheet from the data
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    
+        // Create a new workbook and append the worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, worksheetName);
+    
+        // Adjust column widths
+        const colWidths = Object.keys(dataToExport[0]).map(key => ({
+            wch: Math.max(
+                ...dataToExport.map(item => item[key] ? item[key]!.toString().length : 0),
+                key.length  // Include the length of the header in the calculation
+            )
+        }));
+        worksheet['!cols'] = colWidths;
+    
+        // Write the workbook to a file
+        XLSX.writeFile(workbook, `${filename}.xlsx`);
+    };
+
+    if (loading || isAuthorized === null) { return <Loading/>; }
+
+    if (!isAuthorized) { return <Unauthorized />; }
 
     return ( 
         <div>
@@ -275,63 +378,75 @@ export default function Product() {
                                 icon={<DeleteOutlinedIcon />} 
                                 textColor="custom-red"
                                 borderColor="custom-red" 
-                                fillColor="red-100" 
+                                fillColor={selectedItems.length === 0 ? "gray-200" : "red-100"}
                                 paddingX="px-2.5"
                                 paddingY="py-0.5"
-                                buttonClassName="bg-red-100"
                                 textClassName="font-semibold" 
                                 text="Delete" 
                                 disabled={selectedItems.length === 0}
                             />
                         </div>
-                        <Button 
-                            icon={<QrCode2RoundedIcon />} 
-                            textColor="custom-dark-blue" 
-                            borderColor="custom-dark-blue" 
-                            fillColor="blue-100" 
-                            paddingX="px-2.5"
-                            paddingY="py-0.5"
-                            buttonClassName="bg-blue-100 border-custom-dark-blue" 
-                            textClassName="font-semibold text-custom-dark-blue" 
-                            text="QR-Code" 
-                            disabled={selectedItems.length === 0}
-                        />
-                        <Button 
-                            icon={<InsertDriveFileOutlinedIcon />} 
-                            textColor="custom-dark-blue" 
-                            borderColor="custom-dark-blue" 
-                            fillColor="blue-100" 
-                            paddingX="px-2.5"
-                            paddingY="py-0.5"
-                            textClassName="font-semibold" 
-                            text="Export EXCEL" 
-                            disabled={selectedItems.length === 0}
-                        />
-                        <Button 
-                            icon={<InsertDriveFileOutlinedIcon />} 
-                            textColor="custom-dark-blue" 
-                            borderColor="custom-dark-blue" 
-                            fillColor="blue-100" 
-                            paddingX="px-2.5"
-                            paddingY="py-0.5"
-                            textClassName="font-semibold" 
-                            text="Import EXCEL" 
-                            disabled={selectedItems.length === 0}
-                        />
+                        <div>
+                            <Button 
+                                icon={<QrCode2RoundedIcon />} 
+                                textColor="custom-dark-blue" 
+                                borderColor="custom-dark-blue" 
+                                fillColor="blue-100" 
+                                paddingX="px-2.5"
+                                paddingY="py-0.5"
+                                buttonClassName="bg-blue-100 border-custom-dark-blue" 
+                                textClassName="font-semibold text-custom-dark-blue" 
+                                text="QR-Code" 
+                                disabled={selectedItems.length === 0}
+                            />
+                        </div>
+                        <div onClick={() => exportRepairHistoryToExcel(`Item-Data`, 'ItemData')}>
+                            <Button 
+                                icon={<InsertDriveFileOutlinedIcon />} 
+                                textColor="custom-dark-blue" 
+                                borderColor="custom-dark-blue" 
+                                fillColor="blue-100" 
+                                paddingX="px-2.5"
+                                paddingY="py-0.5"
+                                textClassName="font-semibold" 
+                                text="Export EXCEL" 
+                                disabled={selectedItems.length === 0}
+                            />
+                        </div>
+                        <div>
+                            <Button 
+                                icon={<InsertDriveFileOutlinedIcon />} 
+                                textColor="custom-dark-blue" 
+                                borderColor="custom-dark-blue" 
+                                fillColor="blue-100" 
+                                paddingX="px-2.5"
+                                paddingY="py-0.5"
+                                textClassName="font-semibold" 
+                                text="Import EXCEL" 
+                            />
+                        </div>
                     </div>
                     <div className="w-full border-b border-b-gray-300 bg-white flex items-center relative lg:hidden">
                         <Checkbox 
                             className="absolute left-3 top-1/2 transform -translate-y-1/2" 
-                            checked={selectedItems.length === items.length && items.length > 0}
+                            checked={selectedItems.length === itemsAll.length && itemsAll.length > 0}
                             onChange={toggleSelectAll}
                         />
                         <p className="text-custom-primary font-semibold px-16 py-2 border-b-2 border-b-custom-primary w-fit">PRODUCTS</p>
                     </div>
-                    <div className="bg-white w-full rounded-b-xl overflow-y-auto lg:hidden" style={{ height: '50vh' }}>
-                        <ProductCard items={items} openModal={openModal} itemLoading={itemLoading} selectedItems={selectedItems} onSelectItem={handleSelectItem} />
+                    <div ref={listRef} className="bg-white w-full rounded-b-xl overflow-y-auto lg:hidden" style={{ height: '50vh' }}>
+                        <ProductCard 
+                            items={items} 
+                            openModal={openModal} 
+                            itemLoading={itemLoading} 
+                            selectedItems={selectedItems} 
+                            onSelectItem={handleSelectItem}
+                            hasMore={hasMore}
+                            innerRef={ref} 
+                        />
                     </div>
                     <div className="hidden lg:block">
-                        <div className="w-full bg-gray-100 hidden lg:grid grid-cols-12">
+                        <div className="w-full bg-gray-200 hidden lg:grid grid-cols-12">
                             <div className="col-span-1 mx-auto">
                                 <Checkbox 
                                     checked={selectedItems.length === items.length && items.length > 0}
@@ -347,8 +462,16 @@ export default function Product() {
                             <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">YEAR</span>
                             <span className="text-gray-500 font-semibold col-span-2 xl:col-span-1 py-2 pl-2 truncate">ACTION</span>
                         </div>
-                        <div className="bg-white w-full rounded-b-xl overflow-y-auto" style={{ height: '50vh' }}>
-                            <ProductCard items={items} openModal={openModal} itemLoading={itemLoading} selectedItems={selectedItems} onSelectItem={handleSelectItem} />
+                        <div ref={listRef} className="bg-white w-full rounded-b-xl overflow-y-auto" style={{ height: '50vh' }}>
+                            <ProductCard 
+                                items={items} 
+                                openModal={openModal} 
+                                itemLoading={itemLoading} 
+                                selectedItems={selectedItems} 
+                                onSelectItem={handleSelectItem} 
+                                hasMore={hasMore}
+                                innerRef={ref}
+                            />
                         </div>
                     </div>
                 </div>

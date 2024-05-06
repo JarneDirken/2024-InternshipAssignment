@@ -694,6 +694,7 @@ async function createRequestStatus() {
         "Pending return",
         "Returned",
         "Checked",
+        "Cancelled",
     ];
 
     for (const name of requestStatus) {

@@ -20,6 +20,7 @@ import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { SnackbarProvider } from 'notistack';
 import useAuth from "@/hooks/useAuth";
+import PollOutlinedIcon from '@mui/icons-material/PollOutlined';
 
 export default function DashboardLayout({
   children,
@@ -80,6 +81,9 @@ export default function DashboardLayout({
                 </Link>
                 <Link href="/log">
                   <SidebarItem icon={<ArticleOutlinedIcon fontSize="medium" />} text="Logs" active={pathname === "/log"} />
+                </Link>
+                <Link href="/analytics">
+                  <SidebarItem icon={<PollOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Analytics" active={pathname === "/analytics"} />
                 </Link>
               </>
             )}
