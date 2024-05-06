@@ -7,6 +7,7 @@ import Image from 'next/image';
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 import DoNotTouchOutlinedIcon from '@mui/icons-material/DoNotTouchOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
+import { RefObject } from "react";
 
 interface BorrowCardProps {
     active: boolean;
@@ -17,9 +18,12 @@ interface BorrowCardProps {
     setHandover?: (value: boolean) => void;
     setReceive?: (value: boolean) => void;
     setChecked?: (value: boolean) => void;
+    listRef: RefObject<HTMLDivElement>;
+    hasMore: boolean;
+    innerRef: React.Ref<HTMLDivElement>;
 };
 
-export default function ItemCard({ active, openModal, items, itemLoading, selectedTab, setHandover, setReceive, setChecked }: BorrowCardProps) {
+export default function ItemCard({ active, openModal, items, itemLoading, selectedTab, setHandover, setReceive, setChecked, listRef, hasMore, innerRef }: BorrowCardProps) {
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
 
@@ -83,7 +87,7 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
 
     return (
         <>
-            <div className={active ? listViewClass : gridViewClass} style={{maxHeight: "60vh"}}>
+            <div ref={listRef} className={active ? listViewClass : gridViewClass} style={{maxHeight: "60vh"}}>
                 {items.map((item) => (
                     <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
@@ -339,6 +343,7 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                         )}
                     </div>
                 ))}
+                {hasMore && <div ref={innerRef}>Loading more items...</div>}
         </div>
         </>
     );
