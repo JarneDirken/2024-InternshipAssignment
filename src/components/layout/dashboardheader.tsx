@@ -194,7 +194,7 @@ export default function DashboardHeader() {
             <div className='flex items-center mr-10 sm:mr-16 w-full sm:w-1/5 justify-end'>
                 <div className="relative">
                     <div onClick={handleMenuOpen}>
-                        <NotificationsOutlinedIcon className="text-4xl cursor-pointer" />
+                        <NotificationsOutlinedIcon fontSize='large' className="cursor-pointer" />
                     </div>
                     <div className='rounded-full w-6 h-6 flex items-center justify-center text-white font-semibold absolute top-1 right-1 transform translate-x-1/2 -translate-y-1/2 text-xs bg-custom-primary'>
                         {notifications.length}
@@ -208,29 +208,29 @@ export default function DashboardHeader() {
                         {notifications.length > 0 ? (
                             notifications.map((item) => (
                                 <div key={item.id}>
-                                <MenuItem onClick={handleMenuClose}>
-                                    <div className="flex justify-between items-center w-full">
-                                        <Link href={"/log"}>
-                                            <span onClick={(e) => {
-                                                e.stopPropagation();
-                                            }}>
-                                                {item.message} - {item.timeStamp.toLocaleDateString()}
-                                            </span>
-                                        </Link>
-                                        <IconButton
-                                            edge="end"
-                                            aria-label="remove"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                removeNotification(item.id);
-                                            }}
-                                            size="small"
-                                            className="justify-end" 
-                                        >
-                                            <ClearIcon fontSize="small" />
-                                        </IconButton>
-                                    </div>
-                                </MenuItem>
+                                  <MenuItem onClick={handleMenuClose}>
+                                      <div className="flex justify-between items-center w-full">
+                                          <Link href={"/log"}>
+                                              <span onClick={(e) => {
+                                                  e.stopPropagation();
+                                              }}>
+                                                  {item.message} - {item.timeStamp.toLocaleDateString()}
+                                              </span>
+                                          </Link>
+                                          <IconButton
+                                              edge="end"
+                                              aria-label="remove"
+                                              onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  removeNotification(item.id);
+                                              }}
+                                              size="small"
+                                              className="justify-end" 
+                                          >
+                                              <ClearIcon fontSize="small" />
+                                          </IconButton>
+                                      </div>
+                                  </MenuItem>
                                 </div>
                             ))
                         ) : (
@@ -299,19 +299,19 @@ export default function DashboardHeader() {
                                 <MobileSidebarHeading>Links</MobileSidebarHeading>
                                 <Link href="/borrow" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
-                                        icon={<PersonAddAltOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                        icon={<PersonAddAltOutlinedIcon fontSize="medium" />} 
                                         text="Borrow" 
                                         active={pathname === "/borrow"}  />
                                 </Link>
                                 <Link href="/return" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
-                                        icon={<KeyboardReturnOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                        icon={<KeyboardReturnOutlinedIcon fontSize="medium" />} 
                                         text="Return" 
                                         active={pathname === "/return"}  />
                                 </Link>
                                 <Link href="/history" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
-                                        icon={<HistoryOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                        icon={<HistoryOutlinedIcon fontSize="medium" />} 
                                         text="History"  
                                         active={pathname === "/history"}  />
                                 </Link>
@@ -324,21 +324,21 @@ export default function DashboardHeader() {
                                 <MobileSidebarHeading>Supervisor</MobileSidebarHeading>
                                 <Link href="/request" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
-                                        icon={<ContentPasteOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                        icon={<ContentPasteOutlinedIcon fontSize="medium" />} 
                                         text="Requests"  
                                         active={pathname === "/request"} />
                                 </Link>
-                                <Link href="/repair" onClick={() => setIsOpen(false)}>
-                                    <MobileSidebarItem 
-                                        icon={<HandymanOutlinedIcon fontSize="inherit" className="text-2xl" />} 
-                                        text="Repairs"  
-                                        active={pathname === "/repair"} />
-                                </Link>
                                 <Link href="/lending" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
-                                    icon={<HandshakeOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    icon={<HandshakeOutlinedIcon fontSize="medium" />} 
                                     text="Lendings"  
                                     active={pathname === "/lending"} />
+                                </Link>
+                                <Link href="/repair" onClick={() => setIsOpen(false)}>
+                                    <MobileSidebarItem 
+                                        icon={<HandymanOutlinedIcon fontSize="medium" />} 
+                                        text="Repairs"  
+                                        active={pathname === "/repair"} />
                                 </Link>
                             </> 
                         )}
@@ -349,21 +349,26 @@ export default function DashboardHeader() {
                                 <MobileSidebarHeading>Admin</MobileSidebarHeading>
                                 <Link href="/product" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
-                                        icon={<Inventory2OutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                        icon={<Inventory2OutlinedIcon fontSize="medium" />} 
                                         text="Products"
                                         active={pathname === "/product"}  />
                                 </Link>
-                                <MobileSidebarItem icon={<LocationOnOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Locations"  />
-                                <MobileSidebarItem icon={<PeopleAltOutlinedIcon fontSize="inherit" className="text-2xl" />} text="Users"  />
+                                <Link href="/locations" onClick={() => setIsOpen(false)}>
+                                    <MobileSidebarItem 
+                                        icon={<LocationOnOutlinedIcon fontSize="medium" />} 
+                                        text="Locations"
+                                        active={pathname === "/location"}  />
+                                </Link>
+                                <MobileSidebarItem icon={<PeopleAltOutlinedIcon fontSize="medium" />} text="Users"  />
                                 <Link href="/parameter" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
-                                    icon={<SettingsOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    icon={<SettingsOutlinedIcon fontSize="medium" />} 
                                     text="Parameters"  
                                     active={pathname === "/parameter"} />
                                 </Link>
                                 <Link href="/log" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
-                                    icon={<ArticleOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    icon={<ArticleOutlinedIcon fontSize="medium" />} 
                                     text="Logs"  
                                     active={pathname === "/log"} />
                                 </Link>

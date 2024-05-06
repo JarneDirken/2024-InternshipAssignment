@@ -58,7 +58,6 @@ export default function Product() {
     const [itemStatuses, setItemStatuses] = useState<ItemStatus[]>([]);
 
     const [itemLoading, setItemLoading] = useState(false);
-    const [item, setItem] = useState<Item>();
     const [name, setName] = useState<string>('');
     const [model, setModel] = useState<string>('');
     const [brand, setBrand] = useState<string>('');

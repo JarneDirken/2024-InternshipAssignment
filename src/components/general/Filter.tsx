@@ -31,6 +31,7 @@ import { ItemRequest } from "@/models/ItemRequest";
 import { Filter } from "@/models/Filter";
 import { Repair } from "@/models/Repair";
 import { User } from "@/models/User";
+import { Location } from "@/models/Location";
 import { SortOptions } from "@/models/SortOptions";
 
 interface FiltersProps {
@@ -41,7 +42,7 @@ interface FiltersProps {
     onFilterChange: (filterType: string, filterValue: string) => void;
     onSortChange?: (sortBy: string, sortDirection: 'asc' | 'desc') => void;
     filters: Filter[];
-    items: Item[] | ItemRequest[] | Repair[] | User[];
+    items: Item[] | ItemRequest[] | Repair[] | User[] | Location[];
     sortOptions?: SortOptions[];
     isCardView?: boolean;
     isSort?: boolean;
@@ -282,7 +283,7 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
             </div>
             <div className="p-4">
                 <ThemeProvider theme={theme}>
-                    <div className="grid grid-cols-2 gap-4 mb-4 lg:grid-cols-4">
+                    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                         {filters.map((filter, index) => (
                             <div key={index}>
                                 {(filter.inputType === 'text' && filter.optionsKey) && (
@@ -354,36 +355,36 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                 )}
                             </div>
                         ))}
-                        {isSort && (
-                            <div>
-                                <Button 
-                                    onClick={handleSortClick} 
-                                    startIcon={<SwapVertRoundedIcon />} 
-                                    endIcon={<KeyboardArrowRightRoundedIcon />} 
-                                    sx={{
-                                        fontSize: { xs: '0.8rem', sm: '1rem' }, // Smaller font on extra-small screens
-                                        '& .MuiButton-startIcon, & .MuiButton-endIcon': {
-                                            fontSize: { xs: '15px', sm: '24px' } // Adjust icon sizes as well
-                                        },
-                                        whiteSpace: "nowrap", // Prevent text from wrapping
-                                        minWidth: "170px", // Minimum width to avoid squeezing on small screens
-                                        paddingTop: "6px" // Ensure padding is sufficient but not too large
-                                    }} 
-                                >
-                                Sort by {getSortLabelFromKey(sortBy)} {sortDirection === 'desc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
-                                </Button>
-                                <Menu
-                                    anchorEl={anchorEl}
-                                    open={Boolean(anchorEl)}
-                                    onClose={handleSortClose}
-                                >
-                                    {sortOptions!.map(option => (
-                                        <MenuItem key={option.label} onClick={() => handleSortOptionSelect(option)}>{option.label}</MenuItem>
-                                    ))}
-                                </Menu>
-                            </div>
-                        )}
                     </div>
+                 {isSort && (
+                    <div>
+                      <Button 
+                          onClick={handleSortClick} 
+                          startIcon={<SwapVertRoundedIcon />} 
+                          endIcon={<KeyboardArrowRightRoundedIcon />} 
+                          sx={{
+                              fontSize: { xs: '0.8rem', sm: '1rem' }, // Smaller font on extra-small screens
+                              '& .MuiButton-startIcon, & .MuiButton-endIcon': {
+                                  fontSize: { xs: '15px', sm: '24px' } // Adjust icon sizes as well
+                              },
+                              whiteSpace: "nowrap", // Prevent text from wrapping
+                              minWidth: "170px", // Minimum width to avoid squeezing on small screens
+                              paddingTop: "6px" // Ensure padding is sufficient but not too large
+                          }} 
+                      >
+                      Sort by {getSortLabelFromKey(sortBy)} {sortDirection === 'desc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
+                      </Button>
+                      <Menu
+                          anchorEl={anchorEl}
+                          open={Boolean(anchorEl)}
+                          onClose={handleSortClose}
+                      >
+                          {sortOptions.map(option => (
+                              <MenuItem key={option.label} onClick={() => handleSortOptionSelect(option)}>{option.label}</MenuItem>
+                          ))}
+                      </Menu>
+                    </div>
+                  )}
                 </ThemeProvider>
                 <div className="bg-gray-100 rounded-lg p-2 flex items-center gap-2 flex-wrap">
                     <span className="text-gray-500">Filters applied:&nbsp;</span>
