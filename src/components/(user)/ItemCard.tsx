@@ -4,7 +4,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Loading from "@/components/states/Loading";
 import useAuth from "@/hooks/useAuth";
 import Image from 'next/image';
-import { useState } from "react";
+import { RefObject, useState } from "react";
 import { useSnackbar } from "notistack";
 import { useRecoilState } from "recoil";
 import { updateRequest } from "@/services/store";
@@ -17,9 +17,12 @@ interface BorrowCardProps {
     calculateHistoryDate?: (expectedReturnDate?: Date | string, actualReturnDate?: Date | string) => JSX.Element | null; // Now returns JSX.Element or null
     itemLoading: boolean;
     userId: string | null;
+    listRef: RefObject<HTMLDivElement>;
+    hasMore: boolean;
+    innerRef: React.Ref<HTMLDivElement>;
 }
 
-export default function ItemCard({ active, openModal, items, calculateReturnDate, calculateHistoryDate, itemLoading, userId }: BorrowCardProps) {
+export default function ItemCard({ active, openModal, items, calculateReturnDate, calculateHistoryDate, itemLoading, userId, listRef, hasMore, innerRef }: BorrowCardProps) {
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll w-full";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
@@ -80,7 +83,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
 
     return (
         <>
-            <div className={active ? listViewClass : gridViewClass} style={{maxHeight: "60vh"}}>
+            <div ref={listRef} className={active ? listViewClass : gridViewClass} style={{maxHeight: "60vh"}}>
                 {items.map((item) => (
                     <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
@@ -277,6 +280,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                         )}
                     </div>
                 ))}
+                {hasMore && <div ref={innerRef}>Loading more items...</div>}
         </div>
         </>
     );

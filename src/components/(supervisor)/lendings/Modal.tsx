@@ -114,6 +114,7 @@ export default function Modal({ open, onClose, item, userId, handover, receive, 
     const handleSuccess = () => {
         onClose();
         setRequest(!requests);
+        setMessage(null);
     };
 
     const formatDateTime = (date?: Date | string) => {

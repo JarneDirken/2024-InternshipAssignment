@@ -6,8 +6,8 @@ import RecoilContextProvider from "./recoilContextProvider";
 const inter = Source_Sans_3({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Internship Assignment",
-  description: "Created by two students from thomasmore in Beglium",
+  title: "E-borrowing",
+  description: "Want to borrow items? Your at the right address.",
 };
 
 export default function RootLayout({

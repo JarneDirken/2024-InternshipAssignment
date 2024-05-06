@@ -1,7 +1,7 @@
 'use client';
 import Unauthorized from "@/app/(dashboard)/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAuth } from 'firebase/auth';
 import {app} from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
@@ -12,6 +12,7 @@ import Loading from "@/components/states/Loading";
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import { Filter } from "@/models/Filter";
 import { SortOptions } from "@/models/SortOptions";
+import { useInView } from "react-intersection-observer";
 
 export default function History() {
     const { isAuthorized, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
@@ -31,7 +32,13 @@ export default function History() {
         { label: 'Name', optionsKey: 'item.name' },
         { label: 'End Borrow Date', optionsKey: 'returnDate' },
         { label: 'Location', optionsKey: 'item.location.name' }
-    ];    
+    ];
+    // infinate scroll load
+    const [offset, setOffset] = useState(0);
+    const [hasMore, setHasMore] = useState(true);     
+    const NUMBER_OF_ITEMS_TO_FETCH = 10;
+    const listRef = useRef<HTMLDivElement>(null);
+    const { ref, inView } = useInView();
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -50,6 +57,20 @@ export default function History() {
         }
     }, [userId, nameFilter, borrowDateFilter]);
 
+    // infinate loading scroll
+    useEffect(() => {
+        if (inView && hasMore && !loading) {
+            const currentScrollPosition = listRef.current ? listRef.current.scrollTop : 0;
+            getItems().then(() => {
+                requestAnimationFrame(() => {
+                    if (listRef.current) {
+                        listRef.current.scrollTop = currentScrollPosition;
+                    }
+                });
+            });
+        }
+    }, [inView, loading, hasMore]);
+
     const handleFilterChange = (filterType: string, value: string) => {
         switch (filterType) {
             case 'Name':
@@ -64,7 +85,7 @@ export default function History() {
     };
 
     const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
-        getItems(sortBy, sortDirection);
+        getItems(true, sortBy, sortDirection);
     };
 
     const parseDateFilter = (dateFilter: string) => {
@@ -75,13 +96,17 @@ export default function History() {
         return { borrowDate, returnDate };
     };
 
-    async function getItems(sortBy = 'returnDate', sortDirection = 'desc') {
+    async function getItems(initialLoad = false, sortBy = 'returnDate', sortDirection = 'desc') {
+        if (!hasMore && !initialLoad) return; // infinate loading
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
+        const currentOffset = initialLoad ? 0 : offset; // infinate loading
         const params: Record<string, string> = {
             name: nameFilter,
             sortBy: sortBy || 'returnDate',
-            sortDirection: sortDirection || 'desc'
+            sortDirection: sortDirection || 'desc',
+            offset: currentOffset.toString(), // infinate loading 
+            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
         };
 
         if (borrowDate) {
@@ -107,7 +132,15 @@ export default function History() {
             const itemCount = data.totalCount || 0;
 
             setTotalItemCount(itemCount);
-            setItems(fetchedItems);
+
+            // infinate loading
+            if (initialLoad) {
+                setItems(fetchedItems);
+            } else {
+                setItems(prevItems => [...prevItems, ...fetchedItems]);
+            }
+            setOffset(currentOffset + fetchedItems.length);
+            setHasMore(fetchedItems.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -188,6 +221,9 @@ export default function History() {
                     calculateHistoryDate={calculateOnTime}
                     itemLoading={itemLoading}
                     userId={userId}
+                    listRef={listRef}
+                    hasMore={hasMore}
+                    innerRef={ref}
                 />
             </div>
         </div>

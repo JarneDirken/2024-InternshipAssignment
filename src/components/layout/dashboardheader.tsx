@@ -206,8 +206,8 @@ export default function DashboardHeader() {
                     >
                         {notifications.length > 0 ? (
                             notifications.map((item) => (
-                                <div>
-                                <MenuItem key={item.id} onClick={handleMenuClose}>
+                                <div key={item.id}>
+                                <MenuItem onClick={handleMenuClose}>
                                     <div className="flex justify-between items-center w-full">
                                         <Link href={"/log"}>
                                             <span onClick={(e) => {
