@@ -3,13 +3,16 @@ import { db } from '@/services/firebase-config';
 import { collection, addDoc, where, query, getDocs, updateDoc, doc } from "firebase/firestore"; 
 import { NextRequest } from 'next/server';
 
-export async function DELETE(req: NextRequest) {
+export async function PUT(req: NextRequest) {
     const { data } = await req.json();
 
     const result = await prisma.$transaction(async (prisma) => {
-        const deleteItemRequest = await prisma.itemRequest.delete({
+        const deleteItemRequest = await prisma.itemRequest.update({
             where: {
                 id: data.requestId
+            },
+            data: {
+                requestStatusId: 8,
             }
         });
 

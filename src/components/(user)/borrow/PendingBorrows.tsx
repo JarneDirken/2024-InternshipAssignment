@@ -102,7 +102,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                 borrowerId: userId,
             };
             const response = await fetch(`/api/user/itemrequestcancel/`, {
-                method: 'DELETE',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },

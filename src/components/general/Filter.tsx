@@ -39,14 +39,15 @@ interface FiltersProps {
     active: boolean;
     setActive: Dispatch<SetStateAction<boolean>>;
     onFilterChange: (filterType: string, filterValue: string) => void;
-    onSortChange: (sortBy: string, sortDirection: 'asc' | 'desc') => void;
+    onSortChange?: (sortBy: string, sortDirection: 'asc' | 'desc') => void;
     filters: Filter[];
     items: Item[] | ItemRequest[] | Repair[] | User[];
-    sortOptions: SortOptions[];
+    sortOptions?: SortOptions[];
     isCardView?: boolean;
+    isSort?: boolean;
 }
 
-export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, sortOptions, isCardView }: FiltersProps) {
+export default function Filters({ title, icon, active, setActive, onFilterChange, onSortChange, filters, items, sortOptions, isCardView, isSort }: FiltersProps) {
     const prevWidthRef = useRef<number | null>(null);
     const lastActiveRef = useRef<boolean | null>(null);
     const [resetKeys, setResetKeys] = useState<Record<string, number>>({});
@@ -122,12 +123,12 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
         setSortBy(newSortBy);
         setSortDirection(newSortDirection); // Update state with the new direction
         setSortLabel(option.label); // Update the sort label
-        onSortChange(newSortBy, newSortDirection); // Pass the new direction to the change handler
+        onSortChange!(newSortBy, newSortDirection); // Pass the new direction to the change handler
         setAnchorEl(null);
     };     
 
     const getSortLabelFromKey = (sortByKey: string) => {
-        const option = sortOptions.find(option => option.optionsKey === sortByKey);
+        const option = sortOptions!.find(option => option.optionsKey === sortByKey);
         return option ? option.label : 'Select';
     };    
 
@@ -173,7 +174,7 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
         setSortBy('');
         setSortLabel('');
         setSortDirection('desc');  // Reset to default sort direction or choose a reasonable default
-        onSortChange('', 'desc');  // Notify the system that sorting has been reset
+        onSortChange!('', 'desc');  // Notify the system that sorting has been reset
     };
     
     const getYearOrString = (value: string | null): string | null => {
@@ -353,33 +354,35 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                                 )}
                             </div>
                         ))}
-                        <div>
-                            <Button 
-                                onClick={handleSortClick} 
-                                startIcon={<SwapVertRoundedIcon />} 
-                                endIcon={<KeyboardArrowRightRoundedIcon />} 
-                                sx={{
-                                    fontSize: { xs: '0.8rem', sm: '1rem' }, // Smaller font on extra-small screens
-                                    '& .MuiButton-startIcon, & .MuiButton-endIcon': {
-                                        fontSize: { xs: '15px', sm: '24px' } // Adjust icon sizes as well
-                                    },
-                                    whiteSpace: "nowrap", // Prevent text from wrapping
-                                    minWidth: "170px", // Minimum width to avoid squeezing on small screens
-                                    paddingTop: "6px" // Ensure padding is sufficient but not too large
-                                }} 
-                            >
-                            Sort by {getSortLabelFromKey(sortBy)} {sortDirection === 'desc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
-                            </Button>
-                            <Menu
-                                anchorEl={anchorEl}
-                                open={Boolean(anchorEl)}
-                                onClose={handleSortClose}
-                            >
-                                {sortOptions.map(option => (
-                                    <MenuItem key={option.label} onClick={() => handleSortOptionSelect(option)}>{option.label}</MenuItem>
-                                ))}
-                            </Menu>
-                        </div>
+                        {isSort && (
+                            <div>
+                                <Button 
+                                    onClick={handleSortClick} 
+                                    startIcon={<SwapVertRoundedIcon />} 
+                                    endIcon={<KeyboardArrowRightRoundedIcon />} 
+                                    sx={{
+                                        fontSize: { xs: '0.8rem', sm: '1rem' }, // Smaller font on extra-small screens
+                                        '& .MuiButton-startIcon, & .MuiButton-endIcon': {
+                                            fontSize: { xs: '15px', sm: '24px' } // Adjust icon sizes as well
+                                        },
+                                        whiteSpace: "nowrap", // Prevent text from wrapping
+                                        minWidth: "170px", // Minimum width to avoid squeezing on small screens
+                                        paddingTop: "6px" // Ensure padding is sufficient but not too large
+                                    }} 
+                                >
+                                Sort by {getSortLabelFromKey(sortBy)} {sortDirection === 'desc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
+                                </Button>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleSortClose}
+                                >
+                                    {sortOptions!.map(option => (
+                                        <MenuItem key={option.label} onClick={() => handleSortOptionSelect(option)}>{option.label}</MenuItem>
+                                    ))}
+                                </Menu>
+                            </div>
+                        )}
                     </div>
                 </ThemeProvider>
                 <div className="bg-gray-100 rounded-lg p-2 flex items-center gap-2 flex-wrap">

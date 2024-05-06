@@ -19,6 +19,7 @@ import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import PollOutlinedIcon from '@mui/icons-material/PollOutlined';
 import { usePathname } from 'next/navigation';
 import { MobileSidebarItem } from './sidebar';
 import MobileSidebarHeading from './sidebarheading';
@@ -365,6 +366,12 @@ export default function DashboardHeader() {
                                     icon={<ArticleOutlinedIcon fontSize="inherit" className="text-2xl" />} 
                                     text="Logs"  
                                     active={pathname === "/log"} />
+                                </Link>
+                                <Link href="/analytics" onClick={() => setIsOpen(false)}>
+                                    <MobileSidebarItem 
+                                    icon={<PollOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    text="Analytics"  
+                                    active={pathname === "/analytics"} />
                                 </Link>
                             </>
                         )}
