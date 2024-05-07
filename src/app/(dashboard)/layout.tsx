@@ -71,7 +71,9 @@ export default function DashboardLayout({
                 <Link href="/product">
                   <SidebarItem icon={<Inventory2OutlinedIcon fontSize="medium" />} text="Products" active={pathname === "/product"} />
                 </Link>
-                <SidebarItem icon={<LocationOnOutlinedIcon fontSize="medium" />} text="Locations" />
+                <Link href="/location">
+                  <SidebarItem icon={<LocationOnOutlinedIcon fontSize="medium" />} text="Locations" active={pathname === "/location"} />
+                </Link>
                 <SidebarItem icon={<PeopleAltOutlinedIcon fontSize="medium" />} text="Users" />
                 <Link href="/parameter">
                   <SidebarItem icon={<SettingsOutlinedIcon fontSize="medium" />} text="Parameters" active={pathname === "/parameter"} />
