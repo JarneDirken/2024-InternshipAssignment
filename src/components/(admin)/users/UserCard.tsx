@@ -1,6 +1,5 @@
 import { User } from "@/models/User";
 import Loading from "@/components/states/Loading";
-import Image from 'next/image';
 import Checkbox from '@mui/material/Checkbox';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';

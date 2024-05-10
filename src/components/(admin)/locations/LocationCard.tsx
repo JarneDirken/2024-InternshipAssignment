@@ -1,9 +1,7 @@
 import { Location } from "@/models/Location";
 import Loading from "@/components/states/Loading";
-import Image from 'next/image';
 import Checkbox from '@mui/material/Checkbox';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import { useRouter } from 'next/navigation';
 import Tooltip from '@mui/material/Tooltip';
@@ -14,16 +12,13 @@ interface LocationCardProps {
     itemLoading: boolean;
     selectedItems: Location[];
     onSelectItem: (id: number) => void;
+    hasMore: boolean;
+    innerRef: React.Ref<HTMLDivElement>;
 };
 
-export default function LocationCard({ openModal, onSelectItem, selectedItems, items, itemLoading }: LocationCardProps) {
+export default function LocationCard({ openModal, onSelectItem, selectedItems, items, itemLoading, hasMore, innerRef }: LocationCardProps) {
     const router = useRouter();
 
-    const viewItemHistory = (itemId: number) => {
-            const type="item"
-            router.push(`/historypage/${type}/${itemId}`);
-    };
-    
     if (itemLoading) { return (<Loading />); };
 
     if (items.length === 0) {
@@ -100,6 +95,7 @@ export default function LocationCard({ openModal, onSelectItem, selectedItems, i
                     </div>
                 </div>
             ))}
+            {hasMore && <div ref={innerRef}>Loading more items...</div>}
         </>
     );
 }

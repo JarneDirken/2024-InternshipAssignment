@@ -34,6 +34,8 @@ export async function GET(request: NextRequest) {
     const nameFilter = searchParams.get('name') || '';
     const sortBy = searchParams.get('sortBy') || 'id';
     const sortDirection = searchParams.get('sortDirection') as Prisma.SortOrder || 'desc';
+    const offset = parseInt(searchParams.get('offset') || '0');
+    const limit = parseInt(searchParams.get('limit') || '10');
 
     const orderBy = createNestedOrderBy(sortBy, sortDirection);
 
@@ -62,9 +64,16 @@ export async function GET(request: NextRequest) {
             Items: true
         },
         orderBy: orderBy, 
+        skip: offset, // infinite scroll
+        take: limit // infinite scroll
     });
 
-    return new Response(JSON.stringify(locations), {
+    const locationsAll = await prisma.location.findMany({
+        where: whereClause,
+        orderBy: orderBy,
+    });
+
+    return new Response(JSON.stringify({locations, locationsAll}), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',
