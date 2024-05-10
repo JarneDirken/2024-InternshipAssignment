@@ -157,6 +157,14 @@ export default function GeneralItem({ params } : {params: {id: string}}){
         </div>;
     }
 
+    const getLastItemRequest = () => {
+        return item.ItemRequests && item.ItemRequests.length > 0
+            ? item.ItemRequests[item.ItemRequests.length - 1]
+            : undefined;
+    };
+
+    const currentLastItemRequest = getLastItemRequest();
+
     return (
         <>
             <Modal 
@@ -209,7 +217,8 @@ export default function GeneralItem({ params } : {params: {id: string}}){
                     </div>
                     <div className="flex flex-col mt-4 md:justify-center md:items-center gap-2">
                         {checkAvailability(item)}
-                        {((userRole === "Supervisor" || userRole === "Admin") && item.ItemRequests![item.ItemRequests!.length - 1].requestStatusId === 6) && (
+                        {currentLastItemRequest ? (
+                        ((userRole === "Supervisor" || userRole === "Admin") && currentLastItemRequest.requestStatusId === 6) && (
                             <Button 
                                 text="Checked"
                                 textColor="custom-green"
@@ -218,7 +227,8 @@ export default function GeneralItem({ params } : {params: {id: string}}){
                                 paddingY="py-0"
                                 onClick={isChecked}
                             />
-                        )}
+                        )
+                    ) : null}
                     </div>
                 </div>
             </div>

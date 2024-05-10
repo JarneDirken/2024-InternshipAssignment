@@ -2,6 +2,7 @@ import Loading from "@/components/states/Loading";
 import { ItemRequest } from '@/models/ItemRequest';
 import UserItemView from './UserItemView';
 import ItemUserView from './ItemUserView';
+import Reparation from "./Reparation";
 
 interface BorrowCardProps {
     active: boolean;
@@ -24,6 +25,11 @@ export default function ItemCard({ active, items, itemLoading, type}: BorrowCard
         );
     };
 
+    const reparations = items[0].item.Reparations;
+    const itemSignle = items[0].item;
+
+    if (!reparations || !itemSignle) {return;}
+
     return (
         <>
             <div className={active ? listViewClass : gridViewClass} style={{ maxHeight: "60vh" }}>
@@ -34,11 +40,14 @@ export default function ItemCard({ active, items, itemLoading, type}: BorrowCard
                         </div>
                     ))
                 :
-                    items.map((item, index) => (
-                        <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
+                    <>
+                        {items.map((item, index) => (
+                            <div key={item.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                             <ItemUserView key={item.id} item={item} active={active} />
-                        </div>
-                    ))
+                            </div>
+                        ))}
+                        <Reparation reparations={reparations} active={active} item={itemSignle}/>
+                    </>
                 }
         </div>
         </>

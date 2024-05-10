@@ -7,8 +7,6 @@ import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import { useRouter } from 'next/navigation';
 import RestoreOutlinedIcon from '@mui/icons-material/RestoreOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
-import { useEffect } from "react";
-import { Item } from "@/models/Item";
 
 interface BorrowCardProps {
     active: boolean;

@@ -4,10 +4,6 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Avatar from "@mui/material/Avatar";
 import RestoreOutlinedIcon from '@mui/icons-material/RestoreOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
-import Image from "next/image";
-import HourglassEmptyOutlinedIcon from '@mui/icons-material/HourglassEmptyOutlined';
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import DoNotTouchOutlinedIcon from '@mui/icons-material/DoNotTouchOutlined';
 
 interface BorrowCardProps {
     active: boolean;
@@ -78,7 +74,6 @@ export default function ItemUserView({ active, item}: BorrowCardProps) {
     return (
         <div>
             {active ? 
-                <div>
                     <div className="flex flex-row py-2 px-8 border-b border-gray-300 items-center justify-between w-full">
                         <div className="flex flex-row items-center w-full">
                             <div className="mr-2 w-[100px] h-[72px] flex justify-center items-center max-h-[72px] overflow-hidden">
@@ -130,64 +125,6 @@ export default function ItemUserView({ active, item}: BorrowCardProps) {
                             </div>
                         </div>
                     </div>
-                    {item.item.Reparations && item.item.Reparations.length > 0 && (
-                        <div>
-                            {item.item.Reparations.map((reparation) => (
-                                <div key={reparation.id} className="flex flex-row py-2 px-8 items-center justify-between w-full">
-                                    <div className="flex flex-row items-center w-full">
-                                        <div className="mr-2 w-[100px] h-[72px] flex justify-center items-center max-h-[72px] overflow-hidden">
-                                            <Image 
-                                                src={!item.item.image ? "/assets/images/defaultImage.jpg" : item.item.image}
-                                                alt={item.item.name}
-                                                style={{ width: 'auto', height: '60px'}}
-                                                width={60}
-                                                height={60}
-                                                loading="lazy"
-                                            />
-                                        </div>
-                                        <div className="flex flex-col w-1/3">
-                                            <div className="font-semibold text-lg">
-                                                <span>Reparation</span>
-                                            </div>
-                                            <div className='flex truncate items-center text-gray-400 gap-1 text-xs sm:text-sm'>
-                                                <AccessTimeIcon fontSize="small"/>
-                                                {reparation.returnDate ? (
-                                                    <span>{formatDate(reparation.repairDate)} - {formatDate(reparation.returnDate)} </span>
-                                                ) : (
-                                                    <span>{formatDate(reparation.repairDate)}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="flex w-1/3">
-                                            <span className="font-semibold">Notes:&nbsp;</span>
-                                            {reparation.notes ? (reparation.notes) : (<span>No notes</span>)}
-                                        </div>
-                                        <div className="flex flex-col w-1/3">
-                                        {reparation.item.itemStatusId === 6 ? (
-                                            <div className="flex truncate text-custom-red gap-1 text-sm sm:text-base">
-                                                <DoNotTouchOutlinedIcon fontSize="small"/>
-                                                <span>Broken</span>
-                                            </div>
-                                        ) : (
-                                            reparation.returnDate ?
-                                                <div className="flex gap-1 text-custom-green text-sm sm:text-base">
-                                                    <CheckCircleOutlineOutlinedIcon />
-                                                    <span>Repaired</span>
-                                                </div> 
-                                            : 
-                                                <div className="flex gap-1 text-custom-primary text-sm sm:text-base">
-                                                    <HourglassEmptyOutlinedIcon />
-                                                    <span>In repair</span>
-                                                </div>
-                                        )}
-                                        </div>
-                                        <div className="w-1/12 flex flex-col gap-1 justify-end items-end"></div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
                 : 
                 <div className="overflow-hidden">
                     <div className="p-2 flex items-center flex-wrap">
