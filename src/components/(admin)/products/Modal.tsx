@@ -1039,21 +1039,27 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
                         )}
                         {mode === 'delete' && (     // Only show delete button if mode is delete
                             <>
-                                <div onClick={() =>{
-                                    if (selectedItems?.length === 1) {
-                                        handleSoftDelete();
-                                    } else {
-                                        handleMultiSoftDelete();
-                                    }
-                                }}>
-                                    <Button 
-                                        paddingX="px-2"
-                                        textColor="custom-dark-blue" 
-                                        borderColor="custom-dark-blue"
-                                        textClassName="font-semibold text-xs select-none" 
-                                        text="Soft Delete"
-                                    />
-                                </div>
+                                {selectedItems && (
+                                    <>
+                                        {(selectedItems.length > 1 || (selectedItems.length === 1 && selectedItems[0].active)) && (
+                                            <div onClick={() =>{
+                                                if (selectedItems?.length === 1) {
+                                                    handleSoftDelete();
+                                                } else {
+                                                    handleMultiSoftDelete();
+                                                }
+                                            }}>
+                                                <Button 
+                                                    paddingX="px-2"
+                                                    textColor="custom-dark-blue" 
+                                                    borderColor="custom-dark-blue"
+                                                    textClassName="font-semibold text-xs select-none" 
+                                                    text="Soft Delete"
+                                                />
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                                 <div onClick={() => {
                                     if (selectedItems?.length === 1) {
                                         handlePermanentDelete();

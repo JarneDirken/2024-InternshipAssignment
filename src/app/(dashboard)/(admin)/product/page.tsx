@@ -7,7 +7,7 @@ import { Role } from "@/models/Role";
 import { Location } from "@/models/Location";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { getAuth, getIdToken } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import {app} from "@/services/firebase-config";
 import Button from "@/components/states/Button";
 import Checkbox from '@mui/material/Checkbox';
@@ -213,7 +213,6 @@ export default function Product() {
         if (selectedItems.length === itemsAll.length) {
             setSelectedItems([]); // Deselect all if all are selected
         } else {
-            const newSelectedItems = new Set(itemsAll.map(item => item.id));
             setSelectedItems([...itemsAll]); // Select all
         }
     };
@@ -238,6 +237,9 @@ export default function Product() {
     };
 
     const closeModal = () => {
+        if (mode === 'delete' && selectedItems.length === 1 || mode === 'edit' && selectedItems.length === 1){
+            setSelectedItems([]);
+        }
         setModalOpen(false);
     };
 
@@ -284,27 +286,31 @@ export default function Product() {
     };
 
     interface ExportDataItem {
-        [key: string]: number | string | undefined;
+        [key: string]: number | string | boolean | undefined;
         itemId: number;
-        ItemName: string;
-        ItemBrand: string;
-        ItemModel: string;
-        ItemYear: string | undefined;
+        Number: string;
+        Name: string;
+        Model: string;
+        Brand: string;
         Location: string;
+        Year: string | undefined;
         Status: string | undefined;
+        Active: boolean;
     };
 
-    const exportRepairHistoryToExcel = (filename: string, worksheetName: string) => {
+    const exportProductsToExcel = (filename: string, worksheetName: string) => {
         if (!selectedItems || !selectedItems.length) return;
     
         const dataToExport: ExportDataItem[] = selectedItems.map(item => ({
             itemId: item.id,
-            ItemName: item.name,
-            ItemBrand: item.brand,
-            ItemModel: item.model,
-            ItemYear: formatDate(item.yearBought!),
+            Number: item.number,
+            Name: item.name,
+            Model: item.model,
+            Brand: item.brand,
             Location: item.location.name,
+            Year: formatDate(item.yearBought!),
             Status: item.itemStatus?.name,
+            Active: item.active
         }));
     
         // Create a worksheet from the data
@@ -337,7 +343,7 @@ export default function Product() {
                 <Modal 
                     open={isModalOpen}
                     onClose={closeModal}
-                    onItemsUpdated={getAllItems}
+                    onItemsUpdated={() => getAllItems(true)}
                     selectedItems={selectedItems}
                     roles={roles}
                     locations={locations}
@@ -407,7 +413,7 @@ export default function Product() {
                                 disabled={selectedItems.length === 0}
                             />
                         </div>
-                        <div onClick={() => exportRepairHistoryToExcel(`Item-Data`, 'ItemData')}>
+                        <div onClick={() => exportProductsToExcel(`Item-Data`, 'ItemData')}>
                             <Button 
                                 icon={<InsertDriveFileOutlinedIcon />} 
                                 textColor="custom-dark-blue" 
@@ -456,7 +462,7 @@ export default function Product() {
                         <div className="w-full bg-gray-200 hidden lg:grid grid-cols-12">
                             <div className="col-span-1 mx-auto">
                                 <Checkbox 
-                                    checked={selectedItems.length === items.length && items.length > 0}
+                                    checked={selectedItems.length === itemsAll.length && itemsAll.length > 0}
                                     onChange={toggleSelectAll}
                                 />
                             </div>

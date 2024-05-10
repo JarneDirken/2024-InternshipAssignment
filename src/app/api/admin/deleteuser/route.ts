@@ -1,6 +1,6 @@
 import prisma from "@/services/db";
 import { db } from "@/services/firebase-config";
-// import admin from '@/services/firebase-admin-config';
+import admin from '@/services/firebase-admin-config';
 import { addDoc, collection } from "firebase/firestore";
 import { NextRequest } from "next/server";
 
@@ -78,16 +78,16 @@ export async function DELETE(req: NextRequest) {
             });
 
             if (userForDeletion) {
-                // try {
-                //     await admin.auth().deleteUser(userForDeletion.firebaseUid);
-                // } catch (error) {
-                //     if (error instanceof Error) {
-                //         console.error(`Error deleting user from Firebase: ${error.message}`);
-                //     } else {
-                //         console.error('Error deleting user from Firebase:', error);
-                //     }
-                //     throw new Error('Failed to delete user from Firebase Auth');
-                // }
+                try {
+                    await admin.auth().deleteUser(userForDeletion.firebaseUid);
+                } catch (error) {
+                    if (error instanceof Error) {
+                        console.error(`Error deleting user from Firebase: ${error.message}`);
+                    } else {
+                        console.error('Error deleting user from Firebase:', error);
+                    }
+                    throw new Error('Failed to delete user from Firebase Auth');
+                }
     
                 const deleteUser = await prisma.user.delete({
                     where: {
