@@ -28,12 +28,40 @@ export default function Login() {
         event.preventDefault();
     };
 
+    async function checkUser() {
+        setErrorMessage('');
+
+        const params: Record<string, string> = {
+            email
+        };
+
+        const queryString = new URLSearchParams(params).toString();
+
+        const response = await fetch(`/api/auth?${queryString}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            setErrorMessage(errorData.message || "E-mail does not exist or user is not active.");
+            return false;
+        }
+        return true;
+    };
+
     async function handleLogin(event: FormEvent<HTMLFormElement>){
         event.preventDefault();
+        const userExists = await checkUser();
+        if (!userExists) {
+            return;
+        }
         setErrorMessage('');
         const auth = getAuth();
 
-        const form = new FormData(event.currentTarget);
+        const form = new FormData(event.target as HTMLFormElement);
         const email = form.get('email') as string;
         const password = form.get('password') as string;
 
@@ -71,7 +99,7 @@ export default function Login() {
             },
           },
         },
-      });
+    });
 
     async function handlePasswordReset(){
         if (!email) {

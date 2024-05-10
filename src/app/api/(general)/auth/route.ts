@@ -29,3 +29,31 @@ export async function POST(req: NextRequest) {
         });
     }
 }
+
+export async function GET(req: NextRequest) {
+    const { searchParams } = new URL(req.url);
+    const email = searchParams.get("email") || '';
+
+    const user = await prisma.user.findUnique({
+        where: {
+            active: true,
+            email: email,
+        }
+    });
+
+    if (!user) {
+        return new Response(JSON.stringify({ message: "E-mail does not exist or user is not active." }), {
+            status: 404,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    }
+
+    return new Response(JSON.stringify(user), {
+        status: 200,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+}
