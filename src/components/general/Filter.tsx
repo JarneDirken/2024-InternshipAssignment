@@ -356,37 +356,37 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
                             </div>
                         ))}
                     </div>
-                 {isSort && (
-                    <div>
-                      <Button 
-                          onClick={handleSortClick} 
-                          startIcon={<SwapVertRoundedIcon />} 
-                          endIcon={<KeyboardArrowRightRoundedIcon />} 
-                          sx={{
-                              fontSize: { xs: '0.8rem', sm: '1rem' }, // Smaller font on extra-small screens
-                              '& .MuiButton-startIcon, & .MuiButton-endIcon': {
-                                  fontSize: { xs: '15px', sm: '24px' } // Adjust icon sizes as well
-                              },
-                              whiteSpace: "nowrap", // Prevent text from wrapping
-                              minWidth: "170px", // Minimum width to avoid squeezing on small screens
-                              paddingTop: "6px" // Ensure padding is sufficient but not too large
-                          }} 
-                      >
-                      Sort by {getSortLabelFromKey(sortBy)} {sortDirection === 'desc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
-                      </Button>
-                      <Menu
-                          anchorEl={anchorEl}
-                          open={Boolean(anchorEl)}
-                          onClose={handleSortClose}
-                      >
-                          {sortOptions.map(option => (
-                              <MenuItem key={option.label} onClick={() => handleSortOptionSelect(option)}>{option.label}</MenuItem>
-                          ))}
-                      </Menu>
-                    </div>
-                  )}
+                    {isSort && (
+                        <div>
+                            <Button 
+                                onClick={handleSortClick} 
+                                startIcon={<SwapVertRoundedIcon />} 
+                                endIcon={<KeyboardArrowRightRoundedIcon />} 
+                                sx={{
+                                    fontSize: { xs: '0.8rem', sm: '1rem' }, // Smaller font on extra-small screens
+                                    '& .MuiButton-startIcon, & .MuiButton-endIcon': {
+                                        fontSize: { xs: '15px', sm: '24px' } // Adjust icon sizes as well
+                                    },
+                                    whiteSpace: "nowrap", // Prevent text from wrapping
+                                    minWidth: "170px", // Minimum width to avoid squeezing on small screens
+                                    paddingTop: "6px" // Ensure padding is sufficient but not too large
+                                }} 
+                            >
+                            Sort by {getSortLabelFromKey(sortBy)} {sortDirection === 'desc' ? <ArrowDownwardRoundedIcon fontSize="inherit" /> : <ArrowUpwardRoundedIcon fontSize="inherit" />}
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                open={Boolean(anchorEl)}
+                                onClose={handleSortClose}
+                            >
+                                {sortOptions?.map(option => (
+                                    <MenuItem key={option.label} onClick={() => handleSortOptionSelect(option)}>{option.label}</MenuItem>
+                                ))}
+                            </Menu>
+                        </div>
+                    )}
                 </ThemeProvider>
-                <div className="bg-gray-100 rounded-lg p-2 flex items-center gap-2 flex-wrap">
+                <div className={`bg-gray-100 rounded-lg p-2 flex items-center gap-2 flex-wrap ${isSort ? '' : 'mt-4'}`}>
                     <span className="text-gray-500">Filters applied:&nbsp;</span>
                     {filters.map((filter, index) => (
                         filter.state[0] && (

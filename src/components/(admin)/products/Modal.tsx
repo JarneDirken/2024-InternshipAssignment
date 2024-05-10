@@ -42,9 +42,10 @@ interface ModalCardProps {
     uniqueNames: string[];
     uniqueModels: string[];
     uniqueBrands: string[];  
+    existingNumbers: string[];
 }
 
-export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mode, userId, roles, locations, itemStatuses, uniqueNames, uniqueModels, uniqueBrands }: ModalCardProps) {
+export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mode, userId, roles, locations, itemStatuses, uniqueNames, uniqueModels, uniqueBrands, existingNumbers }: ModalCardProps) {
     const theme = createTheme({
         palette: {
             primary: {
@@ -227,6 +228,9 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
             isValid = false;
         } else if (number.length < 19 || number.length > 22) {
             setNumberError('Number must be between 19 and 22 characters.');
+            isValid = false;
+        } else if (existingNumbers.includes(number)) {
+            setNumberError('Number must be unique.');
             isValid = false;
         }
         if (!model) {

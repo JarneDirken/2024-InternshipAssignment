@@ -75,7 +75,9 @@ export default function DashboardLayout({
                 <Link href="/location">
                   <SidebarItem icon={<LocationOnOutlinedIcon fontSize="medium" />} text="Locations" active={pathname === "/location"} />
                 </Link>
-                <SidebarItem icon={<PeopleAltOutlinedIcon fontSize="medium" />} text="Users" />
+                <Link href="/user">
+                  <SidebarItem icon={<PeopleAltOutlinedIcon fontSize="medium" />} text="Users" active={pathname === "/user"} />
+                </Link>
                 <Link href="/parameter">
                   <SidebarItem icon={<SettingsOutlinedIcon fontSize="medium" />} text="Parameters" active={pathname === "/parameter"} />
                 </Link>
@@ -83,7 +85,7 @@ export default function DashboardLayout({
                   <SidebarItem icon={<ArticleOutlinedIcon fontSize="medium" />} text="Logs" active={pathname === "/log"} />
                 </Link>
                 <Link href="/analytics">
-                  <SidebarItem icon={<PollOutlinedIcon fontSize="inherit" className="text-3xl" />} text="Analytics" active={pathname === "/analytics"} />
+                  <SidebarItem icon={<PollOutlinedIcon fontSize="medium" />} text="Analytics" active={pathname === "/analytics"} />
                 </Link>
               </>
             )}

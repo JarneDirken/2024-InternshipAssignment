@@ -1,23 +1,21 @@
 'use client';
 import { useEffect, useRef, useState } from "react";
 import Filters from "@/components/general/Filter";
-import { Item } from "@/models/Item";
-import { ItemStatus } from "@/models/ItemStatus";
 import { Role } from "@/models/Role";
-import { Location } from "@/models/Location";
+import { User } from "@/models/User";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { getAuth, getIdToken } from 'firebase/auth';
 import {app} from "@/services/firebase-config";
 import Button from "@/components/states/Button";
 import Checkbox from '@mui/material/Checkbox';
-import ProductCard from "@/components/(admin)/products/ProductCard";
-import Modal from "@/components/(admin)/products/Modal";
+import UserCard from "@/components/(admin)/users/UserCard";
+import Modal from "@/components/(admin)/users/Modal";
 import { SortOptions } from "@/models/SortOptions";
 import { Filter } from "@/models/Filter";
 import { useMemo } from 'react';
 import * as XLSX from 'xlsx';
-import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
@@ -27,8 +25,7 @@ import useAuth from "@/hooks/useAuth";
 import Loading from "@/components/states/Loading";
 import Unauthorized from "../../(error)/unauthorized/page";
 
-
-export default function Product() {
+export default function Users() {
     const { isAuthorized, loading } = useAuth(['Admin']);
     const theme = createTheme({
         components: {
@@ -51,28 +48,22 @@ export default function Product() {
     });
 
     const [active, setActive] = useState(true);
-    const [items, setItems] = useState<Item[]>([]);
-    const [itemsAll, setItemsAll] = useState<Item[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
+    const [usersAll, setUsersAll] = useState<User[]>([]);
+    const [selectedItems, setSelectedItems] = useState<User[]>([]);
     const [roles, setRoles] = useState<Role[]>([]);
-    const [locations, setLocations] = useState<Location[]>([]);
-    const [itemStatuses, setItemStatuses] = useState<ItemStatus[]>([]);
 
     const [itemLoading, setItemLoading] = useState(false);
-    const [name, setName] = useState<string>('');
-    const [model, setModel] = useState<string>('');
-    const [brand, setBrand] = useState<string>('');
-    const [location, setLocation] = useState<string>('');
-    const [year, setYear] = useState<string>('');
-    const [availability, setAvailability] = useState<string>('');
-    const [selectedItems, setSelectedItems] = useState<Item[]>([]);
+    const [firstName, setFirstName] = useState<string>('');
+    const [lastName, setLastName] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
+    const [role, setRole] = useState<string>('');
 
     const filters: Filter[] = [
-        { label: 'Name', state: [name, setName], inputType: 'text', optionsKey: 'name'},
-        { label: 'Model', state: [model, setModel], inputType: 'text', optionsKey: 'model'},
-        { label: 'Brand', state: [brand, setBrand], inputType: 'text', optionsKey: 'brand'},
-        { label: 'Location', state: [location, setLocation], inputType: 'text', optionsKey: 'location.name'},
-        { label: 'Year', state: [year, setYear], inputType: 'text', optionsKey: 'yearBought'},
-        { label: 'Availability', state: [availability, setAvailability], inputType: 'multipleSelect', options: ['Active', 'Inactive']},
+        { label: 'First Name', state: [firstName, setFirstName], inputType: 'text', optionsKey: 'firstName'},
+        { label: 'Last Name', state: [lastName, setLastName], inputType: 'text', optionsKey: 'lastName'},
+        { label: 'E-mail', state: [email, setEmail], inputType: 'text', optionsKey: 'email'},
+        { label: 'Level', state: [role, setRole], inputType: 'text', optionsKey: 'role.name'},
     ];
 
     const [isModalOpen, setModalOpen] = useState(false);
@@ -82,10 +73,11 @@ export default function Product() {
 
     const sortOptions: SortOptions[] = [
         { label: 'Id', optionsKey: 'id'},
-        { label: 'Name', optionsKey: 'name' },
-        { label: 'Model', optionsKey: 'model' },
-        { label: 'Brand', optionsKey: 'brand' },
-        { label: 'Location', optionsKey: 'location.name' }
+        { label: 'First Name', optionsKey: 'firstName' },
+        { label: 'Last Name', optionsKey: 'lastName' },
+        { label: 'Student Code', optionsKey: 'studentCode' },
+        { label: 'E-mail', optionsKey: 'email' },
+        { label: 'Level', optionsKey: 'role' },
     ];
 
     // infinite scroll load
@@ -108,15 +100,15 @@ export default function Product() {
 
     useEffect(() => {
         if(userId) {
-            getAllItems(true);
+            getAllUsers(true);
         }
-    }, [userId, name, model, brand, location, year, availability]);
+    }, [userId, firstName, lastName, email, role]);
 
     // infinite loading scroll
     useEffect(() => {
         if (inView && hasMore && !loading) {
             const currentScrollPosition = listRef.current ? listRef.current.scrollTop : 0;
-            getAllItems().then(() => {
+            getAllUsers().then(() => {
                 requestAnimationFrame(() => {
                     if (listRef.current) {
                         listRef.current.scrollTop = currentScrollPosition;
@@ -128,44 +120,36 @@ export default function Product() {
 
     const handleFilterChange = (filterType: string, value: string | string[]) => {
         switch (filterType) {
-            case 'name':
-                setName(value as string);
+            case 'firstname':
+                setFirstName(value as string);
                 break;
-            case 'model':
-                setModel(value as string);
+            case 'lastname':
+                setLastName(value as string);
                 break;
-            case 'brand':
-                setBrand(value as string);
+            case 'email':
+                setEmail(value as string);
                 break;
-            case 'location':
-                setLocation(value as string);
-                break;
-            case 'year':
-                setYear(value as string);
-                break;
-            case 'availability':
-                setAvailability(value as string);
+            case 'role':
+                setRole(value as string);
                 break;
             default:
                 break;
         }
     };
 
-    async function getAllItems(initialLoad = false, sortBy = 'id', sortDirection = 'desc') {
-        if (!hasMore && !initialLoad) return; // infinate loading
-        const currentOffset = initialLoad ? 0 : offset; // infinate loading
+    async function getAllUsers(initialLoad = false, sortBy = 'id', sortDirection = 'desc') {
+        if (!hasMore && !initialLoad) return; // infinite loading
+        const currentOffset = initialLoad ? 0 : offset; // infinite loading
         setItemLoading(true);
         const params: Record<string, string> = {
-            name: name,
-            model: model,
-            brand: brand,
-            location: location,
-            year: year,
-            availability: availability,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            role: role,
             sortBy: sortBy || 'id',
             sortDirection: sortDirection || 'desc',
-            offset: currentOffset.toString(), // infinate loading 
-            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
+            offset: currentOffset.toString(), // infinite loading 
+            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinite loading 
         };
     
         // Only add userId to the query if it is not null
@@ -176,24 +160,22 @@ export default function Product() {
         const queryString = new URLSearchParams(params).toString();
     
         try {
-            const response = await fetch(`/api/admin/products?${queryString}`);
+            const response = await fetch(`/api/admin/users?${queryString}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
     
             const data = await response.json();
-            const fetchedItems = data.items || [];
-            const fetchedItemsAll = data.itemsAll || [];
+            const fetchedItems = data.users || [];
+            const fetchedItemsAll = data.usersAll || [];
             setRoles(data.roles || []);
-            setLocations(data.locations || []);
-            setItemStatuses(data.itemStatuses || []);
-            setItemsAll(fetchedItemsAll);
+            setUsersAll(fetchedItemsAll);
 
             // infinate loading
             if (initialLoad) {
-                setItems(fetchedItems);
+                setUsers(fetchedItems);
             } else {
-                setItems(prevItems => [...prevItems, ...fetchedItems]);
+                setUsers(prevItems => [...prevItems, ...fetchedItems]);
             }
             setOffset(currentOffset + fetchedItems.length);
             setHasMore(fetchedItems.length === NUMBER_OF_ITEMS_TO_FETCH);
@@ -206,15 +188,15 @@ export default function Product() {
 
     const handleSortChange = (sortBy: string, sortDirection: 'asc' | 'desc') => {
         // Implement sorting logic here
-        getAllItems(true, sortBy, sortDirection);
+        getAllUsers(true, sortBy, sortDirection);
     };
 
     const toggleSelectAll = () => {
-        if (selectedItems.length === itemsAll.length) {
+        if (selectedItems.length === usersAll.length) {
             setSelectedItems([]); // Deselect all if all are selected
         } else {
-            const newSelectedItems = new Set(itemsAll.map(item => item.id));
-            setSelectedItems([...itemsAll]); // Select all
+            const newSelectedItems = new Set(usersAll.map(item => item.id));
+            setSelectedItems([...usersAll]); // Select all
         }
     };
 
@@ -224,7 +206,7 @@ export default function Product() {
     
         if (selectedIndex === -1) {
             // Check if the item exists before adding it
-            const itemToAdd = items.find(item => item.id === id);
+            const itemToAdd = users.find(item => item.id === id);
             if (itemToAdd) {
                 newSelectedItems.push(itemToAdd);
             } else {
@@ -241,7 +223,7 @@ export default function Product() {
         setModalOpen(false);
     };
 
-    const openModal = (mode: 'add' | 'edit' | 'delete', item?: Item) => {
+    const openModal = (mode: 'add' | 'edit' | 'delete', item?: User) => {
         if (item) {
             setSelectedItems([item]);
         }
@@ -249,62 +231,30 @@ export default function Product() {
         setModalOpen(true);
     };
 
-    const uniqueNames = useMemo(() => {
-        const nameSet = new Set(items.map(item => item.name));
-        return Array.from(nameSet);
-    }, [items]);
-    
-    const uniqueModels = useMemo(() => {
-        const modelSet = new Set(items.map(item => item.model));
-        return Array.from(modelSet);
-    }, [items]);
-    
-    const uniqueBrands = useMemo(() => {
-        const brandSet = new Set(items.map(item => item.brand));
-        return Array.from(brandSet);
-    }, [items]);
-
-    const uniqueNumbers = useMemo(() => {
-        const numberSet = new Set(items.map(item => item.number));
-        return Array.from(numberSet);
-    }, [items]);
-
-    const formatDate = (dateString: Date): string => {
-        const date = new Date(dateString);
-        const options: Intl.DateTimeFormatOptions = {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric',
-            hour12: true
-        };
-        return date.toLocaleString('en-US', options);
-    };
-
     interface ExportDataItem {
-        [key: string]: number | string | undefined;
-        itemId: number;
-        ItemName: string;
-        ItemBrand: string;
-        ItemModel: string;
-        ItemYear: string | undefined;
-        Location: string;
-        Status: string | undefined;
+        [key: string]: number | string | boolean | undefined;
+        userId: number;
+        UserFirstName: string;
+        UserLastName: string;
+        UserEmail: string;
+        UserStudentcode: string | undefined;
+        UserTelephone: string;
+        UserActive: boolean;
+        UserRole: string;
     };
 
     const exportRepairHistoryToExcel = (filename: string, worksheetName: string) => {
         if (!selectedItems || !selectedItems.length) return;
     
         const dataToExport: ExportDataItem[] = selectedItems.map(item => ({
-            itemId: item.id,
-            ItemName: item.name,
-            ItemBrand: item.brand,
-            ItemModel: item.model,
-            ItemYear: formatDate(item.yearBought!),
-            Location: item.location.name,
-            Status: item.itemStatus?.name,
+            userId: item.id,
+            UserFirstName: item.firstName,
+            UserLastName: item.lastName,
+            UserEmail: item.email,
+            UserStudentcode: item.studentCode,
+            UserTelephone: item.tel,
+            UserActive: item.active,
+            UserRole: item.role.name,
         }));
     
         // Create a worksheet from the data
@@ -337,28 +287,22 @@ export default function Product() {
                 <Modal 
                     open={isModalOpen}
                     onClose={closeModal}
-                    onItemsUpdated={getAllItems}
+                    onItemsUpdated={getAllUsers}
                     selectedItems={selectedItems}
                     roles={roles}
-                    locations={locations}
-                    itemStatuses={itemStatuses}
                     mode={mode}
                     userId={userId}
-                    uniqueNames={uniqueNames}  
-                    uniqueModels={uniqueModels}
-                    uniqueBrands={uniqueBrands}
-                    existingNumbers={uniqueNumbers}
                 />
                 <div className="bg-white mb-4 rounded-xl">
                     <Filters
                         active={active}
                         setActive={setActive}
-                        title="Products"
-                        icon={<Inventory2OutlinedIcon fontSize="large" />}
+                        title="Users"
+                        icon={<PeopleAltOutlinedIcon fontSize="large" />}
                         onFilterChange={handleFilterChange}
                         onSortChange={handleSortChange}
                         filters={filters}
-                        items={items}
+                        items={users}
                         sortOptions={sortOptions}
                         isSort={true}
                     />
@@ -393,20 +337,6 @@ export default function Product() {
                                 disabled={selectedItems.length === 0}
                             />
                         </div>
-                        <div>
-                            <Button 
-                                icon={<QrCode2RoundedIcon />} 
-                                textColor="custom-dark-blue" 
-                                borderColor="custom-dark-blue" 
-                                fillColor="blue-100" 
-                                paddingX="px-2.5"
-                                paddingY="py-0.5"
-                                buttonClassName="bg-blue-100 border-custom-dark-blue" 
-                                textClassName="font-semibold text-custom-dark-blue" 
-                                text="QR-Code" 
-                                disabled={selectedItems.length === 0}
-                            />
-                        </div>
                         <div onClick={() => exportRepairHistoryToExcel(`Item-Data`, 'ItemData')}>
                             <Button 
                                 icon={<InsertDriveFileOutlinedIcon />} 
@@ -420,30 +350,18 @@ export default function Product() {
                                 disabled={selectedItems.length === 0}
                             />
                         </div>
-                        <div>
-                            <Button 
-                                icon={<InsertDriveFileOutlinedIcon />} 
-                                textColor="custom-dark-blue" 
-                                borderColor="custom-dark-blue" 
-                                fillColor="blue-100" 
-                                paddingX="px-2.5"
-                                paddingY="py-0.5"
-                                textClassName="font-semibold" 
-                                text="Import EXCEL" 
-                            />
-                        </div>
                     </div>
                     <div className="w-full border-b border-b-gray-300 bg-white flex items-center relative lg:hidden">
                         <Checkbox 
                             className="absolute left-3 top-1/2 transform -translate-y-1/2" 
-                            checked={selectedItems.length === itemsAll.length && itemsAll.length > 0}
+                            checked={selectedItems.length === usersAll.length && usersAll.length > 0}
                             onChange={toggleSelectAll}
                         />
                         <p className="text-custom-primary font-semibold px-16 py-2 border-b-2 border-b-custom-primary w-fit">PRODUCTS</p>
                     </div>
                     <div ref={listRef} className="bg-white w-full rounded-b-xl overflow-y-auto lg:hidden" style={{ height: '50vh' }}>
-                        <ProductCard 
-                            items={items} 
+                        <UserCard 
+                            items={users} 
                             openModal={openModal} 
                             itemLoading={itemLoading} 
                             selectedItems={selectedItems} 
@@ -456,22 +374,21 @@ export default function Product() {
                         <div className="w-full bg-gray-200 hidden lg:grid grid-cols-12">
                             <div className="col-span-1 mx-auto">
                                 <Checkbox 
-                                    checked={selectedItems.length === items.length && items.length > 0}
+                                    checked={selectedItems.length === users.length && users.length > 0}
                                     onChange={toggleSelectAll}
                                 />
                             </div>
-                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 truncate">IMAGE</span>
-                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-2 py-2 pl-2 truncate">NO.</span>
-                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-2 py-2 pl-2 truncate">NAME</span>
-                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">MODEL</span>
-                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">BRAND</span>
-                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 xl:col-span-2 py-2 pl-2 truncate">LOCATION</span>
-                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">YEAR</span>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-2 py-2 truncate">FIRST NAME</span>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-2 py-2 pl-2 truncate">LAST NAME</span>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">STUDENT CODE</span>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 xl:col-span-2 py-2 pl-2 truncate">TELEPHONE</span>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-2 py-2 pl-2 truncate">EMAIL</span>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">ROLE</span>
                             <span className="text-gray-500 font-semibold col-span-2 xl:col-span-1 py-2 pl-2 truncate">ACTION</span>
                         </div>
                         <div ref={listRef} className="bg-white w-full rounded-b-xl overflow-y-auto" style={{ height: '50vh' }}>
-                            <ProductCard 
-                                items={items} 
+                            <UserCard 
+                                items={users} 
                                 openModal={openModal} 
                                 itemLoading={itemLoading} 
                                 selectedItems={selectedItems} 

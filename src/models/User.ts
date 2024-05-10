@@ -7,8 +7,9 @@ export interface User {
     firstName: string;
     lastName: string;
     email: string;
-    studentCode: string;
+    studentCode?: string;
     tel: string;
+    active: boolean;
     createdAt: Date;
     role: {id: number, name: string};
     profilePic?: string;

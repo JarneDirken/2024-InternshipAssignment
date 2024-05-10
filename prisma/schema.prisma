@@ -14,7 +14,7 @@ model User {
   firstName            String
   lastName             String
   email                String        @unique
-  studentCode          String        @unique @db.Char(8)
+  studentCode          String?       @unique @db.Char(8)
   tel                  String        @unique
   active               Boolean       @default(true)
   createdAt            DateTime      @default(now())
