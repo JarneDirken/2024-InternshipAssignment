@@ -374,7 +374,7 @@ export default function DashboardHeader() {
                                 </Link>
                                 <Link href="/analytics" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
-                                    icon={<PollOutlinedIcon fontSize="inherit" className="text-2xl" />} 
+                                    icon={<PollOutlinedIcon fontSize="medium" />} 
                                     text="Analytics"  
                                     active={pathname === "/analytics"} />
                                 </Link>
