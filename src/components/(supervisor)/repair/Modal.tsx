@@ -219,6 +219,12 @@ export default function Modal({ open, onClose, item, repaired, broken, setRepair
                                     </div>
                                 )}
                             </div>
+                            <div className="flex justify-between gap-1">
+                                <div className="flex flex-col">
+                                    <span className="font-semibold text-gray-400">Notes</span>
+                                    <span>{item.notes}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
