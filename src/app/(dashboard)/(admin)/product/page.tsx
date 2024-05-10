@@ -26,7 +26,8 @@ import { useInView } from "react-intersection-observer";
 import useAuth from "@/hooks/useAuth";
 import Loading from "@/components/states/Loading";
 import Unauthorized from "../../(error)/unauthorized/page";
-
+import QrCode from "qrcode";
+import jsPDF from "jspdf";
 
 export default function Product() {
     const { isAuthorized, loading } = useAuth(['Admin']);
@@ -333,6 +334,60 @@ export default function Product() {
         XLSX.writeFile(workbook, `${filename}.xlsx`);
     };
 
+    const exportQRCodesToPDF = async (items: Item[]) => {
+        const doc = new jsPDF();
+        const qrSize = 40; // Size of QR code
+        const textOffsetY = 45; // Vertical offset for item number below QR code
+        const marginX = 10; // Horizontal margin between QR codes
+        const marginY = 20; // Vertical margin between QR codes
+
+        const columns = 3; // Number of QR codes per row
+        const rows = 4; // Number of QR codes per column
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const pageWidth = doc.internal.pageSize.getWidth();
+
+        // Calculate total grid dimensions
+        const gridWidth = columns * (qrSize + marginX) - marginX;
+        const gridHeight = rows * (qrSize + marginY) - marginY;
+
+        // Calculate starting positions to center the grid
+        const startX = (pageWidth - gridWidth) / 2;
+        const startY = (pageHeight - gridHeight) / 2;
+
+        doc.setFontSize(8); // Smaller font size
+
+
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const url = `http://localhost:3000/item/${item.id}`;
+    
+            try {
+                const src = await QrCode.toDataURL(url);
+    
+                // Calculate position for current QR code
+                const col = i % columns;
+                const row = Math.floor((i % (columns * rows)) / columns);
+                const x = startX + col * (qrSize + marginX);
+                const y = startY + row * (qrSize + marginY);
+    
+                // Add QR code and item number to PDF
+                doc.addImage(src, 'JPEG', x, y, qrSize, qrSize);
+                doc.text(`Item No: ${item.number}`, x, y + textOffsetY);
+    
+                // Add a new page if reached the last position of the grid
+                if ((i + 1) % (columns * rows) === 0 && i < items.length - 1) {
+                    doc.addPage();
+                }
+    
+            } catch (error) {
+                console.error('Error generating QR code:', error);
+            }
+        }
+    
+        // Save PDF
+        doc.save('Items_QR_Codes.pdf');
+    };
+
     if (loading || isAuthorized === null) { return <Loading/>; }
 
     if (!isAuthorized) { return <Unauthorized />; }
@@ -399,7 +454,7 @@ export default function Product() {
                                 disabled={selectedItems.length === 0}
                             />
                         </div>
-                        <div>
+                        <div onClick={() => exportQRCodesToPDF(selectedItems)}>
                             <Button 
                                 icon={<QrCode2RoundedIcon />} 
                                 textColor="custom-dark-blue" 
@@ -409,7 +464,7 @@ export default function Product() {
                                 paddingY="py-0.5"
                                 buttonClassName="bg-blue-100 border-custom-dark-blue" 
                                 textClassName="font-semibold text-custom-dark-blue" 
-                                text="QR-Code" 
+                                text="Qr-Code" 
                                 disabled={selectedItems.length === 0}
                             />
                         </div>
