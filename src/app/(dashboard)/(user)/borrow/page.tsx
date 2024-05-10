@@ -37,6 +37,7 @@ export default function Borrow() {
     const created = useRecoilValue(createRequest); // see if an item has been borrowed (for refresh)
     const { cart } = useCart(); // useCart hook
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
+    const [canceled, setCanceled] = useState(false);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -130,7 +131,7 @@ export default function Borrow() {
         if (userId) {
             getPendingBorrowCount();
         }
-    }, [userId, created]);
+    }, [userId, created, canceled]);
 
     useEffect(() => {
         getPendingBorrowCount();
@@ -208,6 +209,8 @@ export default function Borrow() {
                         userId={userId || ''}
                         openMessageModal={setMessageModalOpen}
                         setMessage={setMessage}
+                        setCanceled={setCanceled}
+                        canceled={canceled}
                     />
                 )}
             </div>

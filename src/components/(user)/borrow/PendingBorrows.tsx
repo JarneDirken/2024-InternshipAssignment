@@ -22,12 +22,13 @@ interface PendingBorrowProps {
     userId: string;
     openMessageModal: (value: boolean) => void;
     setMessage: (value: string) => void;
+    setCanceled: (value: boolean) => void;
+    canceled: boolean;
 }
 
-export default function PendingBorrows({ active, nameFilter, modelFilter, brandFilter, locationFilter, userId, openMessageModal, setMessage }: PendingBorrowProps) {
+export default function PendingBorrows({ active, nameFilter, modelFilter, brandFilter, locationFilter, userId, openMessageModal, setMessage, setCanceled, canceled }: PendingBorrowProps) {
     const [loading, setLoading] = useState(true);
     const [requests, setRequests] = useRecoilState(requestsState);
-    const [canceled, setCanceled] = useState(false);
     const { enqueueSnackbar } = useSnackbar();
     // infinate scroll load
     const [offset, setOffset] = useState(0);
@@ -118,7 +119,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
     };
 
     const handleSuccessCancle = () => {
-        setCanceled(current => !current);
+        setCanceled(!canceled);
         enqueueSnackbar('Request cancelled successfully', { variant: 'success' });
     };
 
