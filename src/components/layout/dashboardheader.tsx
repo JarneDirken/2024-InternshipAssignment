@@ -353,13 +353,18 @@ export default function DashboardHeader() {
                                         text="Products"
                                         active={pathname === "/product"}  />
                                 </Link>
-                                <Link href="/locations" onClick={() => setIsOpen(false)}>
+                                <Link href="/location" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
                                         icon={<LocationOnOutlinedIcon fontSize="medium" />} 
                                         text="Locations"
                                         active={pathname === "/location"}  />
                                 </Link>
-                                <MobileSidebarItem icon={<PeopleAltOutlinedIcon fontSize="medium" />} text="Users"  />
+                                <Link href="/user" onClick={() => setIsOpen(false)}>
+                                    <MobileSidebarItem 
+                                        icon={<PeopleAltOutlinedIcon fontSize="medium" />} 
+                                        text="Users"
+                                        active={pathname === "/user"}  />
+                                </Link>
                                 <Link href="/parameter" onClick={() => setIsOpen(false)}>
                                     <MobileSidebarItem 
                                     icon={<SettingsOutlinedIcon fontSize="medium" />} 

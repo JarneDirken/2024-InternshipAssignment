@@ -1,11 +1,11 @@
-// import * as admin from 'firebase-admin';
+import admin from 'firebase-admin';
 
-// if (!admin.apps.length) {
-//     const serviceAccount = require('../../firebaseAdmin.json');
+const serviceAccount = require('../config/serviceAccountKey.json');
 
-//     admin.initializeApp({
-//         credential: admin.credential.cert(serviceAccount)
-//     });
-// }
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+    });
+}
 
-// export default admin;
+export default admin;

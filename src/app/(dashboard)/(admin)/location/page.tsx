@@ -194,6 +194,7 @@ export default function Locations() {
                         filters={filters}
                         items={locations}
                         sortOptions={sortOptions}
+                        isSort={true}
                     />
                 </div>
                 <div className="rounded-xl">

@@ -3,32 +3,18 @@ import { useSnackbar } from "notistack";
 import MaterialUIModal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { TextField, Popover } from '@mui/material';
+import { TextField } from '@mui/material';
 //icons
-import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
-import { ClearIcon } from "@mui/x-date-pickers/icons";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { YearCalendar } from '@mui/x-date-pickers/YearCalendar';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs, { Dayjs } from 'dayjs';
-import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from "react";
-import { Item } from "@/models/Item";
 import Button from "@/components/states/Button";
-import { Checkbox, FormGroup } from "@mui/material";
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import Image from 'next/image';
 import Tooltip from '@mui/material/Tooltip';
 
-import { Role } from "@/models/Role";
 import { Location } from "@/models/Location";
-import { ItemStatus } from "@/models/ItemStatus";
 
 interface ModalCardProps {
     open: boolean;
