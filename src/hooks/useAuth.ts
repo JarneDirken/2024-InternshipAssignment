@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import '../services/firebase-config';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 function useAuth(allowedRoles: string[] = []) {
@@ -9,10 +9,15 @@ function useAuth(allowedRoles: string[] = []) {
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname()
 
   useEffect(() => {
       const auth = getAuth();
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (pathname === '/register') {
+            setLoading(false);
+            return; // Skip the rest of the hook logic if on the register page
+        }
           if (!user) {
             setTimeout(() => router.push('/login'), 0);
           } else {
