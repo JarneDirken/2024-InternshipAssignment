@@ -79,7 +79,7 @@ export default function Product() {
     const [isModalOpen, setModalOpen] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
     const auth = getAuth(app);
-    const [mode, setMode] = useState<'add' | 'edit' | 'delete'>('add');
+    const [mode, setMode] = useState<'add' | 'edit' | 'delete' | 'import'>('add');
 
     const sortOptions: SortOptions[] = [
         { label: 'Id', optionsKey: 'id'},
@@ -238,13 +238,13 @@ export default function Product() {
     };
 
     const closeModal = () => {
-        if (mode === 'delete' && selectedItems.length === 1 || mode === 'edit' && selectedItems.length === 1){
+        if (mode === 'delete' || mode === 'edit' && selectedItems.length === 1){
             setSelectedItems([]);
         }
         setModalOpen(false);
     };
 
-    const openModal = (mode: 'add' | 'edit' | 'delete', item?: Item) => {
+    const openModal = (mode: 'add' | 'edit' | 'delete' | 'import', item?: Item) => {
         if (item) {
             setSelectedItems([item]);
         }
@@ -295,6 +295,7 @@ export default function Product() {
         Brand: string;
         Location: string;
         Year: string | undefined;
+        Role: string | undefined;
         Status: string | undefined;
         Active: boolean;
     };
@@ -310,6 +311,7 @@ export default function Product() {
             Brand: item.brand,
             Location: item.location.name,
             Year: formatDate(item.yearBought!),
+            Role: item.RoleItem?.[0].Role?.name,
             Status: item.itemStatus?.name,
             Active: item.active
         }));
@@ -481,7 +483,7 @@ export default function Product() {
                                 disabled={selectedItems.length === 0}
                             />
                         </div>
-                        <div>
+                        <div onClick={() => openModal('import')}>
                             <Button 
                                 icon={<InsertDriveFileOutlinedIcon />} 
                                 textColor="custom-dark-blue" 
