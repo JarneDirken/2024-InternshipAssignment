@@ -5,7 +5,7 @@ import { Role } from "@/models/Role";
 import { User } from "@/models/User";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { getAuth, getIdToken } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import {app} from "@/services/firebase-config";
 import Button from "@/components/states/Button";
 import Checkbox from '@mui/material/Checkbox';
@@ -18,7 +18,6 @@ import * as XLSX from 'xlsx';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import { useInView } from "react-intersection-observer";
 import useAuth from "@/hooks/useAuth";
@@ -171,7 +170,7 @@ export default function Users() {
             setRoles(data.roles || []);
             setUsersAll(fetchedItemsAll);
 
-            // infinate loading
+            // infinite loading
             if (initialLoad) {
                 setUsers(fetchedItems);
             } else {
@@ -195,7 +194,6 @@ export default function Users() {
         if (selectedItems.length === usersAll.length) {
             setSelectedItems([]); // Deselect all if all are selected
         } else {
-            const newSelectedItems = new Set(usersAll.map(item => item.id));
             setSelectedItems([...usersAll]); // Select all
         }
     };
@@ -220,6 +218,9 @@ export default function Users() {
     };
 
     const closeModal = () => {
+        if (mode === 'delete' && selectedItems.length === 1 || mode === 'edit' && selectedItems.length === 1){
+            setSelectedItems([]);
+        }
         setModalOpen(false);
     };
 
@@ -234,27 +235,27 @@ export default function Users() {
     interface ExportDataItem {
         [key: string]: number | string | boolean | undefined;
         userId: number;
-        UserFirstName: string;
-        UserLastName: string;
-        UserEmail: string;
-        UserStudentcode: string | undefined;
-        UserTelephone: string;
-        UserActive: boolean;
-        UserRole: string;
+        FirstName: string;
+        LastName: string;
+        Email: string;
+        Studentcode: string | undefined;
+        Telephone: string;
+        Active: boolean;
+        Role: string;
     };
 
-    const exportRepairHistoryToExcel = (filename: string, worksheetName: string) => {
+    const exportUsersToExcel = (filename: string, worksheetName: string) => {
         if (!selectedItems || !selectedItems.length) return;
     
         const dataToExport: ExportDataItem[] = selectedItems.map(item => ({
             userId: item.id,
-            UserFirstName: item.firstName,
-            UserLastName: item.lastName,
-            UserEmail: item.email,
-            UserStudentcode: item.studentCode,
-            UserTelephone: item.tel,
-            UserActive: item.active,
-            UserRole: item.role.name,
+            FirstName: item.firstName,
+            LastName: item.lastName,
+            Email: item.email,
+            Studentcode: item.studentCode,
+            Telephone: item.tel,
+            Active: item.active,
+            Role: item.role.name,
         }));
     
         // Create a worksheet from the data
@@ -287,7 +288,7 @@ export default function Users() {
                 <Modal 
                     open={isModalOpen}
                     onClose={closeModal}
-                    onItemsUpdated={getAllUsers}
+                    onItemsUpdated={() => getAllUsers(true)}
                     selectedItems={selectedItems}
                     roles={roles}
                     mode={mode}
@@ -337,7 +338,7 @@ export default function Users() {
                                 disabled={selectedItems.length === 0}
                             />
                         </div>
-                        <div onClick={() => exportRepairHistoryToExcel(`Item-Data`, 'ItemData')}>
+                        <div onClick={() => exportUsersToExcel(`User-Data`, 'UserData')}>
                             <Button 
                                 icon={<InsertDriveFileOutlinedIcon />} 
                                 textColor="custom-dark-blue" 
@@ -374,7 +375,7 @@ export default function Users() {
                         <div className="w-full bg-gray-200 hidden lg:grid grid-cols-12">
                             <div className="col-span-1 mx-auto">
                                 <Checkbox 
-                                    checked={selectedItems.length === users.length && users.length > 0}
+                                    checked={selectedItems.length === usersAll.length && usersAll.length > 0}
                                     onChange={toggleSelectAll}
                                 />
                             </div>

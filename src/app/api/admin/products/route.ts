@@ -93,7 +93,8 @@ export async function GET(request: NextRequest) {
         where: whereClause,
         include: { 
             RoleItem: true,
-            location: true
+            location: true,
+            itemStatus: true,
         },
         orderBy: orderBy,
         skip: offset, // infinate scroll
@@ -104,7 +105,8 @@ export async function GET(request: NextRequest) {
         where: whereClause,
         include: { 
             RoleItem: true,
-            location: true
+            location: true,
+            itemStatus: true,
         },
         orderBy: orderBy,
     });

@@ -3,33 +3,21 @@ import { useSnackbar } from "notistack";
 import MaterialUIModal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { TextField, Popover } from '@mui/material';
+import { TextField } from '@mui/material';
 //icons
-import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
-import { ClearIcon } from "@mui/x-date-pickers/icons";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { YearCalendar } from '@mui/x-date-pickers/YearCalendar';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs, { Dayjs } from 'dayjs';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from "react";
 import { User } from "@/models/User";
 import Button from "@/components/states/Button";
 import { Checkbox, FormGroup } from "@mui/material";
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import Image from 'next/image';
 import Tooltip from '@mui/material/Tooltip';
 
 import { Role } from "@/models/Role";
-import { Location } from "@/models/Location";
-import { ItemStatus } from "@/models/ItemStatus";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 
 interface ModalCardProps {
     open: boolean;
@@ -114,7 +102,6 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
 
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
     const items = selectedItems || [];
-    const auth = getAuth();
 
     const primitiveUserId = userId ? String(userId) : null; // uid from firebase
 
@@ -129,7 +116,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
     // Item states
     const [firstName, setFirstName] = useState<string | null>(null);
     const [lastName, setLastName] = useState<string | null>(null);
-    const [studentCode, setstudentCode] = useState<string | null>(null);
+    const [studentCode, setStudentCode] = useState<string | null>(null);
     const [telephone, setTelephone] = useState<string | null>(null);
     const [email, setEmail] = useState<string>('');
     const [userActive, setUserActive] = useState(true);
@@ -147,7 +134,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
     const resetFields = () => {
         setFirstName(null);
         setLastName(null);
-        setstudentCode(null);
+        setStudentCode(null);
         setTelephone(null);
         setEmail('');
         setUserActive(true);
@@ -160,7 +147,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
             const item = items[0];
             setFirstName(item.firstName || null);
             setLastName(item.lastName || null);
-            setstudentCode(item.studentCode || null);
+            setStudentCode(item.studentCode || null);
             setTelephone(item.tel|| null);
             setEmail(item.email || '');
             setUserActive(item.active);
@@ -180,6 +167,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
         let isValid = true;
         resetErrors();
 
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const role = roles.find(role => role.id === selectedRoleId);
         const isStudentRole = role && role.name === 'Student';
 
@@ -206,6 +194,9 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
         }
         if (email === '') {
             setEmailError('Email is required.');
+            isValid = false;
+        } else if (!emailPattern.test(email)) {
+            setEmailError('Invalid email format.');
             isValid = false;
         }
         if (!selectedRoleId) {
@@ -399,9 +390,6 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
     const handleRoleChange = (event: React.ChangeEvent<{}>, value: Role | null) => {
         setSelectedRoleId(value ? value.id : null);
         setRoleError('');
-        if (value?.name !== 'Student') {
-            setstudentCode(null);
-        }
     };
 
     const renderContent = () => {
@@ -486,7 +474,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
                                 value={studentCode}
                                 error={!!studentCodeError}
                                 helperText={studentCodeError}
-                                onChange={(e) => setstudentCode(e.target.value)}
+                                onChange={(e) => setStudentCode(e.target.value)}
                                 />
                         </div>
                         <div className="flex justify-center mt-4">
@@ -551,12 +539,14 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
                                                     <span>{selectedItems[0].email}</span>
                                                 </Tooltip>
                                             </div>
-                                            <div className="truncate">
-                                                <span className="font-medium text-gray-400">Student Code&nbsp;</span><br/>
-                                                <Tooltip title={selectedItems[0].studentCode} placement="top-start">
-                                                    <span>{selectedItems[0].studentCode}</span>
-                                                </Tooltip>
-                                            </div>
+                                            {selectedItems[0].studentCode && (
+                                                <div className="truncate">
+                                                    <span className="font-medium text-gray-400">Student Code&nbsp;</span><br/>
+                                                    <Tooltip title={selectedItems[0].studentCode} placement="top-start">
+                                                        <span>{selectedItems[0].studentCode}</span>
+                                                    </Tooltip>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -645,21 +635,27 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
                         )}
                         {mode === 'delete' && (     // Only show delete button if mode is delete
                             <>
-                                <div onClick={() =>{
-                                    if (selectedItems?.length === 1) {
-                                        handleSoftDelete();
-                                    } else {
-                                        handleMultiSoftDelete();
-                                    }
-                                }}>
-                                    <Button 
-                                        paddingX="px-2"
-                                        textColor="custom-dark-blue" 
-                                        borderColor="custom-dark-blue"
-                                        textClassName="font-semibold text-xs select-none" 
-                                        text="Soft Delete"
-                                    />
-                                </div>
+                                {selectedItems && (
+                                    <>
+                                        {(selectedItems.length > 1 || (selectedItems.length === 1 && selectedItems[0].active)) && (
+                                            <div onClick={() =>{
+                                                if (selectedItems?.length === 1) {
+                                                    handleSoftDelete();
+                                                } else {
+                                                    handleMultiSoftDelete();
+                                                }
+                                            }}>
+                                                <Button 
+                                                    paddingX="px-2"
+                                                    textColor="custom-dark-blue" 
+                                                    borderColor="custom-dark-blue"
+                                                    textClassName="font-semibold text-xs select-none" 
+                                                    text="Soft Delete"
+                                                />
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                                 <div onClick={() => {
                                     if (selectedItems?.length === 1) {
                                         handlePermanentDelete();
