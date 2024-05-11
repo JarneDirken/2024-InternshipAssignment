@@ -23,7 +23,7 @@ If you are not interested with all the technical details of our application you 
 
 ## 🦄 Features
 
-Here's a quick overview of what you can do with our E-borrowing system. If you want to see a more detailed explanation download [this file](https://github.com/jarnedirken):
+Here's a quick overview of what you can do with our E-borrowing system. If you want to see a more detailed explanation download [this file](https://github.com/JarneDirken/2024-InternshipAssignment/blob/main/files/ManualUsers.pdf):
 
 - **Create an account**: You can create an account and view your personal data with the help of firebase.
 
