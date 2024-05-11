@@ -11,6 +11,7 @@ import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import { ClearIcon } from "@mui/x-date-pickers/icons";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
+import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { YearCalendar } from '@mui/x-date-pickers/YearCalendar';
@@ -24,10 +25,28 @@ import { Checkbox, FormGroup } from "@mui/material";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import Image from 'next/image';
 import Tooltip from '@mui/material/Tooltip';
+import * as XLSX from 'xlsx';
 
 import { Role } from "@/models/Role";
 import { Location } from "@/models/Location";
 import { ItemStatus } from "@/models/ItemStatus";
+
+interface ItemImport {
+    number: string;
+    name: string;
+    model: string;
+    brand: string;
+    locationId: number | undefined; // since it could be undefined if location name is not found
+    roleId: number | undefined; // since it could be undefined if role name is not found
+    yearBought: Date;
+    itemStatusId: number | undefined; // since it could be undefined if status name is not found
+    active: boolean;
+    notes: string | undefined;
+    schoolNumber: string | undefined;
+    consumable: boolean;
+    amount: number | undefined;
+    userId: String | null; // Adjust based on your actual usage, assuming it might be null
+}
 
 interface ModalCardProps {
     open: boolean;
@@ -37,7 +56,7 @@ interface ModalCardProps {
     roles: Role[];
     locations: Location[];
     itemStatuses: ItemStatus[];
-    mode: 'add' | 'edit' | 'delete';
+    mode: 'add' | 'edit' | 'delete' | 'import';
     userId: String | null;
     uniqueNames: string[];
     uniqueModels: string[];
@@ -120,6 +139,10 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
     const items = selectedItems || [];
     const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
     const openDatePicker = Boolean(anchorEl);
+
+    // File import states
+    type ImportData = string[][];
+    const [importData, setImportData] = useState<ImportData>([]);
 
     // File upload states
     const [file, setFile] = useState<File | null>(null);
@@ -207,10 +230,13 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
             if (availableStatus) {
                 setSelectedItemStatusId(availableStatus.id);
             }
+        } else if (mode === 'import') {
+            setImportData([]);
         }
     }, [items, mode]);
 
     const handleSuccess = () => {
+        if (mode === 'add' || mode === 'edit' || mode === 'delete') {}
         onItemsUpdated();
         onClose();
     };
@@ -512,6 +538,128 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
         }
     };
 
+    const handleImportData = async () => {
+        if (importData.length <= 1) {
+            enqueueSnackbar('No data to import.', { variant: 'error' });
+            return;
+        }
+    
+        const itemsToCreate = [];
+    
+        for (let i = 1; i < importData.length; i++) {
+            const row = importData[i];
+            const [
+                number, name, model, brand, location, yearStr, role, status, 
+                activeStr, note, schoolNumber, consumableStr, amountStr
+            ] = row;
+    
+            // Convert year from string to number
+            const year = parseInt(yearStr);
+            const active = activeStr === "true" ? true : activeStr === "false" ? false : Boolean(activeStr);
+            const consumable = consumableStr === "true" ? true : consumableStr === "false" ? false : Boolean(consumableStr);
+            let amount = undefined;
+
+            if (consumable && amountStr !== "") {
+                const parsedAmount = parseInt(amountStr);
+                if (!isNaN(parsedAmount)) {
+                    amount = parsedAmount;
+                }
+            }
+
+            // Prepare data
+            const itemData = {
+                number: number,
+                name: name,
+                model: model,
+                brand: brand,
+                locationId: locations.find(loc => loc.name === location)?.id,
+                roleId: roles.find(r => r.name === role)?.id,
+                yearBought: new Date(year, 0, 1), // Assuming year is just a number
+                itemStatusId: itemStatuses.find(s => s.name === status)?.id,
+                active: active,
+                notes: note || undefined,
+                schoolNumber: schoolNumber || undefined,
+                consumable: consumable,
+                amount: amount,
+                userId: primitiveUserId, // Assuming `userId` is from context or props
+            };
+    
+            // Validation checks
+            if (!number || existingNumbers.includes(number)) {
+                enqueueSnackbar(`Row ${i + 1}: Invalid or duplicate 'Number'.`, { variant: 'error' });
+                return;
+            }
+            if (!name) {
+                enqueueSnackbar(`Row ${i + 1}: 'Name' is required.`, { variant: 'error' });
+                return;
+            }
+            if (!model) {
+                enqueueSnackbar(`Row ${i + 1}: 'Model' is required.`, { variant: 'error' });
+                return;
+            }
+            if (!brand) {
+                enqueueSnackbar(`Row ${i + 1}: 'Brand' is required.`, { variant: 'error' });
+                return;
+            }
+            if (!itemData.locationId) {
+                enqueueSnackbar(`Row ${i + 1}: Invalid 'Location'.`, { variant: 'error' });
+                return;
+            }
+            if (!itemData.roleId) {
+                enqueueSnackbar(`Row ${i + 1}: Invalid 'Role'.`, { variant: 'error' });
+                return;
+            }
+            if (!itemData.itemStatusId) {
+                enqueueSnackbar(`Row ${i + 1}: Invalid or missing 'Status'.`, { variant: 'error' });
+                return;
+            }
+            if (typeof year !== 'number' || year < 2000 || year > new Date().getFullYear()) {
+                enqueueSnackbar(`Row ${i + 1}: Invalid 'Year'. Must be between 2000 and the current year.`, { variant: 'error' });
+                return;
+            }
+            if (typeof active !== 'boolean' && active !== "true" && active !== "false") {
+                enqueueSnackbar(`Row ${i + 1}: 'Active' must be true or false.`, { variant: 'error' });
+                return;
+            }
+            if (consumable && amount === undefined) {
+                enqueueSnackbar(`Row ${i + 1}: 'Amount' must be specified and valid for consumable items.`, { variant: 'error' });
+                return;
+            }
+    
+            // If validation passes, add to items to create
+            itemsToCreate.push(itemData);
+        }
+    
+        // If all rows are valid, create items
+        if (itemsToCreate.length > 0) {
+            enqueueSnackbar('All items are valid, starting import...', { variant: 'success' });
+            await handleMultiAdd(itemsToCreate);
+        }
+    };
+
+    const handleMultiAdd = async (items: ItemImport[]) => {
+        for (const item of items) {
+            const response = await fetch(`/api/admin/products/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ data: item }),
+            });
+    
+            if (!response.ok) {
+                const message = `Failed to create product: ${item.name}`;
+                console.error(message);
+                enqueueSnackbar(message, { variant: 'error' });
+                return; // Stop further processing if any request fails
+            }
+        }
+        
+        handleSuccess();
+        enqueueSnackbar('All products successfully created', { variant: 'success' });
+        setImportData([]); // Clear import data after successful creation
+    };
+
     const handleConsumableChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setConsumable(event.target.checked);
         if (!event.target.checked) {
@@ -646,9 +794,44 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
             const fileInput = document.getElementById('file-upload') as HTMLInputElement;
             if (fileInput) fileInput.value = '';
         }
+        if (mode === 'import') {
+            setImportData([]);
+        }
         onClose();
     }
+
+    const readExcelFile = (file: File) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const data = new Uint8Array(event.target?.result as ArrayBuffer);
+            const workbook = XLSX.read(data, { type: 'array' });
     
+            // Read the first worksheet
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+    
+            // Convert worksheet to JSON
+            const jsonData: ImportData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as ImportData;
+            setImportData(jsonData);
+            console.log(jsonData);
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
+    const handleImportUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            readExcelFile(file);
+        }
+    };
+
+    const handleDropImport = async (event: React.DragEvent<HTMLLabelElement>) => {
+        event.preventDefault();
+        const file = event.dataTransfer.files[0];
+        if (file) {
+            readExcelFile(file);
+        }
+    };
 
     const renderContent = () => {
         switch (mode) {
@@ -977,6 +1160,68 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
                         </>
                     );
                 }
+            case 'import':
+                return (
+                    <>
+                        <div className="flex justify-center">
+                            <div className="px-4 grid grid-cols-2">
+                                {importData.length === 0 && (
+                                    <>
+                                        <div className="col-span-1 flex justify-center items-center">
+                                            <a href="/assets/templates/Item-Data-Template.xlsx" download="TemplateFile.xlsx">
+                                                <Button 
+                                                    icon={<InsertDriveFileOutlinedIcon className="text-xl" />}
+                                                    textColor="custom-dark-blue" 
+                                                    borderColor="custom-dark-blue"
+                                                    textClassName="font-semibold select-none" 
+                                                    text="Template"
+                                                />
+                                            </a>
+                                        </div>
+                                    
+                                        <label
+                                            htmlFor="file-upload"
+                                            className="mx-auto bg-gray-100 border-2 border-gray-300 border-dotted p-3 flex flex-col justify-center items-center rounded col-span-1"
+                                            onDragOver={handleDragOver}
+                                            onDrop={handleDropImport}
+                                        >
+                                            <FileUploadOutlinedIcon className="text-gray-600 mb-1.5" />
+                                            <div className="text-sm">
+                                                <span className="text-blue-500 select-none">Click to upload</span><span className="select-none"> or drag and drop</span>
+                                            </div>
+                                            <span className="text-xs text-gray-400 select-none">XLSX and XLS only.</span>
+                                            <input
+                                                id="file-upload"
+                                                type="file"
+                                                onChange={handleImportUpload}
+                                                className="opacity-0 w-0 h-0"
+                                                accept=".xlsx, .xls"
+                                            />
+                                        </label>
+                                    </>
+                                )}
+                                {importData.length >= 1 && (
+                                    <div className="flex flex-row justify-around items-center gap-2 sm:col-span-2">
+                                        <div>
+                                            Import file has been loaded.
+                                        </div>
+                                        <div className="cursor-pointer" onClick={() => setImportData([])}>
+                                            <Button 
+                                                icon={<ClearIcon className="text-xl" />}
+                                                paddingX="px-2"
+                                                textColor="custom-gray" 
+                                                borderColor="custom-gray"
+                                                textClassName="font-semibold" 
+                                                text="Remove"
+                                            />
+                                        </div>
+                                        
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                );
         }
     };
 
@@ -991,9 +1236,9 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
                 <ThemeProvider theme={theme}>
                     <div className="flex justify-between items-center py-3 px-4 border-b-2 border-gray-200">
                         <div className="flex items-center gap-2">
-                            <span className="font-bold my-auto">{mode === 'add'? <Inventory2OutlinedIcon /> : mode === 'edit' ? <Inventory2OutlinedIcon /> : <WarningAmberRoundedIcon className="text-custom-red text-3xl" />}</span>
+                            <span className="font-bold my-auto">{mode === 'add'? <Inventory2OutlinedIcon /> : mode === 'edit' ? <Inventory2OutlinedIcon /> : mode === 'import' ? <InsertDriveFileOutlinedIcon /> : <WarningAmberRoundedIcon className="text-custom-red text-3xl" />}</span>
                             <span className={`font-bold ${mode === 'delete' ? 'text-custom-red' : ''}`}>
-                                {mode === 'add' ? 'Add product' : mode === 'edit' ? 'Edit product' :
+                                {mode === 'add' ? 'Add product' : mode === 'edit' ? 'Edit product' : mode === 'import' ? 'Import products' :
                                 selectedItems?.length === 1 ? "You're about to delete this item. Are you sure?" :
                                 "Delete products"}
                             </span>
@@ -1034,6 +1279,17 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
                                     borderColor="custom-green"
                                     textClassName="font-semibold select-none" 
                                     text="Save"
+                                />
+                            </div>
+                        )}
+                        {mode === 'import' && (   
+                            <div onClick={handleImportData}>
+                                <Button 
+                                    icon={<InsertDriveFileOutlinedIcon className="text-xl" />}
+                                    textColor="custom-dark-blue" 
+                                    borderColor="custom-dark-blue"
+                                    textClassName="font-semibold select-none" 
+                                    text="Import"
                                 />
                             </div>
                         )}
