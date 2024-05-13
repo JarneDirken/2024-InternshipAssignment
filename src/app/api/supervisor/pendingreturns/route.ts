@@ -47,11 +47,23 @@ export async function GET(request: NextRequest) {
         where: {
             firebaseUid: uid,
         },
+        include: {
+            role: true,
+        }
     });
 
     if (!user){
         return new Response(JSON.stringify("User not found"), {
             status: 404,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
+
+    if (!["Admin", "Supervisor"].includes(user.role.name)) {
+        return new Response(JSON.stringify("Forbidden, you don't have the rights to make this call"), {
+            status: 403, // Use 403 for Forbidden instead of 404
             headers: {
                 'Content-Type': 'application/json',
             },

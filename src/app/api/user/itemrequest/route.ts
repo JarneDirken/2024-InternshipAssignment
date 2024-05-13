@@ -118,6 +118,9 @@ export async function GET(request: NextRequest) {
         where: {
             firebaseUid: uid,
         },
+        include: {
+            role: true,
+        }
     });
 
     if (!user){
@@ -127,7 +130,16 @@ export async function GET(request: NextRequest) {
                 'Content-Type': 'application/json',
             },
         });
-    }
+    };
+
+    if (!["Admin", "Supervisor", "Teacher", "Student"].includes(user.role.name)) {
+        return new Response(JSON.stringify("Forbidden, you don't have the rights to make this call"), {
+            status: 403, // Use 403 for Forbidden instead of 404
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
 
     const itemRequests = await prisma.itemRequest.findMany({
         where: {
