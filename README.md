@@ -9,9 +9,9 @@ A E-borrowing system project with Next.js and TypeScript for our international i
 
 If you are not interested with all the technical details of our application you can try it out yourself by going to [our website](https://2024-internship-assignment.vercel.app/)
 
-- Student: username: `test1` password: `test1`
-- Supervisor: username: `test1` password: `test1`
-- Admin: username: `test1` password: `test1`
+- Student: email: `user1user@kmitl.ac.th` password: `B#v9B*y7e&sUF2`
+- Supervisor: email: `user2supervisor@kmitl.ac.th` password: `!VYB^^6c4&N@a2`
+- Admin: email: `user3admin@kmitl.ac.th` password: `WayDnTHR!H55y*`
 
 ## 📦 Technologies
 
