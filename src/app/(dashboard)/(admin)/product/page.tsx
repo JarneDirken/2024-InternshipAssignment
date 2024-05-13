@@ -298,11 +298,17 @@ export default function Product() {
         Role: string | undefined;
         Status: string | undefined;
         Active: boolean;
+        Note: string | undefined;
+        Schoolnumber: string | undefined;
+        Consumable: boolean;
+        Amount: number | undefined;
     };
 
     const exportProductsToExcel = (filename: string, worksheetName: string) => {
         if (!selectedItems || !selectedItems.length) return;
     
+        console.log(selectedItems);
+
         const dataToExport: ExportDataItem[] = selectedItems.map(item => ({
             itemId: item.id,
             Number: item.number,
@@ -311,9 +317,13 @@ export default function Product() {
             Brand: item.brand,
             Location: item.location.name,
             Year: formatDate(item.yearBought!),
-            Role: item.RoleItem?.[0].Role?.name,
+            Role: roles.find(role => role.id === item.RoleItem?.[0].roleId)?.name,
             Status: item.itemStatus?.name,
-            Active: item.active
+            Active: item.active,
+            Note: item.notes,
+            Schoolnumber: item.schoolNumber,
+            Consumable: item.consumable,
+            Amount: item.amount
         }));
     
         // Create a worksheet from the data
