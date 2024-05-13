@@ -436,6 +436,7 @@ export default function Product() {
                                 icon={<AddIcon />} 
                                 textColor="custom-primary" 
                                 borderColor="custom-primary" 
+                                buttonClassName="hover:bg-orange-200"
                                 fillColor="orange-100" 
                                 paddingX="px-2.5"
                                 paddingY="py-0.5"
@@ -449,6 +450,7 @@ export default function Product() {
                                 textColor="custom-red"
                                 borderColor="custom-red" 
                                 fillColor={selectedItems.length === 0 ? "gray-200" : "red-100"}
+                                buttonClassName={selectedItems.length === 0 ? "" : "hover:bg-red-200"}
                                 paddingX="px-2.5"
                                 paddingY="py-0.5"
                                 textClassName="font-semibold" 
@@ -464,7 +466,7 @@ export default function Product() {
                                 fillColor="blue-100" 
                                 paddingX="px-2.5"
                                 paddingY="py-0.5"
-                                buttonClassName="bg-blue-100 border-custom-dark-blue" 
+                                buttonClassName={`bg-blue-100 border-custom-dark-blue ${selectedItems.length === 0 ? "" : "hover:bg-blue-200"}`}
                                 textClassName="font-semibold text-custom-dark-blue" 
                                 text="Qr-Code" 
                                 disabled={selectedItems.length === 0}
@@ -476,6 +478,7 @@ export default function Product() {
                                 textColor="custom-dark-blue" 
                                 borderColor="custom-dark-blue" 
                                 fillColor="blue-100" 
+                                buttonClassName={selectedItems.length === 0 ? "" : "hover:bg-blue-200"}
                                 paddingX="px-2.5"
                                 paddingY="py-0.5"
                                 textClassName="font-semibold" 
@@ -489,6 +492,7 @@ export default function Product() {
                                 textColor="custom-dark-blue" 
                                 borderColor="custom-dark-blue" 
                                 fillColor="blue-100" 
+                                buttonClassName="hover:bg-blue-200"
                                 paddingX="px-2.5"
                                 paddingY="py-0.5"
                                 textClassName="font-semibold" 
@@ -528,9 +532,9 @@ export default function Product() {
                             <span className="text-gray-500 border-r-4 border-white font-semibold col-span-2 py-2 pl-2 truncate">NAME</span>
                             <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">MODEL</span>
                             <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">BRAND</span>
-                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 xl:col-span-2 py-2 pl-2 truncate">LOCATION</span>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">LOCATION</span>
                             <span className="text-gray-500 border-r-4 border-white font-semibold col-span-1 py-2 pl-2 truncate">YEAR</span>
-                            <span className="text-gray-500 font-semibold col-span-2 xl:col-span-1 py-2 pl-2 truncate">ACTION</span>
+                            <span className="text-gray-500 font-semibold col-span-2 py-2 pl-2 truncate">ACTION</span>
                         </div>
                         <div ref={listRef} className="bg-white w-full rounded-b-xl overflow-y-auto" style={{ height: '50vh' }}>
                             <ProductCard 

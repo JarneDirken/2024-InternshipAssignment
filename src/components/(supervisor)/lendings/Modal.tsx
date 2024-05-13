@@ -318,9 +318,9 @@ export default function Modal({ open, onClose, item, userId, handover, receive, 
                             <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
                                 <button className="text-custom-gray">Cancel</button>
                             </div>
-                            <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green cursor-pointer'
+                            <div className='group border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green hover:border-custom-green-hover cursor-pointer'
                                 onClick={handOverItem}>
-                                <button className='text-custom-green'>Confirm</button>
+                                <button className='text-custom-green group-hover:text-custom-green-hover'>Confirm</button>
                             </div>
                         </div>
                     )}
@@ -329,9 +329,9 @@ export default function Modal({ open, onClose, item, userId, handover, receive, 
                             <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
                                 <button className="text-custom-gray">Cancel</button>
                             </div>
-                            <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green cursor-pointer'
+                            <div className='group border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green hover:border-custom-green-hover cursor-pointer'
                                 onClick={receiveItem}>
-                                <button className='text-custom-green'>Confirm</button>
+                                <button className='text-custom-green group-hover:text-custom-green-hover'>Confirm</button>
                             </div>
                         </div>
                     )}
@@ -342,9 +342,9 @@ export default function Modal({ open, onClose, item, userId, handover, receive, 
                                 <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={() => setRepairState!(false)}>
                                     <button className="text-custom-gray">Cancel</button>
                                 </div>
-                                <div className={`border py-1 px-3 rounded-lg flex items-center gap-1 ${message ? 'border-custom-primary cursor-pointer' : 'border-custom-gray cursor-not-allowed'}`}
+                                <div className={`group border py-1 px-3 rounded-lg flex items-center gap-1 ${message ? 'border-custom-primary hover:border-custom-primary-hover cursor-pointer' : 'border-custom-gray cursor-not-allowed'}`}
                                     onClick={message ? () => checkItem(repairState) : undefined}>
-                                    <button className={`${message ? 'text-custom-primary cursor-pointer' : 'text-custom-gray cursor-not-allowed'}`}>Confirm</button>
+                                    <button className={`${message ? 'text-custom-primary group-hover:text-custom-primary-hover cursor-pointer' : 'text-custom-gray cursor-not-allowed'}`}>Confirm</button>
                                 </div>
                                 </>
                             ) : (
@@ -352,13 +352,13 @@ export default function Modal({ open, onClose, item, userId, handover, receive, 
                                 <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={onClose}>
                                     <button className="text-custom-gray">Cancel</button>
                                 </div>
-                                <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green cursor-pointer'
+                                <div className='group border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green hover:border-custom-green-hover cursor-pointer'
                                     onClick={() => checkItem(repairState)}>
-                                    <button className='text-custom-green'>Confirm</button>
+                                    <button className='text-custom-green group-hover:text-custom-green-hover'>Confirm</button>
                                 </div>
-                                    <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-primary cursor-pointer'
+                                    <div className='group border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-primary hover:border-custom-primary-hover cursor-pointer'
                                     onClick={() => setRepairState!(true)}>
-                                    <button className='text-custom-primary'>Repair</button>
+                                    <button className='text-custom-primary group-hover:text-custom-primary-hover'>Repair</button>
                                 </div>
                                 </>
                             )}

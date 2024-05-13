@@ -165,7 +165,7 @@ export default function Analytics() {
                     </div>
                     <div className="w-full flex flex-col md:flex-row items-center">
                         <div className="w-full flex flex-col justify-center items-center">
-                            <div>Total Requests Made</div>
+                            <div>Total requests Made</div>
                             <Gauge
                                 value={totalRequestsMade}
                                 startAngle={0}

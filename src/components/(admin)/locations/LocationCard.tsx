@@ -5,6 +5,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import { useRouter } from 'next/navigation';
 import Tooltip from '@mui/material/Tooltip';
+import { IconButton } from "@mui/material";
 
 interface LocationCardProps {
     openModal: (mode: 'add' | 'edit' | 'delete', item: Location) => void;
@@ -74,21 +75,25 @@ export default function LocationCard({ openModal, onSelectItem, selectedItems, i
                                 onChange={() => onSelectItem(item.id)} 
                             />
                         </div>
-                        <div className="truncate col-span-9 lg:col-span-10 p-2 self-center">
+                        <div className="truncate col-span-9 p-2 self-center">
                             <Tooltip title={item.name} placement="top-start" arrow>
                                 <span>{item.name}</span>
                             </Tooltip>
                         </div>
                         
-                        <div className="flex justify-evenly col-span-2 lg:col-span-1 p-2 self-center">
+                        <div className="flex justify-evenly col-span-2 p-2 self-center">
                             <Tooltip title="Edit" placement="top" arrow>
                                 <div className="cursor-pointer" onClick={() => openModal('edit', item)}>
-                                    <EditOutlinedIcon className="text-gray-400" />
+                                    <IconButton size="small">
+                                        <EditOutlinedIcon className="text-gray-400" />
+                                    </IconButton>
                                 </div>
                             </Tooltip>
                             <Tooltip title="Delete" placement="top" arrow>
                                 <div className="cursor-pointer" onClick={() => openModal('delete', item)}>
-                                    <DeleteOutlinedIcon className="text-custom-red" />
+                                    <IconButton size="small">
+                                        <DeleteOutlinedIcon className="text-custom-red" />
+                                    </IconButton>
                                 </div>
                             </Tooltip>
                         </div>

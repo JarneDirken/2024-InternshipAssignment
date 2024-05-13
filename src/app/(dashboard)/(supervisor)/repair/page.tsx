@@ -359,7 +359,7 @@ export default function Reparation() {
                 <div className="flex border-b border-b-gray-300 bg-white rounded-tl-xl rounded-tr-xl z-0 overflow-x-scroll" id="selectTabs">
                     <div className="relative">
                         <div
-                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'repair' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
+                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer hover:text-custom-primary ${selectedTab === 'repair' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
                             onClick={() => setSelectedTab('repair')}
                         >
                             In repair
@@ -370,7 +370,7 @@ export default function Reparation() {
                     </div>
                     <div className="relative">
                         <div
-                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'history' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
+                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer hover:text-custom-primary ${selectedTab === 'history' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
                             onClick={() => setSelectedTab('history')}
                         >
                             History
@@ -382,6 +382,7 @@ export default function Reparation() {
                                 icon={<InsertDriveFileOutlinedIcon />} 
                                 textColor="custom-dark-blue" 
                                 borderColor="custom-dark-blue" 
+                                buttonClassName="hover:bg-blue-200"
                                 fillColor="blue-100" 
                                 paddingX="px-2.5"
                                 paddingY="py-0.5"

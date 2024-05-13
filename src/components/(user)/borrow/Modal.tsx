@@ -545,15 +545,15 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
                         <div className="border-custom-gray border py-1 px-3 rounded-lg cursor-pointer" onClick={closeModal}>
                             <button className="text-custom-gray">Cancel</button>
                         </div>
-                        <div className={`border py-1 px-3 rounded-lg flex items-center gap-1 ${(!isUrgent && !fileUrl || isUrgent && fileUrl) && borrowDate && returnDate && !errorMessage ? 'border-custom-green text-custom-green cursor-pointer' : 'border-gray-300 text-gray-300 cursor-not-allowed'}`}
+                        <div className={`group border py-1 px-3 rounded-lg flex items-center gap-1 ${(!isUrgent && !fileUrl || isUrgent && fileUrl) && borrowDate && returnDate && !errorMessage ? 'border-custom-green text-custom-green cursor-pointer hover:border-custom-green-hover' : 'border-gray-300 text-gray-300 cursor-not-allowed'}`}
                             onClick={(!isUrgent && !fileUrl || isUrgent && fileUrl) && borrowDate && returnDate && !errorMessage ? borrowItem : undefined}>
-                            <CheckCircleOutlineOutlinedIcon fontSize="small" className={`${(!isUrgent && !fileUrl || isUrgent && fileUrl) && borrowDate && returnDate && !errorMessage ? 'text-custom-green' : 'text-custom-gray cursor-not-allowed'}`} />
-                            <button className={`${(!isUrgent && !fileUrl || isUrgent && fileUrl) && borrowDate && returnDate && !errorMessage ? 'text-custom-green' : 'text-custom-gray cursor-not-allowed disabled'}`}>Borrow</button>
+                            <CheckCircleOutlineOutlinedIcon fontSize="small" className={`${(!isUrgent && !fileUrl || isUrgent && fileUrl) && borrowDate && returnDate && !errorMessage ? 'text-custom-green group-hover:text-custom-green-hover' : 'text-custom-gray cursor-not-allowed'}`} />
+                            <button className={`${(!isUrgent && !fileUrl || isUrgent && fileUrl) && borrowDate && returnDate && !errorMessage ? 'text-custom-green group-hover:text-custom-green-hover' : 'text-custom-gray cursor-not-allowed disabled'}`}>Borrow</button>
                         </div>
-                        <div className={`border py-1 px-3 rounded-lg flex items-center gap-1 ${(!isUrgent && !fileUrl || isUrgent && fileUrl) && borrowDate && returnDate && !errorMessage ? 'border-custom-primary text-custom-primary cursor-pointer' : 'border-gray-300 text-gray-300 cursor-not-allowed'}`}
+                        <div className={`group border py-1 px-3 rounded-lg flex items-center gap-1 ${(!isUrgent && !fileUrl || isUrgent && fileUrl) && borrowDate && returnDate && !errorMessage ? 'border-custom-primary text-custom-primary cursor-pointer hover:border-custom-primary-hover' : 'border-gray-300 text-gray-300 cursor-not-allowed'}`}
                             onClick={() => (!isUrgent && !fileUrl || isUrgent && fileUrl) && borrowDate && returnDate && !errorMessage ? handleAddToCart(item) : undefined}>
-                            <ShoppingCartOutlinedIcon fontSize="small" className={`${(!isUrgent && !fileUrl || isUrgent && fileUrl) && borrowDate && returnDate && !errorMessage ? 'text-custom-primary' : 'text-custom-gray cursor-not-allowed'}`} />
-                            <button className={`${(!isUrgent && !fileUrl || isUrgent && fileUrl) && borrowDate && returnDate && !errorMessage ? 'text-custom-primary' : 'text-custom-gray cursor-not-allowed disabled'}`}>Add cart</button>
+                            <ShoppingCartOutlinedIcon fontSize="small" className={`${(!isUrgent && !fileUrl || isUrgent && fileUrl) && borrowDate && returnDate && !errorMessage ? 'text-custom-primary group-hover:text-custom-primary-hover' : 'text-custom-gray cursor-not-allowed'}`} />
+                            <button className={`${(!isUrgent && !fileUrl || isUrgent && fileUrl) && borrowDate && returnDate && !errorMessage ? 'text-custom-primary group-hover:text-custom-primary-hover' : 'text-custom-gray cursor-not-allowed disabled'}`}>Add cart</button>
                         </div>
                     </div>
                 </div>

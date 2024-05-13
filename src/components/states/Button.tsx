@@ -29,7 +29,7 @@ export default function Button({
     textClassName = "",
     disabled = false
 }: ButtonProps) {
-    const buttonClasses = `border rounded-lg items-center justify-center ${paddingY} ${paddingX} flex gap-1 border-${borderColor} bg-${fillColor} ${buttonClassName} ${disabled ? 'bg-gray-200 border-gray-400 cursor-not-allowed' : ''}`;
+    const buttonClasses = `group border rounded-lg items-center justify-center ${paddingY} ${paddingX} flex gap-1 border-${borderColor} bg-${fillColor} ${buttonClassName} ${disabled ? 'bg-gray-200 border-gray-400 cursor-not-allowed' : ''}`;
     const textClasses = `font-${font} text-${textColor} text-sm sm:text-lg ${textClassName} ${disabled ? 'text-gray-400' : ''}`;
 
     return (

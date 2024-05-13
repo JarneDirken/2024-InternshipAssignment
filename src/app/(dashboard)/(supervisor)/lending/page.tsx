@@ -513,7 +513,7 @@ export default function Lending() {
                 <div className="flex border-b border-b-gray-300 bg-white rounded-tl-xl rounded-tr-xl z-0 overflow-x-scroll" id="selectTabs">
                     <div className="relative">
                         <div
-                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'borrows' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
+                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer hover:text-custom-primary ${selectedTab === 'borrows' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
                             onClick={() => setSelectedTab('borrows')}
                         >
                             Pending borrows
@@ -524,7 +524,7 @@ export default function Lending() {
                     </div>
                     <div className="relative">
                         <div
-                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'returns' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
+                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer hover:text-custom-primary ${selectedTab === 'returns' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
                             onClick={() => setSelectedTab('returns')}
                         >
                             Pending returns
@@ -535,7 +535,7 @@ export default function Lending() {
                     </div>
                     <div className="relative">
                         <div
-                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'checkitem' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
+                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer hover:text-custom-primary ${selectedTab === 'checkitem' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
                             onClick={() => setSelectedTab('checkitem')}
                         >
                             check items
@@ -546,7 +546,7 @@ export default function Lending() {
                     </div>
                     <div className="relative">
                         <div
-                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer ${selectedTab === 'history' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
+                            className={`w-48 flex justify-center py-3 uppercase cursor-pointer hover:text-custom-primary ${selectedTab === 'history' ? 'border-b-4 border-b-custom-primary text-custom-primary font-semibold ' : 'text-custom-gray font-normal'}`}
                             onClick={() => setSelectedTab('history')}
                         >
                             History

@@ -161,6 +161,8 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                                 paddingY='py-1'
                                                 textColor='custom-primary'
                                                 borderColor='custom-primary'
+                                                buttonClassName='hover:border-custom-primary-hover'
+                                                textClassName='group-hover:text-custom-primary-hover'
                                                 onClick={() => openModal(item)}
                                             />
                                         </div>

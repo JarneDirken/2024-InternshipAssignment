@@ -176,6 +176,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                             textColor="white" 
                                             borderColor="custom-primary" 
                                             fillColor="custom-primary"
+                                            buttonClassName="hover:bg-custom-primary-hover"
                                             paddingY="py-0"
                                             font="semibold"
                                             onClick={() => returnItem(item)}
@@ -186,6 +187,7 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                             textColor="white" 
                                             borderColor="custom-primary" 
                                             fillColor="custom-primary"
+                                            buttonClassName="hover:bg-custom-primary-hover"
                                             paddingY="py-0"
                                             font="semibold"
                                             onClick={() => openModal!(item)}

@@ -293,28 +293,28 @@ export default function Modal({ open, onClose, item, userId, rejected, setReject
                     </div>
                     {!rejected && !approved && (
                         <>
-                            <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-red cursor-pointer'
+                            <div className='group border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-red cursor-pointer hover:border-custom-red-hover'
                                 onClick={rejectedButton}>
-                                <CancelOutlinedIcon fontSize="small" className='text-custom-red' />
-                                <button className='text-custom-red'>Reject</button>
+                                <CancelOutlinedIcon fontSize="small" className='text-custom-red group-hover:text-custom-red-hover' />
+                                <button className='text-custom-red group-hover:text-custom-red-hover'>Reject</button>
                             </div>
-                            <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green cursor-pointer'
+                            <div className='group border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green cursor-pointer hover:border-custom-green-hover'
                                 onClick={approvedButton}>
-                                <CheckCircleOutlineOutlinedIcon fontSize="small" className='text-custom-green' />
-                                <button className='text-custom-green'>Approve</button>
+                                <CheckCircleOutlineOutlinedIcon fontSize="small" className='text-custom-green group-hover:text-custom-green-hover' />
+                                <button className='text-custom-green group-hover:text-custom-green-hover'>Approve</button>
                             </div>
                         </>
                     )}
                     {rejected && (
-                        <div className={`border py-1 px-3 rounded-lg flex items-center gap-1 ${message ? 'border-custom-red cursor-pointer' : 'border-custom-gray cursor-not-allowed'}`}
+                        <div className={`group border py-1 px-3 rounded-lg flex items-center gap-1 ${message ? 'border-custom-red cursor-pointer hover:border-custom-red-hover' : 'border-custom-gray cursor-not-allowed'}`}
                             onClick={message ? requestItem : undefined}>
-                            <button className={`text-${message ? 'custom-red' : 'custom-gray cursor-not-allowed'}`}>Confirm</button>
+                            <button className={`text-${message ? 'custom-red group-hover:text-custom-red-hover' : 'custom-gray cursor-not-allowed'}`}>Confirm</button>
                         </div>
                     )}
                     {approved && (
-                        <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green cursor-pointer'
+                        <div className='group border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green cursor-pointer hover:border-custom-green-hover'
                             onClick={requestItem}>
-                            <button className='text-custom-green'>Confirm</button>
+                            <button className='text-custom-green group-hover:text-custom-green-hover'>Confirm</button>
                         </div>
                     )}
                 </div>

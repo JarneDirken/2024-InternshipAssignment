@@ -201,6 +201,8 @@ export default function ItemCard({ active, openModal, items, itemLoading, setApp
                                             text="Reject" 
                                             textColor="custom-red" 
                                             borderColor="custom-red"
+                                            buttonClassName="hover:border-custom-red-hover"
+                                            textClassName="group-hover:text-custom-red-hover"
                                             paddingY="py-0"
                                             font="semibold"
                                             onClick={() => rejected(item)}
@@ -209,6 +211,8 @@ export default function ItemCard({ active, openModal, items, itemLoading, setApp
                                             text="Approve" 
                                             textColor="custom-green" 
                                             borderColor="custom-green" 
+                                            buttonClassName="hover:border-custom-green-hover"
+                                            textClassName="group-hover:text-custom-green-hover"
                                             paddingY="py-0"
                                             font="semibold"
                                             onClick={() => approved(item)}
@@ -218,6 +222,7 @@ export default function ItemCard({ active, openModal, items, itemLoading, setApp
                                             textColor="white" 
                                             borderColor="custom-primary" 
                                             fillColor="custom-primary"
+                                            buttonClassName="hover:bg-custom-primary-hover"
                                             paddingY="py-0"
                                             font="semibold"
                                             onClick={() => openModal(item)}
