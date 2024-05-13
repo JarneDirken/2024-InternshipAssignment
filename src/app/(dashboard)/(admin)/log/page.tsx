@@ -154,6 +154,7 @@ export default function Log() {
                         icon={<InsertDriveFileOutlinedIcon />} 
                         textColor="custom-dark-blue"
                         borderColor="custom-dark-blue"
+                        buttonClassName="hover:bg-blue-200"
                         fillColor="blue-100"
                         paddingX="px-2.5"
                         paddingY="py-0.5"

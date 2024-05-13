@@ -624,7 +624,8 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
                                     icon={<CheckCircleOutlineIcon className="text-xl" />}
                                     textColor="custom-green" 
                                     borderColor="custom-green"
-                                    textClassName="font-semibold select-none" 
+                                    buttonClassName="hover:border-custom-green-hover"
+                                    textClassName="font-semibold select-none group-hover:text-custom-green-hover" 
                                     text="Add"
                                 />
                             </div>
@@ -635,7 +636,8 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
                                     icon={<CheckCircleOutlineIcon className="text-xl" />}
                                     textColor="custom-green" 
                                     borderColor="custom-green"
-                                    textClassName="font-semibold select-none" 
+                                    buttonClassName="hover:border-custom-green-hover"
+                                    textClassName="font-semibold select-none group-hover:text-custom-green-hover" 
                                     text="Save"
                                 />
                             </div>
@@ -656,6 +658,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
                                                     paddingX="px-2"
                                                     textColor="custom-dark-blue" 
                                                     borderColor="custom-dark-blue"
+                                                    buttonClassName="hover:bg-blue-200 transition-colors"
                                                     textClassName="font-semibold text-xs select-none" 
                                                     text="Soft Delete"
                                                 />
@@ -674,6 +677,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
                                         paddingX="px-2"
                                         textColor="custom-red" 
                                         borderColor="custom-red"
+                                        buttonClassName="hover:bg-red-200 transition-colors"
                                         textClassName="font-semibold text-xs select-none" 
                                         text="Permanent Delete"
                                     />

@@ -105,6 +105,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
                     textColor="white" 
                     borderColor="custom-primary" 
                     fillColor="custom-primary"
+                    buttonClassName="hover:bg-custom-primary-hover"
                     paddingY="py-0"
                     font="semibold"
                     onClick={() => openModal(item)}

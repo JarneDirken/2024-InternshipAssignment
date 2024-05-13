@@ -6,6 +6,7 @@ import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import { useRouter } from 'next/navigation';
 import Tooltip from '@mui/material/Tooltip';
+import { IconButton } from "@mui/material";
 
 interface UserCardProps {
     openModal: (mode: 'add' | 'edit' | 'delete', item: User) => void;
@@ -93,17 +94,23 @@ export default function UserCard({ openModal, onSelectItem, selectedItems, items
                                 <div className="flex justify-evenly items-end mt-auto">
                                     <Tooltip title="Edit" placement="top-start" arrow>
                                         <div className="cursor-pointer" onClick={() => openModal('edit', item)}>
-                                            <EditOutlinedIcon className="text-gray-400" />
+                                            <IconButton size="small">
+                                                <EditOutlinedIcon className="text-gray-400" />
+                                            </IconButton>
                                         </div>
                                     </Tooltip>
                                     <Tooltip title="Delete" placement="top-start" arrow>
-                                        <div className="cursor-pointer" onClick={() => openModal('delete', item)}>
-                                            <DeleteOutlinedIcon className="text-custom-red" />
+                                        <div className="cursor-pointer" onClick={() => openModal('delete', item)}>\
+                                            <IconButton size="small">
+                                                <DeleteOutlinedIcon className="text-custom-red" />
+                                            </IconButton>
                                         </div>
                                     </Tooltip>
                                     <Tooltip title="Delete" placement="top-start" arrow>
                                         <div className="cursor-pointer" onClick={() => viewUserHistory(item.id)}>
-                                            <HistoryOutlinedIcon className="text-custom-primary" />
+                                            <IconButton size="small">
+                                                <HistoryOutlinedIcon className="text-custom-primary" />
+                                            </IconButton>
                                         </div>
                                     </Tooltip>
                                 </div>
@@ -135,7 +142,7 @@ export default function UserCard({ openModal, onSelectItem, selectedItems, items
                                 <span>{item.studentCode}</span>
                             </Tooltip>
                         </div>
-                        <div className="truncate col-span-1 xl:col-span-2 p-2 self-center">
+                        <div className="truncate col-span-1 p-2 self-center">
                             <Tooltip title={item.tel} placement="top-start" arrow>
                                 <span>{item.tel}</span>
                             </Tooltip>
@@ -151,21 +158,27 @@ export default function UserCard({ openModal, onSelectItem, selectedItems, items
                             </Tooltip>
                         </div>
                         
-                        <div className="flex justify-evenly col-span-2 xl:col-span-1 p-2 self-center">
+                        <div className="flex justify-evenly col-span-2 p-2 self-center">
                             <Tooltip title="Edit" placement="top" arrow>
                                 <div className="cursor-pointer" onClick={() => openModal('edit', item)}>
-                                    <EditOutlinedIcon className="text-gray-400" />
+                                    <IconButton size="small">
+                                        <EditOutlinedIcon className="text-gray-400" />
+                                    </IconButton>
                                 </div>
                             </Tooltip>
                             <Tooltip title="Delete" placement="top" arrow>
                                 <div className="cursor-pointer" onClick={() => openModal('delete', item)}>
-                                    <DeleteOutlinedIcon className="text-custom-red" />
+                                    <IconButton size="small">
+                                        <DeleteOutlinedIcon className="text-custom-red" />
+                                    </IconButton>
                                 </div>
                             </Tooltip>
                             
                             <Tooltip title="History" placement="top" arrow>
                                 <div className="cursor-pointer" onClick={() => viewUserHistory(item.id)}>
-                                    <HistoryOutlinedIcon className="text-custom-primary" />
+                                    <IconButton size="small">
+                                        <HistoryOutlinedIcon className="text-custom-primary" />
+                                    </IconButton>
                                 </div>
                             </Tooltip>
                         </div>

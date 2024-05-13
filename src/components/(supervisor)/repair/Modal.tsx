@@ -234,28 +234,28 @@ export default function Modal({ open, onClose, item, repaired, broken, setRepair
                     </div>
                     {(!repaired && !broken && selectedTab !== "history") && (
                         <>
-                            <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-red cursor-pointer'
+                            <div className='group border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-red group-hover:border-custom-red-hover cursor-pointer'
                                 onClick={() => setBroken(true)}>
-                                <CancelOutlinedIcon fontSize="small" className='text-custom-red' />
-                                <button className='text-custom-red'>Broken</button>
+                                <CancelOutlinedIcon fontSize="small" className='text-custom-red group-hover:text-custom-red-hover' />
+                                <button className='text-custom-red group-hover:text-custom-red-hover'>Broken</button>
                             </div>
-                            <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green cursor-pointer'
+                            <div className='group border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green group:border-custom-green-hover cursor-pointer'
                                 onClick={() => setRepaired(true)}>
-                                <CheckCircleOutlineOutlinedIcon fontSize="small" className='text-custom-green' />
-                                <button className='text-custom-green'>Repaired</button>
+                                <CheckCircleOutlineOutlinedIcon fontSize="small" className='text-custom-green group-hover:text-custom-green-hover' />
+                                <button className='text-custom-green group-hover:text-custom-green-hover'>Repaired</button>
                             </div>
                         </>
                     )}
                     {broken && (
-                        <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-red cursor-pointer'
+                        <div className='group border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-red hover:border-custom-red-hover cursor-pointer'
                             onClick={repairItem}>
-                            <button className='text-custom-red'>Confirm</button>
+                            <button className='text-custom-red group-hover:text-custom-red-hover'>Confirm</button>
                         </div>
                     )}
                     {repaired && (
-                        <div className='border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green cursor-pointer'
+                        <div className='group border py-1 px-3 rounded-lg flex items-center gap-1 border-custom-green hover:border-custom-green-hover cursor-pointer'
                             onClick={repairItem}>
-                            <button className='text-custom-green'>Confirm</button>
+                            <button className='text-custom-green group-hover:text-custom-green-hover'>Confirm</button>
                         </div>
                     )}
                 </div>

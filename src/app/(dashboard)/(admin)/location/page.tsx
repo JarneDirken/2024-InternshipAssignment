@@ -280,6 +280,7 @@ export default function Locations() {
                                 icon={<AddIcon />} 
                                 textColor="custom-primary" 
                                 borderColor="custom-primary" 
+                                buttonClassName="hover:bg-orange-200"
                                 fillColor="orange-100" 
                                 paddingX="px-2.5"
                                 paddingY="py-0.5"
@@ -293,6 +294,7 @@ export default function Locations() {
                                 textColor="custom-red"
                                 borderColor="custom-red" 
                                 fillColor={selectedLocations.length === 0 ? "gray-200" : "red-100"}
+                                buttonClassName={selectedLocations.length === 0 ? "" : "hover:bg-red-200"}
                                 paddingX="px-2.5"
                                 paddingY="py-0.5"
                                 textClassName="font-semibold" 
@@ -305,6 +307,7 @@ export default function Locations() {
                                 icon={<InsertDriveFileOutlinedIcon />} 
                                 textColor="custom-dark-blue" 
                                 borderColor="custom-dark-blue" 
+                                buttonClassName={selectedLocations.length === 0 ? "" : "hover:bg-blue-200"}
                                 fillColor="blue-100" 
                                 paddingX="px-2.5"
                                 paddingY="py-0.5"
@@ -341,8 +344,8 @@ export default function Locations() {
                                     onChange={toggleSelectAll}
                                 />
                             </div>
-                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-9 lg:col-span-10 py-2 pl-2 truncate">NAME</span>
-                            <span className="text-gray-500 font-semibold col-span-2 lg:col-span-1 py-2 pl-2 truncate">ACTION</span>
+                            <span className="text-gray-500 border-r-4 border-white font-semibold col-span-9 py-2 pl-2 truncate">NAME</span>
+                            <span className="text-gray-500 font-semibold col-span-2 py-2 pl-2 truncate">ACTION</span>
                         </div>
                         <div className="bg-white w-full rounded-b-xl overflow-y-auto" style={{ height: '50vh' }}>
                             <LocationCard 

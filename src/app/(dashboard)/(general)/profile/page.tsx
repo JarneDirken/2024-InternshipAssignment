@@ -208,7 +208,7 @@ export default function Profile() {
                     </div>
                     <div className='flex flex-col justify-center items-center md:items-start'>
                         <div className='flex gap-4 mb-2'>
-                            <label htmlFor="profilePicUpload" className="border border-gray-300 rounded-lg items-center justify-center py-1 px-4 flex gap-1 cursor-pointer">
+                            <label htmlFor="profilePicUpload" className="border border-gray-300 rounded-lg items-center justify-center py-1 px-4 flex gap-1 cursor-pointer hover:bg-gray-100 transition">
                                 Upload new photo
                                 <input
                                     type="file"
@@ -218,7 +218,7 @@ export default function Profile() {
                                     onChange={handleFileChange}
                                 />
                             </label>
-                            <Button text='Remove' icon={<DeleteIcon fontSize='small'/>} onClick={RemovePhoto}/>
+                            <Button text='Remove' icon={<DeleteIcon fontSize='small'/>} onClick={RemovePhoto} buttonClassName='hover:bg-gray-100 transition' />
                         </div>
                         <div className='flex flex-col justify-center items-center md:items-start'>
                             <span className='text-sm text-gray-400'>At least 800 x 800 px recommended.</span>
@@ -232,9 +232,9 @@ export default function Profile() {
                         <div className='flex justify-between items-center mb-4'>
                             <h1 className='font-semibold text-2xl'>Personal Info</h1>
                             { !edit ? (
-                                <Button text='Edit' icon={<EditIcon fontSize='small'/>} onClick={handleEditButton}/>
+                                <Button text='Edit' icon={<EditIcon fontSize='small'/>} onClick={handleEditButton} buttonClassName='hover:bg-gray-100 transition' />
                             ) : (
-                                <Button text='Save' icon={<CheckIcon fontSize='small'/>} onClick={handleSaveButton}/>
+                                <Button text='Save' icon={<CheckIcon fontSize='small'/>} onClick={handleSaveButton} buttonClassName='hover:bg-gray-100 transition' />
                             )}
                             
                         </div>

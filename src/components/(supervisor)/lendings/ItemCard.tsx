@@ -185,6 +185,8 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                                 text="Hand over"
                                                 textColor="custom-green"
                                                 borderColor="custom-green"
+                                                buttonClassName="hover:border-custom-green-hover"
+                                                textClassName="group-hover:text-custom-green-hover"
                                                 paddingX="px-0"
                                                 paddingY="py-0"
                                                 onClick={() => handover(item)}
@@ -194,6 +196,8 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                                 text="Received"
                                                 textColor="custom-green"
                                                 borderColor="custom-green"
+                                                buttonClassName="hover:border-custom-green-hover"
+                                                textClassName="group-hover:text-custom-green-hover"
                                                 paddingX="px-0"
                                                 paddingY="py-0"
                                                 onClick={() => receive(item)}
@@ -203,6 +207,8 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                                 text="Checked"
                                                 textColor="custom-green"
                                                 borderColor="custom-green"
+                                                buttonClassName="hover:border-custom-green-hover"
+                                                textClassName="group-hover:text-custom-green-hover"
                                                 paddingX="px-0"
                                                 paddingY="py-0"
                                                 onClick={() => checked(item)}
