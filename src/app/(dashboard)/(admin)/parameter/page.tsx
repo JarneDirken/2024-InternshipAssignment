@@ -15,6 +15,11 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import { InputAdornment, TextField } from '@mui/material';
 import { getAuth } from 'firebase/auth';
 import {app} from "@/services/firebase-config";
+import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import { ClearIcon } from "@mui/x-date-pickers/icons";
+import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
+import { deleteObject, getDownloadURL, getStorage, listAll, ref, uploadBytes } from 'firebase/storage';
+import CheckIcon from '@mui/icons-material/Check';
 
 export default function Parameter() {
     const { isAuthorized, loading } = useAuth(['Admin']);
@@ -33,6 +38,9 @@ export default function Parameter() {
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
     const [userId, setUserId] = useState<string | null>(null); // userID
     const auth = getAuth(app); // Get authentication
+    const storage = getStorage(app);
+    const [templateUrl, setTemplateUrl] = useState('');
+    const [stagedFile, setStagedFile] = useState<File | null>(null);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -47,6 +55,7 @@ export default function Parameter() {
 
     useEffect(() => {
         getParameters();
+        fetchCurrentTemplateUrl();
     }, []);
 
     const handleTimeChange = (dayjsSetter: DayjsSetterType, stringSetter: StringSetterType) => (newValue: Dayjs | null) => {
@@ -65,7 +74,25 @@ export default function Parameter() {
         const time2 = dayjs(time2String, 'HH:mm');
         return time1.isBefore(time2);
     };
+
+    const handleDragOver = (event: React.DragEvent<HTMLLabelElement>) => {
+        event.preventDefault();
+    };
+
+    const handleImportUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];  // Use optional chaining to safely access the file
+        if (file && file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+            setStagedFile(file);
+        }
+    };
     
+    const handleDropImport = async (event: React.DragEvent<HTMLLabelElement>) => {
+        event.preventDefault();
+        const file = event.dataTransfer.files?.[0];  // Use optional chaining to safely access the file
+        if (file && file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+            setStagedFile(file);  // Store the file for staged upload instead of directly uploading
+        }
+    };
 
     async function getParameters() {
         try {
@@ -146,6 +173,50 @@ export default function Parameter() {
         } else {
             enqueueSnackbar('Failed to save data', { variant: 'error' });
             console.error('Failed to save item data');
+        }
+    };
+
+    async function fetchCurrentTemplateUrl() {
+        const storage = getStorage();
+        const directoryRef = ref(storage, 'templates/urgentBorrow/');
+    
+        try {
+            const result = await listAll(directoryRef);
+            if (result.items.length > 0) {
+                const fileRef = result.items[0];  // Assuming there's at least one file and we take the first one
+                const url = await getDownloadURL(fileRef);
+                setTemplateUrl(url);
+            } else {
+                console.error('No files found in the directory.');
+            }
+        } catch (error) {
+            console.error('Failed to list files:', error);
+        }
+    };
+
+    async function replaceTemplate() {
+        if (!stagedFile) return; 
+    
+        const storage = getStorage();
+        const directoryRef = ref(storage, 'templates/urgentBorrow/');
+    
+        try {
+            // List all files in the directory
+            const list = await listAll(directoryRef);
+            if (list.items.length > 0) {
+                // Assume there's only one file and delete it
+                await deleteObject(list.items[0]);
+            }
+    
+            // Upload new file
+            const newFileRef = ref(storage, `templates/urgentBorrow/${stagedFile.name}`);
+            await uploadBytes(newFileRef, stagedFile);
+            const url = await getDownloadURL(newFileRef); 
+            setTemplateUrl(url);
+            setStagedFile(null);
+            enqueueSnackbar('Changed urgent borrowing request template succefully', { variant: 'success' });
+        } catch (error) {
+            console.error('Error replacing template:', error);
         }
     };
 
@@ -240,6 +311,73 @@ export default function Parameter() {
                     text='Save'
                     onClick={updateParameters}
                 />
+            </div>
+            <div className="flex flex-col mt-4">
+                <div>
+                    Urgent borrow request template:
+                </div>
+                <div className='flex'>
+                    <div className="px-4 grid grid-cols-2">
+                        {stagedFile ? (
+                            <div className='flex flex-col'>
+                                <span className='text-custom-red font-bold text-xl'>Are you sure you want to change the template?</span>
+                                <div className='flex gap-2'>
+                                    <Button 
+                                        icon={<CheckIcon className="text-xl" />}
+                                        textColor="custom-dark-green" 
+                                        borderColor="custom-dark-green"
+                                        textClassName="font-semibold select-none" 
+                                        text="Yes I'm sure"
+                                        onClick={replaceTemplate}
+                                    />
+                                    <Button 
+                                        icon={<ClearIcon className="text-xl" />}
+                                        paddingX="px-4"
+                                        textColor="custom-red" 
+                                        borderColor="custom-red"
+                                        textClassName="font-semibold" 
+                                        text="Cancel"
+                                        onClick={() => setStagedFile(null)}
+                                    />
+                                </div>
+                        </div>
+                        ) : (
+                            <div className="col-span-1 flex justify-center items-center">
+                                <a href={templateUrl} download target="_blank" rel="noopener noreferrer">
+                                    <Button 
+                                        icon={<InsertDriveFileOutlinedIcon className="text-xl" />}
+                                        textColor="custom-dark-blue" 
+                                        borderColor="custom-dark-blue"
+                                        textClassName="font-semibold select-none" 
+                                        text={templateUrl ? "Current template" : "Loading..."}
+                                        disabled={!templateUrl}
+                                    />
+                                </a>
+                            </div>
+                        )}
+                        {!stagedFile && (
+                            <label
+                                htmlFor="file-upload"
+                                className="mx-auto bg-gray-100 border-2 border-gray-300 border-dotted p-3 flex flex-col justify-center items-center rounded col-span-1"
+                                onDragOver={handleDragOver}
+                                onDrop={handleDropImport}
+                            >
+                                <FileUploadOutlinedIcon className="text-gray-600 mb-1.5" />
+                                <div className="text-sm">
+                                    <span className="text-blue-500 select-none">Click to upload</span><span className="select-none"> or drag and drop</span>
+                                </div>
+                                <span className="text-xs text-gray-400 select-none">DOCX only.</span>
+                                <input
+                                    id="file-upload"
+                                    type="file"
+                                    onChange={handleImportUpload}
+                                    className="opacity-0 w-0 h-0"
+                                    accept=".docx"
+                                />
+                            </label>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );
