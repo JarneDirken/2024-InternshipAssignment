@@ -1,4 +1,5 @@
 import prisma from '@/services/db';
+import admin from '@/services/firebase-admin-config';
 import { db } from '@/services/firebase-config';
 import { collection, addDoc } from "firebase/firestore"; 
 import { NextRequest } from 'next/server';
@@ -113,6 +114,7 @@ export async function GET(request: NextRequest) {
     const locationFilter = searchParams.get('location') || '';
     const offset = parseInt(searchParams.get('offset') || '0');
     const limit = parseInt(searchParams.get('limit') || '10');
+    const token = searchParams.get("token") || '';
 
     const user = await prisma.user.findUnique({
         where: {
@@ -122,6 +124,17 @@ export async function GET(request: NextRequest) {
             role: true,
         }
     });
+
+    const decodedToken = await admin.auth().verifyIdToken(token);
+
+    if (!decodedToken) {
+        return new Response(JSON.stringify("Unauthorized"), {
+            status: 403,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
 
     if (!user){
         return new Response(JSON.stringify("User not found"), {

@@ -1,4 +1,5 @@
 import prisma from "@/services/db";
+import admin from "@/services/firebase-admin-config";
 import { Prisma } from "@prisma/client";
 import { NextRequest } from "next/server";
 interface WhereClause extends Prisma.ItemRequestWhereInput {}
@@ -39,6 +40,7 @@ export async function GET(request: NextRequest, {params}: {params: {type: string
     const returnDateItem = searchParams.get('returnDateItem');
     const sortBy = searchParams.get('sortBy') || 'requestDate';  // Default sort field
     const sortDirection = searchParams.get('sortDirection') as Prisma.SortOrder || 'desc';  // Default sort direction
+    const token = searchParams.get("token") || '';
 
     const orderBy = createNestedOrderBy(sortBy, sortDirection);
 
@@ -50,6 +52,17 @@ export async function GET(request: NextRequest, {params}: {params: {type: string
             role: true,
         }
     });
+
+    const decodedToken = await admin.auth().verifyIdToken(token);
+
+    if (!decodedToken) {
+        return new Response(JSON.stringify("Unauthorized"), {
+            status: 403,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
 
     if (!user) {
         return new Response(JSON.stringify("User not found"), {

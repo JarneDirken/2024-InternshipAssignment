@@ -7,6 +7,17 @@ import { NextRequest } from "next/server";
 export async function PUT(req: NextRequest) {
     const { data } = await req.json();
 
+    const decodedToken = await admin.auth().verifyIdToken(data.token);
+
+    if (!decodedToken) {
+        return new Response(JSON.stringify("Unauthorized"), {
+            status: 403,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
+
         // Check if the item already has an active request with itemStatusId: 3
         const result = await prisma.$transaction(async (prisma) => {
             const updateUser = await prisma.user.update({
@@ -86,6 +97,16 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
     const { data } = await req.json();
+    const decodedToken = await admin.auth().verifyIdToken(data.token);
+
+    if (!decodedToken) {
+        return new Response(JSON.stringify("Unauthorized"), {
+            status: 403,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
 
         // Check if the item already has an active request with itemStatusId: 3
         const result = await prisma.$transaction(async (prisma) => {
@@ -121,6 +142,24 @@ export async function DELETE(req: NextRequest) {
                         role: true,
                     }
                 });
+
+                if (!user) {
+                    return new Response(JSON.stringify("User not found"), {
+                        status: 404,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                };
+            
+                if (!["Admin"].includes(user.role.name)) {
+                    return new Response(JSON.stringify("Forbidden, you don't have the rights to make this call"), {
+                        status: 403, // Use 403 for Forbidden instead of 404
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                };
         
                 const Admin = await prisma.user.findMany({
                     where: {

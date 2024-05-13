@@ -1,10 +1,22 @@
 import prisma from "@/services/db";
+import admin from "@/services/firebase-admin-config";
 import { db } from "@/services/firebase-config";
 import { addDoc, collection } from "firebase/firestore";
 import { NextRequest } from "next/server";
 
 export async function DELETE(req: NextRequest) {
     const { data } = await req.json();
+
+    const decodedToken = await admin.auth().verifyIdToken(data.token);
+
+    if (!decodedToken) {
+        return new Response(JSON.stringify("Unauthorized"), {
+            status: 403,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
 
     const result = await prisma.$transaction(async (prisma) => {
         const locations = await prisma.location.findMany({

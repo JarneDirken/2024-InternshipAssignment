@@ -2,8 +2,6 @@
 import Unauthorized from "@/app/(dashboard)/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
 import { useEffect, useRef, useState } from "react";
-import { getAuth } from 'firebase/auth';
-import {app} from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
 import Filters from "@/components/general/Filter";
 import ItemCard from "@/components/(supervisor)/requests/ItemCard";
@@ -16,13 +14,13 @@ import { Filter } from "@/models/Filter";
 import ContentPasteOutlinedIcon from '@mui/icons-material/ContentPasteOutlined';
 import { SortOptions } from "@/models/SortOptions";
 import { useInView } from "react-intersection-observer";
+import useUser from "@/hooks/useUser";
 
 export default function Requests() {
     const { isAuthorized, loading } = useAuth(['Supervisor', 'Admin']);
     const [selectedTab, setSelectedTab] = useState('normalBorrows'); // standard open tab
     const [active, setActive] = useState(true); // this is to toggle from list view to card view
-    const [userId, setUserId] = useState<string | null>(null); // userID
-    const auth = getAuth(app); // Get authentication
+    const { userId, token } = useUser();
     // Items
     const [itemLoading, setItemLoading] = useState(true); // item loading
     const [item, setItem] = useState<ItemRequest>(); // to store one item
@@ -61,17 +59,6 @@ export default function Requests() {
     const NUMBER_OF_ITEMS_TO_FETCH = 10;
     const listRef = useRef<HTMLDivElement>(null);
     const { ref, inView } = useInView();
-
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setUserId(user.uid);
-            } else {
-                setUserId(null);
-            }
-        });
-        return () => unsubscribe();
-    }, [userId]);
 
     // infinate loading scroll
     useEffect(() => {
@@ -207,6 +194,10 @@ export default function Requests() {
         if (userId !== null) {
             params.userId = userId;
         };
+
+        if (token !== null) {
+            params.token = token;
+        };
     
         const queryString = new URLSearchParams(params).toString();
     
@@ -263,7 +254,11 @@ export default function Requests() {
         // Only add userId to the query if it is not null
         if (userId !== null) {
             params.userId = userId;
-        }
+        };
+
+        if (token !== null) {
+            params.token = token;
+        };
     
         const queryString = new URLSearchParams(params).toString();
     
@@ -310,11 +305,15 @@ export default function Requests() {
         if (borrowDate) {
             params.borrowDate = borrowDate;
             params.returnDate = returnDate;
-        }
+        };
     
         // Only add userId to the query if it is not null
         if (userId !== null) {
             params.userId = userId;
+        };
+
+        if (token !== null) {
+            params.token = token;
         };
     
         const queryString = new URLSearchParams(params).toString();

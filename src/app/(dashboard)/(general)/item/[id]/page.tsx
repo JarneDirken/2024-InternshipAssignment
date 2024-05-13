@@ -13,12 +13,12 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Modal from "@/components/(user)/borrow/Modal";
 import ModalLendings from "@/components/(supervisor)/lendings/Modal";
 import { ItemRequest } from "@/models/ItemRequest";
+import useUser from "@/hooks/useUser";
 
 export default function GeneralItem({ params } : {params: {id: string}}){
     const id = params.id;
     const { isAuthorized, loading, userRole } = useAuth(['Student','Teacher','Supervisor', 'Admin']);
-    const [userId, setUserId] = useState<string | null>(null); // userID
-    const auth = getAuth(app); // Get authentication
+    const { userId, token } = useUser();
     const [item, setItem] = useState<Item>();
     const [dataFound, setDataFound] = useState(true);
     const [isModalOpen, setModalOpen] = useState(false); // modal
@@ -27,17 +27,6 @@ export default function GeneralItem({ params } : {params: {id: string}}){
     const [checked, setChecked] = useState(false);
     const [lastItemRequest, setLastItemRequest] = useState<ItemRequest | undefined>();
     const [repairState, setRepairState] = useState(false);
-    
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setUserId(user.uid);
-            } else {
-                setUserId(null);
-            }
-        });
-        return () => unsubscribe();
-    }, [userId]);
 
     useEffect(() => {
         if(userId) {

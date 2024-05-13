@@ -4,8 +4,6 @@ import Filters from "@/components/general/Filter";
 import { Location } from "@/models/Location";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { getAuth } from 'firebase/auth';
-import {app} from "@/services/firebase-config";
 import Button from "@/components/states/Button";
 import Checkbox from '@mui/material/Checkbox';
 import LocationCard from "@/components/(admin)/locations/LocationCard";
@@ -23,6 +21,7 @@ import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import useUser from "@/hooks/useUser";
 
 
 export default function Locations() {
@@ -60,8 +59,7 @@ export default function Locations() {
     ];
 
     const [isModalOpen, setModalOpen] = useState(false);
-    const [userId, setUserId] = useState<string | null>(null);
-    const auth = getAuth(app);
+    const { userId, token } = useUser();
     const [mode, setMode] = useState<'add' | 'edit' | 'delete'>('add');
 
     const sortOptions: SortOptions[] = [
@@ -75,17 +73,6 @@ export default function Locations() {
     const NUMBER_OF_ITEMS_TO_FETCH = 10;
     const listRef = useRef<HTMLDivElement>(null);
     const { ref, inView } = useInView();
-
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setUserId(user.uid);
-            } else {
-                setUserId(null);
-            }
-        });
-        return () => unsubscribe();
-    }, [userId]);
 
     useEffect(() => {
         if(userId) {
@@ -137,6 +124,10 @@ export default function Locations() {
         // Only add userId to the query if it is not null
         if (userId !== null) {
             params.userId = userId;
+        };
+
+        if (token !== null) {
+            params.token = token;
         };
     
         const queryString = new URLSearchParams(params).toString();
@@ -262,6 +253,7 @@ export default function Locations() {
                     selectedItems={selectedLocations}
                     mode={mode}
                     userId={userId}
+                    token={token}
                     existingNames={uniqueNames}
                 />
                 <div className="bg-white mb-4 rounded-xl">

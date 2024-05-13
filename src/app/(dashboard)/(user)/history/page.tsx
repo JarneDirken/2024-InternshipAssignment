@@ -2,8 +2,6 @@
 import Unauthorized from "@/app/(dashboard)/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
 import { useEffect, useRef, useState } from "react";
-import { getAuth } from 'firebase/auth';
-import {app} from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
 import Filters from "@/components/general/Filter";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -13,12 +11,12 @@ import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import { Filter } from "@/models/Filter";
 import { SortOptions } from "@/models/SortOptions";
 import { useInView } from "react-intersection-observer";
+import useUser from "@/hooks/useUser";
 
 export default function History() {
     const { isAuthorized, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
     const [active, setActive] = useState(true); // this is to toggle from list view to card view
-    const [userId, setUserId] = useState<string | null>(null); // userID
-    const auth = getAuth(app); // Get authentication
+    const { userId, token } = useUser();
     const [itemLoading, setItemLoading] = useState(true);
     const [items, setItems] = useState<ItemRequest[]>([]);
     const [totalItemCount, setTotalItemCount] = useState(0);
@@ -39,17 +37,6 @@ export default function History() {
     const NUMBER_OF_ITEMS_TO_FETCH = 10;
     const listRef = useRef<HTMLDivElement>(null);
     const { ref, inView } = useInView();
-
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setUserId(user.uid);
-            } else {
-                setUserId(null);
-            }
-        });
-        return () => unsubscribe(); // Clean up the listener
-    }, [userId]);
 
     useEffect(() => {
         if(userId) {
@@ -117,7 +104,11 @@ export default function History() {
         // Only add userId to the query if it is not null
         if (userId !== null) {
             params.userId = userId;
-        }
+        };
+
+        if (token !== null) {
+            params.token = token;
+        };
     
         const queryString = new URLSearchParams(params).toString();
     

@@ -23,10 +23,11 @@ interface ModalCardProps {
     selectedItems?: Location[];
     mode: 'add' | 'edit' | 'delete';
     userId: String | null;
+    token: String | null;
     existingNames: string[];
 }
 
-export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mode, userId, existingNames }: ModalCardProps) {
+export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mode, userId, existingNames, token }: ModalCardProps) {
     const theme = createTheme({
         palette: {
             primary: {
@@ -155,6 +156,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
         const data = {
             userId: primitiveUserId,
             name: name,
+            token: token,
         };
 
         const response = await fetch(`/api/admin/locations/`, {
@@ -183,6 +185,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
             userId: primitiveUserId,
             id: items[0].id,
             name: name,
+            token: token,
         };
 
         const response = await fetch(`/api/admin/locations/`, {
@@ -205,6 +208,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
         const data = {
             userId: primitiveUserId,
             id: items[0].id,
+            token: token,
         };
 
         const response = await fetch(`/api/admin/deletelocation/`, {
@@ -235,6 +239,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
         const data = {
             userId: primitiveUserId,
             ids: ids,
+            token: token,
         };
     
         const response = await fetch(`/api/admin/deletelocations`, {

@@ -16,9 +16,10 @@ interface BorrowCardProps {
     brandFilter: string;
     locationFilter: string;
     userId: string;
+    token: string | null;
 }
 
-export default function BorrowCard({ active, openModal, nameFilter, modelFilter, brandFilter, locationFilter, userId }: BorrowCardProps) {
+export default function BorrowCard({ active, openModal, nameFilter, modelFilter, brandFilter, locationFilter, userId, token }: BorrowCardProps) {
     const [loading, setLoading] = useState(true);
     const [items, setItems] = useState<GroupedItem[]>([]);
     const successfullCreated = useRecoilValue(createRequest);
@@ -56,7 +57,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
     }, [inView, loading, hasMore]);
 
     async function getItems(initialLoad = false) {
-        if (!hasMore && !initialLoad) return;
+        if ((!hasMore && !initialLoad) || !token) return;
         
         setLoading(true);
         const currentOffset = initialLoad ? 0 : offset;
@@ -66,6 +67,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
             brand: brandFilter,
             location: locationFilter,
             userId: userId,
+            token: token,
             offset: currentOffset.toString(),
             limit: NUMBER_OF_ITEMS_TO_FETCH.toString()
         }).toString();

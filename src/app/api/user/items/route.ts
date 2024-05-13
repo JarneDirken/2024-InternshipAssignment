@@ -1,10 +1,12 @@
 import { GroupedItem, Item } from '@/models/Item';
 import prisma from '@/services/db';
+import admin from '@/services/firebase-admin-config';
 import { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const uid = searchParams.get("userId") || '';
+    const token = searchParams.get("token") || '';
     const nameFilter = searchParams.get('name') || '';
     const modelFilter = searchParams.get('model') || '';
     const brandFilter = searchParams.get('brand') || '';
@@ -20,6 +22,17 @@ export async function GET(request: NextRequest) {
             role: true,
         }
     });
+
+    const decodedToken = await admin.auth().verifyIdToken(token);
+
+    if (!decodedToken) {
+        return new Response(JSON.stringify("Unauthorized"), {
+            status: 403,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
 
     if (!user){
         return new Response(JSON.stringify("User not found"), {

@@ -13,13 +13,12 @@ import Button from '@/components/states/Button';
 import { useSnackbar } from 'notistack';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import { InputAdornment, TextField } from '@mui/material';
-import { getAuth } from 'firebase/auth';
-import {app} from "@/services/firebase-config";
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import { ClearIcon } from "@mui/x-date-pickers/icons";
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import { deleteObject, getDownloadURL, getStorage, listAll, ref, uploadBytes } from 'firebase/storage';
 import CheckIcon from '@mui/icons-material/Check';
+import useUser from '@/hooks/useUser';
 
 export default function Parameter() {
     const { isAuthorized, loading } = useAuth(['Admin']);
@@ -36,22 +35,10 @@ export default function Parameter() {
     type DayjsSetterType = (value: Dayjs | null) => void;
     type StringSetterType = (value: string) => void;
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
-    const [userId, setUserId] = useState<string | null>(null); // userID
-    const auth = getAuth(app); // Get authentication
-    const storage = getStorage(app);
     const [templateUrl, setTemplateUrl] = useState('');
     const [stagedFile, setStagedFile] = useState<File | null>(null);
 
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setUserId(user.uid);
-            } else {
-                setUserId(null);
-            }
-        });
-        return () => unsubscribe();
-    }, [userId]);
+    const { userId, token } = useUser();
 
     useEffect(() => {
         getParameters();
@@ -158,6 +145,7 @@ export default function Parameter() {
             morningBufferTime: monringBufferTime,
             eveningBufferTime: EveningBufferTime,
             userId,
+            token
         };
 
         const response = await fetch(`/api/admin/parameter/`, {

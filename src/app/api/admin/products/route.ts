@@ -1,4 +1,5 @@
 import prisma from "@/services/db";
+import admin from "@/services/firebase-admin-config";
 import { db } from "@/services/firebase-config";
 import { Prisma } from "@prisma/client";
 import { addDoc, collection } from "firebase/firestore";
@@ -41,6 +42,7 @@ export async function GET(request: NextRequest) {
     const sortDirection = searchParams.get('sortDirection') as Prisma.SortOrder || 'desc';
     const offset = parseInt(searchParams.get('offset') || '0');
     const limit = parseInt(searchParams.get('limit') || '10');
+    const token = searchParams.get("token") || '';
 
     const orderBy = createNestedOrderBy(sortBy, sortDirection);
 
@@ -52,6 +54,17 @@ export async function GET(request: NextRequest) {
             role: true,
         }
     });
+
+    const decodedToken = await admin.auth().verifyIdToken(token);
+
+    if (!decodedToken) {
+        return new Response(JSON.stringify("Unauthorized"), {
+            status: 403,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
 
     if (!user){
         return new Response(JSON.stringify("User not found"), {
@@ -140,6 +153,17 @@ export async function GET(request: NextRequest) {
 export async function POST(req: NextRequest) {
     const { data } = await req.json();
 
+    const decodedToken = await admin.auth().verifyIdToken(data.token);
+
+    if (!decodedToken) {
+        return new Response(JSON.stringify("Unauthorized"), {
+            status: 403,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
+
         // Check if the item already has an active request with itemStatusId: 3
         const result = await prisma.$transaction(async (prisma) => {
             const createProduct = await prisma.item.create({
@@ -175,6 +199,24 @@ export async function POST(req: NextRequest) {
                     role: true,
                 }
             });
+
+            if (!user){
+                return new Response(JSON.stringify("User not found"), {
+                    status: 404,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+            };
+        
+            if (!["Admin"].includes(user.role.name)) {
+                return new Response(JSON.stringify("Forbidden, you don't have the rights to make this call"), {
+                    status: 403, // Use 403 for Forbidden instead of 404
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+            };
     
             const Admin = await prisma.user.findMany({
                 where: {
@@ -219,6 +261,17 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
     const { data } = await req.json();
 
+    const decodedToken = await admin.auth().verifyIdToken(data.token);
+
+    if (!decodedToken) {
+        return new Response(JSON.stringify("Unauthorized"), {
+            status: 403,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
+
         // Check if the item already has an active request with itemStatusId: 3
         const result = await prisma.$transaction(async (prisma) => {
             const updateProduct = await prisma.item.update({
@@ -260,6 +313,24 @@ export async function PUT(req: NextRequest) {
                     role: true,
                 }
             });
+
+            if (!user){
+                return new Response(JSON.stringify("User not found"), {
+                    status: 404,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+            };
+        
+            if (!["Admin"].includes(user.role.name)) {
+                return new Response(JSON.stringify("Forbidden, you don't have the rights to make this call"), {
+                    status: 403, // Use 403 for Forbidden instead of 404
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+            };
     
             const Admin = await prisma.user.findMany({
                 where: {

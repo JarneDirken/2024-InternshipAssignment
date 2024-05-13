@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { db } from '@/services/firebase-config';
 import { collection, addDoc, where, getDocs, query, updateDoc } from "firebase/firestore"; 
+import admin from "@/services/firebase-admin-config";
 interface WhereClause extends Prisma.ItemRequestWhereInput {}
 
 interface OrderByType {
@@ -138,6 +139,7 @@ export async function GET(request: NextRequest) {
     const sortDirection = searchParams.get('sortDirection') as Prisma.SortOrder || 'desc';  // Default sort direction
     const offset = parseInt(searchParams.get('offset') || '0');
     const limit = parseInt(searchParams.get('limit') || '10');
+    const token = searchParams.get("token") || '';
 
     const orderBy = createNestedOrderBy(sortBy, sortDirection);
 
@@ -149,6 +151,17 @@ export async function GET(request: NextRequest) {
             role: true,
         }
     });
+
+    const decodedToken = await admin.auth().verifyIdToken(token);
+
+    if (!decodedToken) {
+        return new Response(JSON.stringify("Unauthorized"), {
+            status: 403,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
 
     if (!user){
         return new Response(JSON.stringify("User not found"), {
