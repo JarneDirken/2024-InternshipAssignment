@@ -3,18 +3,16 @@ import Loading from "@/components/states/Loading";
 import useAuth from "@/hooks/useAuth";
 import Unauthorized from "../../(error)/unauthorized/page";
 import { useEffect, useMemo, useState } from "react";
-import { getAuth } from "firebase/auth";
-import { app } from "@/services/firebase-config";
 import { ItemRequest } from "@/models/ItemRequest";
 import { Gauge, LineChart, PieChart, pieArcLabelClasses } from '@mui/x-charts';
 import Filters from "@/components/general/Filter";
 import PollOutlinedIcon from '@mui/icons-material/PollOutlined';
 import { Filter } from "@/models/Filter";
+import useUser from "@/hooks/useUser";
 
 export default function Analytics() {
     const { isAuthorized, loading } = useAuth(['Admin']);
-    const [userId, setUserId] = useState<string | null>(null);
-    const auth = getAuth(app);
+    const { userId, token } = useUser();
     const [items, setItems] = useState<ItemRequest[]>([]);
     const [monthlyCounts, setMonthlyCounts] = useState(Array(12).fill(0));
     const [totalRequestsMade, setTotalRequestsMade] = useState(0);
@@ -25,17 +23,6 @@ export default function Analytics() {
     const filters: Filter[] = [
         { label: 'Year', state: [year, setYear], inputType: 'text', optionsKey: 'startBorrowDate' },
     ];
-
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user && user.uid !== userId) { 
-                setUserId(user.uid);
-            } else if (!user) {
-                setUserId(null);
-            }
-        });
-        return () => unsubscribe();
-    }, []); 
 
     useEffect(() => {
         if (userId) {
@@ -78,6 +65,10 @@ export default function Analytics() {
         // Only add userId to the query if it is not null
         if (userId !== null) {
             params.userId = userId;
+        };
+
+        if (token !== null) {
+            params.token = token;
         };
     
         const queryString = new URLSearchParams(params).toString();

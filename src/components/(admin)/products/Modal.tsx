@@ -58,13 +58,14 @@ interface ModalCardProps {
     itemStatuses: ItemStatus[];
     mode: 'add' | 'edit' | 'delete' | 'import';
     userId: String | null;
+    token: String | null;
     uniqueNames: string[];
     uniqueModels: string[];
     uniqueBrands: string[];  
     existingNumbers: string[];
 }
 
-export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mode, userId, roles, locations, itemStatuses, uniqueNames, uniqueModels, uniqueBrands, existingNumbers }: ModalCardProps) {
+export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mode, userId, roles, locations, itemStatuses, uniqueNames, uniqueModels, uniqueBrands, existingNumbers, token }: ModalCardProps) {
     const theme = createTheme({
         palette: {
             primary: {
@@ -309,6 +310,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
             amount: amount,
             roleId: selectedRoleId,
             userId: primitiveUserId,
+            token: token,
         };
 
         const response = await fetch(`/api/admin/products/`, {
@@ -355,6 +357,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
             roleItemId: items[0]?.RoleItem?.[0].id,
             roleId: selectedRoleId,
             userId: primitiveUserId,
+            token: token,
         };
 
         const response = await fetch(`/api/admin/products/`, {
@@ -395,6 +398,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
         const data = {
             userId: primitiveUserId,
             id: items[0].id,
+            token: token,
         };
 
         const response = await fetch(`/api/admin/deleteproduct/`, {
@@ -441,6 +445,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
             userId: primitiveUserId,
             id: items[0].id,
             roleId: items[0].RoleItem?.[0]?.roleId ?? '',
+            token: token,
         };
 
         const response = await fetch(`/api/admin/deleteproduct/`, {
@@ -470,6 +475,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
         const data = {
             userId: primitiveUserId,
             ids: ids,
+            token: token,
         };
     
         const response = await fetch(`/api/admin/deleteproducts`, {
@@ -518,6 +524,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
         const data = {
             userId: primitiveUserId,
             ids: ids,
+            token: token,
         };
     
         const response = await fetch(`/api/admin/deleteproducts`, {

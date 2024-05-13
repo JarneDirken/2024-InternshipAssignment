@@ -27,9 +27,10 @@ interface ModalCardProps {
     roles: Role[];
     mode: 'add' | 'edit' | 'delete';
     userId: String | null;
+    token: String | null;
 }
 
-export default function Modal({ open, onClose, onItemsUpdated, selectedItems, roles, mode, userId }: ModalCardProps) {
+export default function Modal({ open, onClose, onItemsUpdated, selectedItems, roles, mode, userId, token }: ModalCardProps) {
     const theme = createTheme({
         palette: {
             primary: {
@@ -222,6 +223,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
             roleId: selectedRoleId,
             active: userActive,
             userId: primitiveUserId,
+            token: token,
         };
 
         const response = await fetch(`/api/admin/users/`, {
@@ -256,6 +258,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
             roleId: selectedRoleId,
             active: userActive,
             userId: primitiveUserId,
+            token: token,
         };
 
         const response = await fetch(`/api/admin/users/`, {
@@ -279,6 +282,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
         const data = {
             userId: primitiveUserId,
             id: items[0].id,
+            token: token,
         };
 
         const response = await fetch(`/api/admin/deleteuser/`, {
@@ -301,6 +305,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
         const data = {
             userId: primitiveUserId,
             id: items[0].id,
+            token: token,
         };
 
         const response = await fetch(`/api/admin/deleteuser/`, {
@@ -330,6 +335,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
         const data = {
             userId: primitiveUserId,
             ids: ids,
+            token: token,
         };
     
         const response = await fetch(`/api/admin/deleteusers`, {
@@ -362,6 +368,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
         const data = {
             userId: primitiveUserId,
             ids: ids,
+            token: token,
         };
     
         const response = await fetch(`/api/admin/deleteusers`, {

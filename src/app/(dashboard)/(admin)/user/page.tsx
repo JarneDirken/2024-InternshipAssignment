@@ -23,6 +23,7 @@ import { useInView } from "react-intersection-observer";
 import useAuth from "@/hooks/useAuth";
 import Loading from "@/components/states/Loading";
 import Unauthorized from "../../(error)/unauthorized/page";
+import useUser from "@/hooks/useUser";
 
 export default function Users() {
     const { isAuthorized, loading } = useAuth(['Admin']);
@@ -66,8 +67,7 @@ export default function Users() {
     ];
 
     const [isModalOpen, setModalOpen] = useState(false);
-    const [userId, setUserId] = useState<string | null>(null);
-    const auth = getAuth(app);
+    const { userId, token } = useUser();
     const [mode, setMode] = useState<'add' | 'edit' | 'delete'>('add');
 
     const sortOptions: SortOptions[] = [
@@ -85,17 +85,6 @@ export default function Users() {
     const NUMBER_OF_ITEMS_TO_FETCH = 20;
     const listRef = useRef<HTMLDivElement>(null);
     const { ref, inView } = useInView();
-
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setUserId(user.uid);
-            } else {
-                setUserId(null);
-            }
-        });
-        return () => unsubscribe();
-    }, [userId]);
 
     useEffect(() => {
         if(userId) {
@@ -154,6 +143,10 @@ export default function Users() {
         // Only add userId to the query if it is not null
         if (userId !== null) {
             params.userId = userId;
+        };
+
+        if (token !== null) {
+            params.token = token;
         };
     
         const queryString = new URLSearchParams(params).toString();
@@ -293,6 +286,7 @@ export default function Users() {
                     roles={roles}
                     mode={mode}
                     userId={userId}
+                    token={token}
                 />
                 <div className="bg-white mb-4 rounded-xl">
                     <Filters

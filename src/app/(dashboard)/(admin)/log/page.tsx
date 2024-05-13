@@ -4,34 +4,23 @@ import useAuth from "@/hooks/useAuth";
 import { useCallback, useEffect, useState } from "react";
 import Unauthorized from "../../(error)/unauthorized/page";
 import { DocumentData, DocumentSnapshot, collection, limit, onSnapshot, orderBy, query, startAfter, where } from "firebase/firestore";
-import { app, db } from '@/services/firebase-config';
+import { db } from '@/services/firebase-config';
 import { Notification } from "@/models/Notification";
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 import { Tooltip } from "@mui/material";
-import { getAuth } from "firebase/auth";
 import Button from "@/components/states/Button";
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import * as XLSX from 'xlsx';
+import useUser from "@/hooks/useUser";
 
 export default function Log() {
     const { userRole, loading, isAuthorized } = useAuth(['Student','Teacher','Supervisor','Admin']);
     const [notificationsAdmin, setNotificationsAdmin] = useState<Notification[]>([]);
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    const [userId, setUserId] = useState<string | null>(null); // userID
-    const auth = getAuth(app); // Get authentication
 
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setUserId(user.uid);
-            } else {
-                setUserId(null);
-            }
-        });
-        return () => unsubscribe();
-    }, []);
+    const { userId, token } = useUser();
 
     useEffect(() => {
         if (!loading && isAuthorized && userId && userRole) {

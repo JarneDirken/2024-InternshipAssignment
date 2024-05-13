@@ -1,4 +1,5 @@
 import prisma from '@/services/db';
+import admin from '@/services/firebase-admin-config';
 import { db } from '@/services/firebase-config';
 import { collection, addDoc } from "firebase/firestore"; 
 import { NextRequest } from 'next/server';
@@ -16,6 +17,16 @@ export async function GET() {
 
 export async function PUT(req: NextRequest) {
     const { data } = await req.json();
+    const decodedToken = await admin.auth().verifyIdToken(data.token);
+
+    if (!decodedToken) {
+        return new Response(JSON.stringify("Unauthorized"), {
+            status: 403,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
 
     const results = await prisma.$transaction([
         prisma.parameter.updateMany({
@@ -53,6 +64,24 @@ export async function PUT(req: NextRequest) {
                 role: true,
             }
         });
+
+        if (!user) {
+            return new Response(JSON.stringify("User not found"), {
+                status: 404,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+        };
+
+        if (!["Admin"].includes(user.role.name)) {
+            return new Response(JSON.stringify("Forbidden, you don't have the rights to make this call"), {
+                status: 403, // Use 403 for Forbidden instead of 404
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+        };
 
         const admins = await prisma.user.findMany({
             where: {

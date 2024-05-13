@@ -9,7 +9,7 @@ import MaterialUIModal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import TextField from "@mui/material/TextField";
 import useCart from "@/hooks/useCart";
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, listAll } from "firebase/storage";
 import Image from 'next/image';
 //icons
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
@@ -55,6 +55,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
     const [morningBufferTime, setMorningBufferTime] = useState('');
     const [EveningBufferTime, setEveningBufferTime] = useState('');
     type DayjsSetterType = (value: Dayjs | null) => void;
+    const [templateUrl, setTemplateUrl] = useState('');
 
     useEffect(() => {
         if (borrowDate && returnDate) {
@@ -64,6 +65,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
 
     useEffect(() => {
         getParameters();
+        fetchCurrentTemplateUrl();
     }, []);
 
     const handleEditDate = (type: 'borrow' | 'return') => {
@@ -357,6 +359,24 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
         }
     };
 
+    async function fetchCurrentTemplateUrl() {
+        const storage = getStorage();
+        const directoryRef = ref(storage, 'templates/urgentBorrow/');
+    
+        try {
+            const result = await listAll(directoryRef);
+            if (result.items.length > 0) {
+                const fileRef = result.items[0];  // Assuming there's at least one file and we take the first one
+                const url = await getDownloadURL(fileRef);
+                setTemplateUrl(url);
+            } else {
+                console.error('No files found in the directory.');
+            }
+        } catch (error) {
+            console.error('Failed to list files:', error);
+        }
+    };
+
     const theme = createTheme({
         palette: {
             primary: {
@@ -507,7 +527,9 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
                         <div className="flex flex-col px-8">
                             <div className="flex flex-row justify-between items-center">
                                 <span className="">Download the file and re-upload it with a signature of your teacher.</span>
-                                <span className="text-custom-blue underline cursor-pointer">Download</span>
+                                <a href={templateUrl} download target="_blank" rel="noopener noreferrer">
+                                    <span className="text-custom-blue underline cursor-pointer">Download</span>
+                                </a>
                             </div>
                             <div className="flex flex-col justify-center items-center mt-2">
                                 <label

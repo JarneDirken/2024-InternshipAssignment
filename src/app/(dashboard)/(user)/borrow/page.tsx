@@ -3,7 +3,6 @@ import Unauthorized from "@/app/(dashboard)/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { GroupedItem, Item } from "@/models/Item";
-import { getAuth, getIdToken } from 'firebase/auth';
 import {app} from "@/services/firebase-config";
 import { useRecoilValue } from "recoil";
 import { createRequest, requestsState } from "@/services/store";
@@ -15,6 +14,7 @@ import useCart from "@/hooks/useCart";
 import { useSnackbar } from "notistack";
 import Loading from "@/components/states/Loading";
 import MessageModal from "@/components/(user)/borrow/MessageModal";
+import useUser from "@/hooks/useUser";
 
 export default function Borrow() {
     const { isAuthorized, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
@@ -32,30 +32,28 @@ export default function Borrow() {
     const [isModalOpen, setModalOpen] = useState(false); // modal
     const [isMessageModalOpen, setMessageModalOpen] = useState(false); // Message modal
     const [message, setMessage] = useState("");
-    const [userId, setUserId] = useState<string | null>(null); // userID
-    const auth = getAuth(app); // Get authentication
     const created = useRecoilValue(createRequest); // see if an item has been borrowed (for refresh)
     const { cart } = useCart(); // useCart hook
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
     const [canceled, setCanceled] = useState(false);
 
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setUserId(user.uid);
-            } else {
-                setUserId(null);
-            }
-        });
-        return () => unsubscribe();
-    }, [userId]);
+    const { userId, token } = useUser();
 
     async function getPendingBorrowCount() {
         try {
             if (!userId) { return; }
-            const queryString = new URLSearchParams({
-                userId: userId
-            }).toString();
+            const params: Record<string, string> = {};
+
+            if (userId !== null) {
+                params.userId = userId;
+            };
+    
+            if (token !== null) {
+                params.token = token;
+            };
+
+            const queryString = new URLSearchParams(params).toString();
+
             const response = await fetch(`/api/user/itemrequest?${queryString}`);
 
             if (!response.ok) {
@@ -71,9 +69,16 @@ export default function Borrow() {
     async function getAllItems(){
         try {
             if(userId){
-                const queryString = new URLSearchParams({
-                    userId: userId,
-                }).toString();
+                const params: Record<string, string> = {};
+                if (userId !== null) {
+                    params.userId = userId;
+                };
+        
+                if (token !== null) {
+                    params.token = token;
+                };
+
+                const queryString = new URLSearchParams(params).toString();
                 const response = await fetch(`/api/user/allitems?${queryString}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -198,6 +203,7 @@ export default function Borrow() {
                         brandFilter={brandFilter}
                         locationFilter={locationFilter}
                         userId={userId || ''}
+                        token={token}
                     />
                 ) : (
                     <PendingBorrows 

@@ -1,8 +1,6 @@
 'use client';
 import useAuth from "@/hooks/useAuth";
 import { Filter } from "@/models/Filter";
-import {app} from "@/services/firebase-config";
-import { getAuth } from "firebase/auth";
 import { useEffect, useRef, useState } from "react";
 import Unauthorized from "../../(error)/unauthorized/page";
 import Loading from "@/components/states/Loading";
@@ -18,13 +16,13 @@ import Button from "@/components/states/Button";
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import * as XLSX from 'xlsx';
 import { useInView } from "react-intersection-observer";
+import useUser from "@/hooks/useUser";
 
 export default function Reparation() {
     const { isAuthorized, loading } = useAuth(['Supervisor', 'Admin']);
     const [selectedTab, setSelectedTab] = useState('repair'); // standard open tab
     const [active, setActive] = useState(true); // this is to toggle from list view to card view
-    const [userId, setUserId] = useState<string | null>(null); // userID
-    const auth = getAuth(app); // Get authentication
+    const { userId, token } = useUser();
     // Items
     const [itemLoading, setItemLoading] = useState(true); // item loading
     const [repair, setRepair] = useState<Repair>();
@@ -55,17 +53,6 @@ export default function Reparation() {
     const NUMBER_OF_ITEMS_TO_FETCH = 10;
     const listRef = useRef<HTMLDivElement>(null);
     const { ref, inView } = useInView();
-
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setUserId(user.uid);
-            } else {
-                setUserId(null);
-            }
-        });
-        return () => unsubscribe();
-    }, [userId]);
 
     useEffect(() => {
         if(userId) {
@@ -244,6 +231,10 @@ export default function Reparation() {
         if (userId !== null) {
             params.userId = userId;
         };
+
+        if (token !== null) {
+            params.token = token;
+        };
     
         const queryString = new URLSearchParams(params).toString();
     
@@ -296,6 +287,10 @@ export default function Reparation() {
         // Only add userId to the query if it is not null
         if (userId !== null) {
             params.userId = userId;
+        };
+
+        if (token !== null) {
+            params.token = token;
         };
     
         const queryString = new URLSearchParams(params).toString();
