@@ -33,7 +33,7 @@ export default function Reparation({ active, reparations, item}: BorrowCardProps
             {reparations && reparations.length > 0 && (
                 <div>
                     {reparations.map((reparation) => (
-                        <div className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
+                        <div key={reparation.id} className={`bg-white ${active ? "flex-row rounded-xl" : "rounded-md shadow-lg mb-2"}`}>
                         {active ? (
                             <div key={reparation.id} className="flex flex-row py-2 px-8 items-center justify-between w-full border-b border-gray-300">
                                 <div className="flex flex-row items-center w-full">

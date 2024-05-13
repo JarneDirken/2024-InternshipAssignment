@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "prisma migrate deploy && (test \"$RESEED\" = \"true\" && npm run seed) && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "seed": "prisma db seed"
