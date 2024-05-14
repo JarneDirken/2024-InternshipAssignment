@@ -171,6 +171,7 @@ export default function GeneralItem({ params } : {params: {id: string}}){
                 checked={checked}
                 repairState={repairState}
                 setRepairState={setRepairState}
+                token={token}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <div className="p-4 flex flex-wrap font-semibold text-2xl items-center gap-1">
