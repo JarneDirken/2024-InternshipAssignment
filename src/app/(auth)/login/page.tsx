@@ -32,7 +32,7 @@ export default function Login() {
         setErrorMessage('');
 
         const params: Record<string, string> = {
-            email
+            email: email.toLowerCase()
         };
 
         const queryString = new URLSearchParams(params).toString();
@@ -62,7 +62,8 @@ export default function Login() {
         const auth = getAuth();
 
         const form = new FormData(event.target as HTMLFormElement);
-        const email = form.get('email') as string;
+        const emailRaw = form.get('email') as string;
+        const email = emailRaw.toLowerCase();
         const password = form.get('password') as string;
 
         try {
