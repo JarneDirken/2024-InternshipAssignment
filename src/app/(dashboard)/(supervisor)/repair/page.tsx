@@ -335,6 +335,8 @@ export default function Reparation() {
                 broken={broken}
                 setRepaired={setRepaired}
                 setBroken={setBroken}
+                token={token}
+                userId={userId}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters

@@ -25,6 +25,7 @@ interface ModalCardProps {
     onClose: () => void;
     item: ItemRequest | undefined;
     userId: String | null;
+    token: String | null;
     rejected?: boolean;
     setRejected?: (value: boolean) => void;
     approved?: boolean;
@@ -33,7 +34,7 @@ interface ModalCardProps {
     setRequestStatusId?: (value: number | null) => void;
 }
 
-export default function Modal({ open, onClose, item, userId, rejected, setRejected, approved, setApproved, requestStatusId, setRequestStatusId }: ModalCardProps) {
+export default function Modal({ open, onClose, item, userId, rejected, setRejected, approved, setApproved, requestStatusId, setRequestStatusId, token }: ModalCardProps) {
     const [message, setMessage] = useState<string | null>(null);  // State can be string or null
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
     const [requests, setRequest] = useRecoilState(updateRequest);
@@ -51,6 +52,7 @@ export default function Modal({ open, onClose, item, userId, rejected, setReject
             borrowDate: item.startBorrowDate,
             returnDate: item.endBorrowDate,
             userId,
+            token
         };
 
         const response = await fetch(`/api/supervisor/itemrequest/`, {

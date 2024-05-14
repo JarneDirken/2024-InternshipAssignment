@@ -426,6 +426,7 @@ export default function Requests() {
                 setApproved={setApproved}
                 setRejected={setRejected}
                 setRequestStatusId={setRequestStatusId}
+                token={token}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters

@@ -498,6 +498,7 @@ export default function Lending() {
                 checked={checked}
                 repairState={repairState}
                 setRepairState={setRepairState}
+                token={token}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
