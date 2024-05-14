@@ -62,7 +62,7 @@ export default function Lending() {
     const { ref, inView } = useInView();
 
     useEffect(() => {
-        if(userId) {
+        if(userId && token) {
             getBorrows(true);
             if(selectedTab === "returns"){
                 getReturns(true);
@@ -71,7 +71,7 @@ export default function Lending() {
                 getCheckItem(true);
             }
         }
-    }, [userId, requests, nameFilter, borrowDateFilter, requestor, location]);
+    }, [userId, requests, nameFilter, borrowDateFilter, requestor, location, token]);
 
     useEffect(() => {
         if(selectedTab === "returns"){

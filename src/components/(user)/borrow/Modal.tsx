@@ -29,9 +29,10 @@ interface ModalCardProps {
     onClose: () => void;
     item?: Item;
     userId: String | null;
+    token: String | null;
 }
 
-export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
+export default function Modal({ open, onClose, item, userId, token }: ModalCardProps) {
     const [amount, setAmount] = useState<string | null>(null); // amount 
     const [isUrgent, setIsUrgent] = useState(false); // change this to view / not view the urgent borrow request
     const [file, setFile] = useState<File | null>(null); // file uploader
@@ -299,6 +300,7 @@ export default function Modal({ open, onClose, item, userId }: ModalCardProps) {
             file: fileUrl,
             isUrgent: isUrgent,
             amountRequest: amount,
+            token: token,
         };
 
         const response = await fetch(`/api/user/itemrequest/`, {

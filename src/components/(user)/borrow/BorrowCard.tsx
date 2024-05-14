@@ -34,7 +34,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
 
     useEffect(() => {
         getItems(true);
-    }, [nameFilter, modelFilter, brandFilter, locationFilter]);
+    }, [nameFilter, modelFilter, brandFilter, locationFilter, token]);
 
     useEffect(() => {
         getItems(true);

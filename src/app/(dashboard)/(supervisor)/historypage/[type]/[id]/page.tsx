@@ -54,16 +54,16 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
     ];
 
     useEffect(() => {
-        if ((type === "user") && userId) {
+        if ((type === "user") && userId && token) {
             getHistory("user");
         }
-    }, [userId, type, id, nameUserFilter, borrowDateUserFilter]);
+    }, [userId, type, id, nameUserFilter, borrowDateUserFilter, token]);
 
     useEffect(() => {
-        if ((type === "item") && userId) {
+        if ((type === "item") && userId && token) {
             getHistory("item");
         }
-    }, [userId, type, id, nameFilter, borrowDateFilter]);
+    }, [userId, type, id, nameFilter, borrowDateFilter, token]);
 
     useEffect(() => {
         if (type === "user" || type === "item") {

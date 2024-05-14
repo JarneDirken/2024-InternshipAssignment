@@ -97,10 +97,10 @@ export default function Product() {
     const { ref, inView } = useInView();
 
     useEffect(() => {
-        if(userId) {
+        if(userId && token) {
             getAllItems(true);
         }
-    }, [userId, name, model, brand, location, year, availability]);
+    }, [userId, name, model, brand, location, year, availability, token]);
 
     // infinite loading scroll
     useEffect(() => {

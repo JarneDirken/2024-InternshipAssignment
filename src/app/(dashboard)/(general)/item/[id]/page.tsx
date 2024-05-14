@@ -29,13 +29,13 @@ export default function GeneralItem({ params } : {params: {id: string}}){
     const [repairState, setRepairState] = useState(false);
 
     useEffect(() => {
-        if(userId) {
+        if(userId && token) {
             if (!isModalOpen) {
                 getItem();
             }
             
         }
-    }, [userId, id, isModalOpen]);
+    }, [userId, id, isModalOpen, token]);
 
     const formatDate = (dateString?: Date): string => {
         if (!dateString) {return ''}
@@ -161,6 +161,7 @@ export default function GeneralItem({ params } : {params: {id: string}}){
                 onClose={() => setModalOpen(false)}
                 item={item}
                 userId={userId}
+                token={token}
             />
             <ModalLendings
                 open={isModalCheckOpen}

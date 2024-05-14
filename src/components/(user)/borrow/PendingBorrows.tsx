@@ -24,9 +24,10 @@ interface PendingBorrowProps {
     setMessage: (value: string) => void;
     setCanceled: (value: boolean) => void;
     canceled: boolean;
+    token: string | null;
 }
 
-export default function PendingBorrows({ active, nameFilter, modelFilter, brandFilter, locationFilter, userId, openMessageModal, setMessage, setCanceled, canceled }: PendingBorrowProps) {
+export default function PendingBorrows({ active, nameFilter, modelFilter, brandFilter, locationFilter, userId, openMessageModal, setMessage, setCanceled, canceled, token }: PendingBorrowProps) {
     const [loading, setLoading] = useState(true);
     const [requests, setRequests] = useRecoilState(requestsState);
     const { enqueueSnackbar } = useSnackbar();
@@ -41,7 +42,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
 
     useEffect(() => {
         getPendingBorrows(nameFilter, modelFilter, brandFilter, locationFilter, true);
-    }, [nameFilter, modelFilter, brandFilter, locationFilter, canceled]);
+    }, [nameFilter, modelFilter, brandFilter, locationFilter, canceled, token]);
 
     // infinate loading scroll
     useEffect(() => {
@@ -61,7 +62,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
         if (!hasMore && !initialLoad) return; // infinate loading
         setLoading(true);
         try {
-            if (!userId) { return; }
+            if (!userId || !token) { return; }
             const currentOffset = initialLoad ? 0 : offset; // infinate loading
             const queryString = new URLSearchParams({
                 userId: userId,
@@ -70,7 +71,8 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                 brand: brandFilter,
                 location: locationFilter,
                 offset: currentOffset.toString(), // infinate loading 
-                limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
+                limit: NUMBER_OF_ITEMS_TO_FETCH.toString(), // infinate loading
+                token: token
             }).toString();
             const response = await fetch(`/api/user/itemrequest?${queryString}`);
 
@@ -101,6 +103,7 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
                 itemId,
                 requestId,
                 borrowerId: userId,
+                token: token
             };
             const response = await fetch(`/api/user/itemrequestcancel/`, {
                 method: 'PUT',

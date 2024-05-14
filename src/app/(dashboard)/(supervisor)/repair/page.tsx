@@ -55,13 +55,13 @@ export default function Reparation() {
     const { ref, inView } = useInView();
 
     useEffect(() => {
-        if(userId) {
+        if(userId && token) {
             getRepairs(true);
             if(selectedTab === "history"){
                 getHistory(true);
             }
         }
-    }, [userId, nameFilter, borrowDateFilter, repairRecoilValue]);
+    }, [userId, nameFilter, borrowDateFilter, repairRecoilValue, token]);
 
     useEffect(() => {
         if(selectedTab === "history"){

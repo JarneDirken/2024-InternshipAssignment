@@ -39,10 +39,10 @@ export default function History() {
     const { ref, inView } = useInView();
 
     useEffect(() => {
-        if(userId) {
+        if(userId && token) {
             getItems();
         }
-    }, [userId, nameFilter, borrowDateFilter]);
+    }, [userId, nameFilter, borrowDateFilter, token]);
 
     // infinate loading scroll
     useEffect(() => {

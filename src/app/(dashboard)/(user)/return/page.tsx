@@ -42,10 +42,10 @@ export default function Return() {
     const { ref, inView } = useInView();
 
     useEffect(() => {
-        if(userId) {
+        if(userId && token) {
             getItems(true);
         }
-    }, [userId, requests, nameFilter, borrowDateFilter]); 
+    }, [userId, requests, nameFilter, borrowDateFilter, token]); 
 
     // infinate loading scroll
     useEffect(() => {

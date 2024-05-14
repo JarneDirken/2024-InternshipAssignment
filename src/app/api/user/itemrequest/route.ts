@@ -7,6 +7,46 @@ import { NextRequest } from 'next/server';
 export async function POST(req: NextRequest) {
     const { data } = await req.json();
 
+    const user = await prisma.user.findUnique({
+        where: {
+            firebaseUid: data.borrowerId,
+        },
+        include: {
+            role: true,
+        }
+    });
+    console.log(data);
+    console.log(data.token);
+
+    const decodedToken = await admin.auth().verifyIdToken(data.token);
+
+    if (!decodedToken) {
+        return new Response(JSON.stringify("Unauthorized"), {
+            status: 403,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
+
+    if (!user){
+        return new Response(JSON.stringify("User not found"), {
+            status: 404,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
+
+    if (!["Admin", "Supervisor", "Teacher", "Student"].includes(user.role.name)) {
+        return new Response(JSON.stringify("Forbidden, you don't have the rights to make this call"), {
+            status: 403, // Use 403 for Forbidden instead of 404
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
+
     let createItemRequest : any;
 
     const result = await prisma.$transaction(async (prisma) => {

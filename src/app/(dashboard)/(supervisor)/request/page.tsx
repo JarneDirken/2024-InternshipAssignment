@@ -95,7 +95,7 @@ export default function Requests() {
     }, [inView, loading, hasMore]);
 
     useEffect(() => {
-        if(userId) {
+        if(userId && token) {
             getBorrows(true);
             if(selectedTab === "urgentBorrows"){
                 getUrgentBorrows(true);
@@ -104,7 +104,7 @@ export default function Requests() {
                 getAllRequests(true);
             }
         }
-    }, [userId, requests, nameFilter, borrowDateFilter, requestor, location]);
+    }, [userId, requests, nameFilter, borrowDateFilter, requestor, location, token]);
 
     useEffect(() => {
         if(selectedTab === "urgentBorrows"){

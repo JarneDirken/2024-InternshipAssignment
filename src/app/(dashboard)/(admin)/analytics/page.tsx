@@ -25,10 +25,10 @@ export default function Analytics() {
     ];
 
     useEffect(() => {
-        if (userId) {
+        if (userId && token) {
             getAllBorrows();
         }
-    }, [userId, year]);
+    }, [userId, year, token]);
 
     const handleFilterChange = (filterType: string, value: string) => {
         switch (filterType) {

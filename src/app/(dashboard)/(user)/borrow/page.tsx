@@ -125,18 +125,20 @@ export default function Borrow() {
     };
 
     useEffect(() => {
-        getAllItems();
-    }, [userId]);
+        if (token) {
+            getAllItems();
+        }
+    }, [userId, token]);
 
     useEffect(() => {
         setTotalItemCount(items.length);
     },[items]);
 
     useEffect(() => {
-        if (userId) {
+        if (userId && token) {
             getPendingBorrowCount();
         }
-    }, [userId, created, canceled]);
+    }, [userId, created, canceled, token]);
 
     useEffect(() => {
         getPendingBorrowCount();
@@ -159,6 +161,7 @@ export default function Borrow() {
                 onClose={() => setModalOpen(false)}
                 item={item}
                 userId={userId}
+                token={token}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
@@ -217,6 +220,7 @@ export default function Borrow() {
                         setMessage={setMessage}
                         setCanceled={setCanceled}
                         canceled={canceled}
+                        token={token}
                     />
                 )}
             </div>
