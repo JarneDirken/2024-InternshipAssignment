@@ -281,19 +281,18 @@ export default function DashboardHeader() {
             <div 
                 id="menu-overlay"
                 className={`fixed top-0 left-0 h-screen w-full md:w-auto bg-white z-10 transition-transform duration-500 ease-in-out 
-                            flex flex-col justify-between overflow-y-scroll ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                            flex flex-col justify-between ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                                 
                 <Image src={'/assets/images/logo.png'} 
-                        className="overflow-hidden absolute transition-all right-9 top-6"
+                        className="overflow-hidden fixed transition-all right-9 top-6"
                         style={{ width: '90px', height: 'auto' }}
                         alt="Logo"
                         width={90}
                         height={90}
                         priority
                 />
-                <div className='flex flex-col w-11/12 mx-auto'>
-                    <div className='px-4 mt-24'>
-                        <ul className={`flex-1 px-3 mx-auto"}`}>
+                <div className='flex-1 px-4 mt-24 flex-col overflow-y-auto w-11/12 mx-auto'>
+                    <ul className={`px-3`}>
                         {['Student', 'Teacher', 'Supervisor', 'Admin'].includes(userRole || '') && (
                             <>
                                 <MobileSidebarHeading>Links</MobileSidebarHeading>
@@ -385,12 +384,14 @@ export default function DashboardHeader() {
                                 </Link>
                             </>
                         )}
-                        </ul>
-                    </div>
+                    </ul>
                 </div>
                 <div className='p-8 w-11/12 mx-auto'>
                     <div className='border-b my-6'></div>
-                    <button className={`bg-gray-100 flex py-1.5 hover:bg-gray-200 overflow-hidden transition-all w-full justify-center`} onClick={handleLogout}>
+                    <button 
+                        className={`bg-gray-100 flex py-1.5 hover:bg-gray-200 overflow-hidden transition-all w-full justify-center`} 
+                        onClick={handleLogout}
+                    >
                         <LogoutRoundedIcon className={`text-2xl mr-1.5`} />
                         <p className={`font-semibold ml-1.5`}>Log Out</p>
                     </button>
