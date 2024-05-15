@@ -106,6 +106,11 @@ export default function Users() {
         }
     }, [inView, loading, hasMore]);
 
+    const uniqueEmails = useMemo(() => {
+        const emailSet = new Set(usersAll.map(item => item.email));
+        return Array.from(emailSet);
+    }, [usersAll]);
+
     const handleFilterChange = (filterType: string, value: string | string[]) => {
         switch (filterType) {
             case 'firstname':
@@ -286,6 +291,7 @@ export default function Users() {
                     roles={roles}
                     mode={mode}
                     userId={userId}
+                    uniqueEmails={uniqueEmails} 
                     token={token}
                 />
                 <div className="bg-white mb-4 rounded-xl">
@@ -297,7 +303,7 @@ export default function Users() {
                         onFilterChange={handleFilterChange}
                         onSortChange={handleSortChange}
                         filters={filters}
-                        items={users}
+                        items={usersAll}
                         sortOptions={sortOptions}
                         isSort={true}
                     />

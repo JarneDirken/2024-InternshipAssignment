@@ -81,10 +81,18 @@ export async function GET(request: NextRequest) {
     };
 
     const whereClause: WhereClause = {
-        item: {
-            name: { contains: nameFilter, mode: 'insensitive' },
-            itemStatusId: { not: 5 }
-        },
+        AND: [
+            { 
+                OR: [
+                    { returnDate: { not: null } }, // Include reparations with a return date
+                    { AND: [
+                        { returnDate: null }, // Include reparations without a return date
+                        { item: { itemStatusId: 6 } } // Only if item status is "broken"
+                    ] }
+                ]
+            },
+            { item: { name: { contains: nameFilter, mode: 'insensitive' } } } // Name filter
+        ]
     };
     
     if (borrowDate) {
@@ -112,7 +120,8 @@ export async function GET(request: NextRequest) {
                     location: true,
                     ItemRequests: {
                         include: {
-                            borrower: true
+                            borrower: true,
+                            approver: true
                         }
                     }
                 }

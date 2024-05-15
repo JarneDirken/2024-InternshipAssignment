@@ -256,7 +256,10 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
         } else if (number.length < 19 || number.length > 22) {
             setNumberError('Number must be between 19 and 22 characters.');
             isValid = false;
-        } else if (existingNumbers.includes(number)) {
+        } else if (mode === 'add' && existingNumbers.includes(number)) {
+            setNumberError('Number must be unique.');
+            isValid = false;
+        } else if (mode === 'edit' && number !== items[0].number && existingNumbers.includes(number)) {
             setNumberError('Number must be unique.');
             isValid = false;
         }
@@ -290,7 +293,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
 
     const handleAdd = async () => {
         if (!validateFields()) {
-            enqueueSnackbar('Please fill in all required fields.', { variant: 'error' });
+            enqueueSnackbar('Please correct the errors before submitting.', { variant: 'error' });
             return;
         }
         // Logic to handle add
@@ -335,7 +338,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
 
     const handleEdit = async () => {
         if (!validateFields()) {
-            enqueueSnackbar('Please fill in all required fields.', { variant: 'error' });
+            enqueueSnackbar('Please correct the errors before submitting.', { variant: 'error' });
             return;
         }
         // Logic to handle edit
@@ -375,7 +378,6 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
     
                 try {
                     await deleteObject(imageRef);
-                    console.log('Original image successfully deleted from Firebase Storage');
                 } catch (error) {
                     console.error('Failed to delete original image from Firebase:', error);
                 }
@@ -425,7 +427,6 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
     
             try {
                 await deleteObject(imageRef);
-                console.log('Image successfully deleted from Firebase Storage');
                 // Proceed with deleting the item after the image has been successfully deleted
                 deleteItem();
             } catch (error) {
@@ -589,6 +590,7 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
                 consumable: consumable,
                 amount: amount,
                 userId: primitiveUserId, // Assuming `userId` is from context or props
+                token: token,
             };
     
             // Validation checks
@@ -901,6 +903,10 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
                                     setName(newValue || '');
                                     setNameError('');
                                 }}
+                                onInputChange={(event, newInputValue) => {
+                                    setName(newInputValue || '');
+                                    setNameError('');
+                                }}
                                 renderInput={(params) => <TextField {...params} label="Name" required error={!!nameError} helperText={nameError} />}
                             />
                         </div>
@@ -932,6 +938,10 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
                                     setModel(newValue || '');
                                     setModelError('');
                                 }}
+                                onInputChange={(event, newInputValue) => {
+                                    setModel(newInputValue || '');
+                                    setModelError('');
+                                }}
                                 renderInput={(params) => <TextField {...params} label="Model" required error={!!modelError} helperText={modelError} />}
                             />
                         </div>
@@ -944,6 +954,10 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
                                 value={brand}
                                 onChange={(event, newValue) => {
                                     setBrand(newValue || '');
+                                    setBrandError('');
+                                }}
+                                onInputChange={(event, newInputValue) => {
+                                    setBrand(newInputValue || '');
                                     setBrandError('');
                                 }}
                                 renderInput={(params) => <TextField {...params} label="Brand" required error={!!brandError} helperText={brandError} />}

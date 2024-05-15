@@ -182,7 +182,8 @@ export default function Filters({ title, icon, active, setActive, onFilterChange
         if (!value) return null;
         const date = new Date(value);
         // Check if the date conversion is valid by checking the time value for NaN
-        return !isNaN(date.getTime()) ? date.getUTCFullYear().toString() : value;
+        const isValidDate = !isNaN(date.getTime()) && value.length >= 10 && value[4] === '-' && value[7] === '-';
+        return isValidDate ? date.getUTCFullYear().toString() : value;
     }
 
     const theme = createTheme({
