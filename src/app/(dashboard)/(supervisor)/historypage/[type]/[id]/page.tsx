@@ -129,18 +129,18 @@ export default function HistoryPage({ params } : {params: {type:string, id: stri
             RequestID: item.id,
             ItemName: item.item.name, // Item name
             Borrower: `${item.borrower?.firstName} ${item.borrower?.lastName}`,
-            Approver: `${item.approver?.firstName} ${item.approver?.lastName}`,
+            Approver: item.approver ? `${item.approver.firstName} ${item.approver.lastName}` : "Approver not set",
             Location: item.item.location.name,
             RequestDate: formatDate(item.requestDate),
             StartBorrowDate: formatDate(item.startBorrowDate),
             EndBorrowDate: formatDate(item.endBorrowDate),
-            DecisionDate: formatDate(item.decisionDate!),
-            BorrowDate: formatDate(item.borrowDate!),
-            ReturnDate: formatDate(item.returnDate!),
-            File: item.file,
+            DecisionDate: item.decisionDate ? formatDate(item.decisionDate) : "",
+            BorrowDate: item.borrowDate ? formatDate(item.borrowDate) : "",
+            ReturnDate: item.returnDate ? formatDate(item.returnDate) : "",
             Status: item.requestStatus.name,
-            Urgency: item.isUrgent ? 'Urgent' : 'Normal', // Example of converting boolean to string
             Description: item.approveMessage || 'No message', // Handle null values
+            Urgency: item.isUrgent ? 'Urgent' : 'Normal', // Example of converting boolean to string
+            File: item.file,
         }));
     
         // Create a worksheet from the data

@@ -3,7 +3,6 @@ import { atom } from 'recoil';
 import { User } from '@/models/User';
 import { GroupedItem, Item } from '@/models/Item';
 import { ItemRequest } from '@/models/ItemRequest';
-import { Repair } from '@/models/Repair';
 
 export const userProfileState = atom<User | null>({
     key: 'userProfileState',

@@ -12,6 +12,7 @@ import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutli
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { useInView } from "react-intersection-observer";
+import DoNotTouchOutlinedIcon from '@mui/icons-material/DoNotTouchOutlined';
 
 interface PendingBorrowProps {
     active: boolean;
@@ -127,29 +128,77 @@ export default function PendingBorrows({ active, nameFilter, modelFilter, brandF
     };
 
     const checkAvailability = (request: ItemRequest) => {
-        if(request.item.itemStatusId === 2 && request.requestStatusId === 1) {
-            return (
-                <div className="flex truncate items-center text-custom-primary gap-1">
-                    <AccessTimeIcon fontSize="small"/>
-                    <span>Pending</span>
-                </div>
-            );
-        }
-        if (request.item.itemStatusId === 3 && request.requestStatusId === 2) {
-            return (
-                <div className="flex truncate items-center text-custom-green gap-1">
-                    <CheckCircleOutlineOutlinedIcon fontSize="small"/>
-                    <span>Accepted</span>
-                </div>
-            );
-        }
-        if (request.item.itemStatusId === 1 && request.requestStatusId === 3) {
-            return (
-                <div className="flex truncate items-center text-custom-red gap-1">
-                    <CancelOutlinedIcon fontSize="small"/>
-                    <span>Rejected</span>
-                </div>
-            );
+        switch(request.item.itemStatusId) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                switch(request.requestStatusId) {
+                    case 1:
+                        return (
+                            <div className="flex truncate items-center text-custom-primary gap-1">
+                                <AccessTimeIcon fontSize="small"/>
+                                <span>Pending</span>
+                            </div>
+                        );
+                    case 2:
+                        return (
+                            <div className="flex truncate items-center text-custom-green gap-1">
+                                <CheckCircleOutlineOutlinedIcon fontSize="small"/>
+                                <span>Accepted</span>
+                            </div>
+                        );
+                    case 3:
+                        return (
+                            <div className="flex truncate items-center text-custom-red gap-1">
+                                <CancelOutlinedIcon fontSize="small"/>
+                                <span>Rejected</span>
+                            </div>
+                        );
+                    case 4:
+                        return (
+                            <div className="flex truncate items-center text-custom-green gap-1">
+                                <CheckCircleOutlineOutlinedIcon fontSize="small"/>
+                                <span>Received</span>
+                            </div>
+                        );
+                    case 5:
+                        return (
+                            <div className="flex truncate items-center text-custom-primary gap-1">
+                                <AccessTimeIcon fontSize="small"/>
+                                <span>Pending return</span>
+                            </div>
+                        );
+                    case 6:
+                    case 7:
+                        return (
+                            <div className="flex truncate items-center text-custom-green gap-1">
+                                <CheckCircleOutlineOutlinedIcon fontSize="small"/>
+                                <span>Finished</span>
+                            </div>
+                        );
+                    case 8:
+                        return (
+                            <div className="flex truncate items-center text-custom-red gap-1">
+                                <CancelOutlinedIcon fontSize="small"/>
+                                <span>Cancelled</span>
+                            </div>
+                        );
+                }   
+            case 5:
+                return (
+                    <div className="flex truncate items-center text-custom-primary gap-1 text-sm sm:text-base">
+                        <AccessTimeIcon fontSize="small"/>
+                        <span>In repair</span>
+                    </div>
+                );
+            case 6:
+                return (
+                    <div className="flex truncate items-center text-custom-red gap-1 text-sm sm:text-base">
+                        <DoNotTouchOutlinedIcon fontSize="small"/>
+                        <span>Broken</span>
+                    </div>
+                );
         }
     };
 

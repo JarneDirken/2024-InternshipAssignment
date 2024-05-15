@@ -6,42 +6,54 @@ const EXPIRATION_DURATION = 86400000; // 24 hours
 
 export default function useCart() {
     const [cart, setCart] = useState<CartItem[]>([]);
+    const [isInitialized, setIsInitialized] = useState(false);
+
+    // Function to update local storage and handle expiration
+    const updateLocalStorage = (newCart: CartItem[]) => {
+        if (newCart.length > 0) {
+            localStorage.setItem("cart", JSON.stringify(newCart));
+            const expirationTime = Date.now() + EXPIRATION_DURATION;
+            localStorage.setItem("cartExpiration", expirationTime.toString());
+        } else {
+            localStorage.removeItem("cart");
+            localStorage.removeItem("cartExpiration");
+        }
+        window.dispatchEvent(new CustomEvent(CART_EVENT, { detail: newCart }));
+    };
 
     useEffect(() => {
         const savedCart = localStorage.getItem("cart");
         const expiration = localStorage.getItem("cartExpiration");
         const currentTime = Date.now();
-
         if (savedCart && expiration && currentTime < parseInt(expiration)) {
-            setCart(JSON.parse(savedCart));
+            const parsedCart = JSON.parse(savedCart);
+            setCart(parsedCart);
         } else {
             localStorage.removeItem("cart");
             localStorage.removeItem("cartExpiration");
             setCart([]);
         }
+        setIsInitialized(true);
     }, []);
 
     useEffect(() => {
-        if (cart.length > 0) {
-            localStorage.setItem("cart", JSON.stringify(cart));
-            const expirationTime = Date.now() + EXPIRATION_DURATION;
-            localStorage.setItem("cartExpiration", expirationTime.toString());
-            window.dispatchEvent(new CustomEvent(CART_EVENT, { detail: cart }));
+        if (isInitialized) {
+            updateLocalStorage(cart);
         }
-    }, [cart]);
+    }, [cart, isInitialized]);
 
     useEffect(() => {
         const handleStorageChange = (event: Event) => {
-            if (event.type === CART_EVENT) {
-                const customEvent = event as CustomEvent;
-                setCart(customEvent.detail);
+            if (event instanceof CustomEvent && event.type === CART_EVENT) {
+                setCart(event.detail);
             } else {
                 const savedCart = localStorage.getItem("cart");
                 const expiration = localStorage.getItem("cartExpiration");
                 const currentTime = Date.now();
 
                 if (savedCart && expiration && currentTime < parseInt(expiration)) {
-                    setCart(JSON.parse(savedCart));
+                    const parsedCart = JSON.parse(savedCart);
+                    setCart(parsedCart);
                 } else {
                     setCart([]);
                 }
@@ -62,21 +74,27 @@ export default function useCart() {
         if (isItemInCart) {
             return { success: false, message: 'Error: Item already in cart' };
         } else {
-            setCart(prevCart => [...prevCart, cartItem]);
+            setCart(prevCart => {
+                const newCart = [...prevCart, cartItem];
+                updateLocalStorage(newCart);
+                return newCart;
+            });
             return { success: true, message: 'Item successfully added to cart' };
         }
     };
 
     const removeFromCart = (itemId: number) => {
-        const updatedCart = cart.filter(cartItem => cartItem.item.id !== itemId);
-        localStorage.setItem("cart", JSON.stringify(updatedCart));
-        setCart(updatedCart);
+        setCart(prevCart => {
+            const updatedCart = prevCart.filter(cartItem => cartItem.item.id !== itemId);
+            updateLocalStorage(updatedCart);
+            return updatedCart;
+        });
     };
-    
+
     const clearCart = () => {
+        setCart([]);
         localStorage.removeItem("cart");
         localStorage.removeItem("cartExpiration");
-        setCart([]);
     };
 
     return { cart, addToCart, removeFromCart, clearCart };

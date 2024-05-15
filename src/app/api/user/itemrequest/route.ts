@@ -15,9 +15,7 @@ export async function POST(req: NextRequest) {
             role: true,
         }
     });
-    console.log(data);
-    console.log(data.token);
-
+    
     const decodedToken = await admin.auth().verifyIdToken(data.token);
 
     if (!decodedToken) {
@@ -202,13 +200,8 @@ export async function GET(request: NextRequest) {
                 model: { contains: modelFilter, mode: 'insensitive' },
                 brand: { contains: brandFilter, mode: 'insensitive' },
                 location: { name: { contains: locationFilter, mode: 'insensitive' } },
-                itemStatusId: {
-                    in: [1,2,3]
-                }
             },
-            requestStatusId: {
-                in: [1, 2, 3]
-            }
+            requestStatusId: 1,
         },
         include: { 
             item: {
@@ -227,14 +220,7 @@ export async function GET(request: NextRequest) {
     const totalCount = await prisma.itemRequest.count({
         where: {
             borrowerId: uid,
-            item: {
-                itemStatusId: {
-                    in: [1,2,3]
-                }
-            },
-            requestStatusId: {
-                in: [1, 2, 3]
-            }
+            requestStatusId: 1,
         }
     });
 

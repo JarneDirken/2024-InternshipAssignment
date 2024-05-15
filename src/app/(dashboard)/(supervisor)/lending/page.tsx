@@ -28,6 +28,10 @@ export default function Lending() {
     const [returns, setReturns] = useState<ItemRequest[]>([]);
     const [checkItem, setCheckItem] = useState<ItemRequest[]>([]);
     const [allRequests, setAllRequests] = useState<ItemRequest[]>([]);
+    const [ALLborrows, ALLsetBorrows] = useState<ItemRequest[]>([]);
+    const [ALLreturns, ALLsetReturns] = useState<ItemRequest[]>([]);
+    const [ALLcheckItem, ALLsetCheckItem] = useState<ItemRequest[]>([]);
+    const [ALLallRequests, ALLsetAllRequests] = useState<ItemRequest[]>([]);
     const [totalBorrowsCount, setTotalBorrowsCount] = useState(0);
     const [totalReturnsCount, setTotalReturnCount] = useState(0);
     const [totalCheckItemCount, setTotalCheckItemCount] = useState(0);
@@ -70,39 +74,30 @@ export default function Lending() {
             if(selectedTab === "checkitem"){
                 getCheckItem(true);
             }
+            if(selectedTab === "history"){
+                getAllRequests(true);
+            }
         }
-    }, [userId, requests, nameFilter, borrowDateFilter, requestor, location, token]);
-
-    useEffect(() => {
-        if(selectedTab === "returns"){
-            getReturns(true);
-        }
-        if(selectedTab === "checkitem"){
-            getCheckItem(true);
-        }
-        if(selectedTab === "history"){
-            getAllRequests(true);
-        }
-    }, [selectedTab]);
+    }, [userId, requests, nameFilter, borrowDateFilter, requestor, location, token, selectedTab]);
 
     useEffect(() => {
         switch (selectedTab) {
             case "borrows":
-                setCurrentItems(borrows);
+                setCurrentItems(ALLborrows);
                 break;
             case "returns":
-                setCurrentItems(returns);
+                setCurrentItems(ALLreturns);
                 break;
             case "checkitem":
-                setCheckItem(checkItem);
+                setCurrentItems(ALLcheckItem);
                 break;
             case "history":
-                setCurrentItems(allRequests);
+                setCurrentItems(ALLallRequests);
                 break;
             default:
                 setCurrentItems([]);
         }
-    }, [selectedTab, borrows, returns, checkItem, allRequests]);
+    }, [selectedTab, ALLborrows, ALLcheckItem, ALLallRequests, ALLreturns, returns, borrows, checkItem, allRequests]);
 
     // infinate loading scroll
     useEffect(() => {
@@ -229,6 +224,9 @@ export default function Lending() {
             const itemCount = data.totalCount || 0;
             const itemCountReturn = data.totalCountReturns || 0;
             const itemCountCheckItem = data.totalCountCheckItem || 0;
+            const ALLfetcheditemRequests = data.allitemRequests || [];
+
+            ALLsetBorrows(ALLfetcheditemRequests);
 
             setTotalBorrowsCount(itemCount);
             setTotalReturnCount(itemCountReturn);
@@ -288,15 +286,19 @@ export default function Lending() {
             }
             
             const data = await response.json();
+            const fetcheditemRequests = data.itemRequests || [];
+            const ALLfetcheditemRequests = data.allitemRequests || [];
+
+            ALLsetReturns(ALLfetcheditemRequests);
 
             // infinate loading
             if (initialLoad) {
-                setReturns(data);
+                setReturns(fetcheditemRequests);
             } else {
-                setReturns(prevItems => [...prevItems, ...data]);
+                setReturns(prevItems => [...prevItems, ...fetcheditemRequests]);
             }
-            setOffset(currentOffset + data.length);
-            setHasMore(data.length === NUMBER_OF_ITEMS_TO_FETCH);
+            setOffset(currentOffset + fetcheditemRequests.length);
+            setHasMore(fetcheditemRequests.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -343,15 +345,19 @@ export default function Lending() {
             }
             
             const data = await response.json();
+            const fetcheditemRequests = data.itemRequests || [];
+            const ALLfetcheditemRequests = data.allitemRequests || [];
+
+            ALLsetCheckItem(ALLfetcheditemRequests);
             
             // infinate loading
             if (initialLoad) {
-                setCheckItem(data);
+                setCheckItem(fetcheditemRequests);
             } else {
-                setCheckItem(prevItems => [...prevItems, ...data]);
+                setCheckItem(prevItems => [...prevItems, ...fetcheditemRequests]);
             }
-            setOffset(currentOffset + data.length);
-            setHasMore(data.length === NUMBER_OF_ITEMS_TO_FETCH);
+            setOffset(currentOffset + fetcheditemRequests.length);
+            setHasMore(fetcheditemRequests.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -398,15 +404,19 @@ export default function Lending() {
             }
     
             const data = await response.json();
+            const fetcheditemRequests = data.itemRequests || [];
+            const ALLfetcheditemRequests = data.allitemRequests || [];
+
+            ALLsetAllRequests(ALLfetcheditemRequests);
             
             // infinate loading
             if (initialLoad) {
-                setAllRequests(data);
+                setAllRequests(fetcheditemRequests);
             } else {
-                setAllRequests(prevItems => [...prevItems, ...data]);
+                setAllRequests(prevItems => [...prevItems, ...fetcheditemRequests]);
             }
-            setOffset(currentOffset + data.length);
-            setHasMore(data.length === NUMBER_OF_ITEMS_TO_FETCH);
+            setOffset(currentOffset + fetcheditemRequests.length);
+            setHasMore(fetcheditemRequests.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
             console.error("Failed to fetch items:", error);
         } finally {
@@ -512,6 +522,7 @@ export default function Lending() {
                     filters={filters}
                     sortOptions={sortOptions}
                     isCardView={true}
+                    isSort={true}
                 />
             </div>
             <div className="rounded-xl">

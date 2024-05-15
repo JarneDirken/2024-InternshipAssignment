@@ -64,7 +64,21 @@ export async function GET(request: NextRequest) {
         },
     });
 
-    return new Response(JSON.stringify( items ), {
+    const totalCount = await prisma.item.count({
+        where: {
+            active: true,
+            RoleItem: {
+                some: {
+                    roleId: {
+                        lte: user.roleId,
+                    }
+                }
+            },
+            itemStatusId: 1,
+        }
+    });
+
+    return new Response(JSON.stringify({ items, totalCount }), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',

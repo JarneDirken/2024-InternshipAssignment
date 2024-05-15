@@ -143,7 +143,19 @@ export async function GET(request: NextRequest) {
         countRequests(true)
     ]);
 
-    return new Response(JSON.stringify({itemRequests, totalCount, totalCountUrgent}), {
+    const AllItems = await prisma.itemRequest.findMany({
+        where: baseWhereClause,
+        include: { 
+            item: {
+                include: {
+                    location: true
+                }
+            },
+            borrower: true
+        },
+    });
+
+    return new Response(JSON.stringify({itemRequests, totalCount, totalCountUrgent, AllItems}), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',

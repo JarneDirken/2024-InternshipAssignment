@@ -266,6 +266,12 @@ export default function Modal({ open, onClose, item, userId, token }: ModalCardP
             return;
         }
 
+        if (!token) {
+            return "";
+        }
+
+        const primitiveToken: string = token.valueOf();
+
         const cartItem = {
             item,
             borrowDetails: {
@@ -274,6 +280,7 @@ export default function Modal({ open, onClose, item, userId, token }: ModalCardP
                 isUrgent,
                 file: fileUrl,
                 amountRequest: amount,
+                token: primitiveToken,
             }
         };
 

@@ -12,6 +12,7 @@ import { Filter } from "@/models/Filter";
 import { SortOptions } from "@/models/SortOptions";
 import { useInView } from "react-intersection-observer";
 import useUser from "@/hooks/useUser";
+import MessageModal from "@/components/(user)/borrow/MessageModal";
 
 export default function History() {
     const { isAuthorized, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
@@ -19,9 +20,12 @@ export default function History() {
     const { userId, token } = useUser();
     const [itemLoading, setItemLoading] = useState(true);
     const [items, setItems] = useState<ItemRequest[]>([]);
+    const [allItems, setAllItems] = useState<ItemRequest[]>([]);
     const [totalItemCount, setTotalItemCount] = useState(0);
     const [nameFilter, setNameFilter] = useState(''); // name filter
     const [borrowDateFilter, setBorrowDateFilter] = useState(''); // model filter
+    const [isMessageModalOpen, setMessageModalOpen] = useState(false); // Message modal
+    const [message, setMessage] = useState("");
     const filters: Filter[] = [
         { label: 'Name', state: [nameFilter, setNameFilter], inputType: 'text', optionsKey: 'item.name'},
         { label: 'Borrow Date', state: [borrowDateFilter, setBorrowDateFilter], inputType: 'dateRange'}
@@ -40,7 +44,7 @@ export default function History() {
 
     useEffect(() => {
         if(userId && token) {
-            getItems();
+            getItems(true);
         }
     }, [userId, nameFilter, borrowDateFilter, token]);
 
@@ -83,7 +87,7 @@ export default function History() {
         return { borrowDate, returnDate };
     };
 
-    async function getItems(initialLoad = false, sortBy = 'returnDate', sortDirection = 'desc') {
+    async function getItems(initialLoad = false, sortBy = 'requestDate', sortDirection = 'desc') {
         if (!hasMore && !initialLoad) return; // infinate loading
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
@@ -121,15 +125,23 @@ export default function History() {
             const data = await response.json();
             const fetchedItems = data.itemRequests || [];
             const itemCount = data.totalCount || 0;
+            const allItemsFetched = data.allItems || [];
 
             setTotalItemCount(itemCount);
+            setAllItems(allItemsFetched);
 
             // infinate loading
             if (initialLoad) {
                 setItems(fetchedItems);
             } else {
-                setItems(prevItems => [...prevItems, ...fetchedItems]);
+                setItems((prevItems: ItemRequest[]) => {
+                    const itemsMap = new Map<string, ItemRequest>();
+                    prevItems.forEach((item: ItemRequest) => itemsMap.set(item.id.toString(), item));
+                    fetchedItems.forEach((item: ItemRequest) => itemsMap.set(item.id.toString(), item));
+                    return Array.from(itemsMap.values());
+                });
             }
+
             setOffset(currentOffset + fetchedItems.length);
             setHasMore(fetchedItems.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
@@ -179,6 +191,11 @@ export default function History() {
 
     return (
         <div>
+            <MessageModal 
+                open={isMessageModalOpen}
+                onClose={() => setMessageModalOpen(false)}
+                message={message}
+            />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
                     title="History"
@@ -187,10 +204,11 @@ export default function History() {
                     setActive={setActive}
                     onFilterChange={handleFilterChange}
                     onSortChange={handleSortChange}
-                    items={items}
+                    items={allItems}
                     filters={filters}
                     sortOptions={sortOptions}
                     isCardView={true}
+                    isSort={true}
                 />
             </div>
             <div className="rounded-xl">
@@ -215,6 +233,8 @@ export default function History() {
                     listRef={listRef}
                     hasMore={hasMore}
                     innerRef={ref}
+                    openMessageModal={setMessageModalOpen}
+                    setMessage={setMessage}
                 />
             </div>
         </div>

@@ -26,9 +26,10 @@ interface FiltersProps { // typescript moment, everthing should have a type
     onFilterChange: (filterType: string, filterValue: string) => void;
     items: Item[];
     userId: String | null;
+    token: String | null;
 }
 
-export default function Filters({ active, setActive, onFilterChange, items, userId }: FiltersProps) {
+export default function Filters({ active, setActive, onFilterChange, items, userId, token }: FiltersProps) {
     const prevWidthRef = useRef(window.innerWidth);
     const lastActiveRef = useRef<boolean | null>(null);
     const [name, setName] = useState('');
@@ -110,6 +111,7 @@ export default function Filters({ active, setActive, onFilterChange, items, user
                 file: cartItem.borrowDetails.file,
                 isUrgent: cartItem.borrowDetails.isUrgent,
                 amountRequest: cartItem.borrowDetails.amountRequest,
+                token: token,
             };
     
             try {
