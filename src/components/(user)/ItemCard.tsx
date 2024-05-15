@@ -22,8 +22,8 @@ interface BorrowCardProps {
     listRef: RefObject<HTMLDivElement>;
     hasMore: boolean;
     innerRef: React.Ref<HTMLDivElement>;
-    openMessageModal: (value: boolean) => void;
-    setMessage: (value: string) => void;
+    openMessageModal?: (value: boolean) => void;
+    setMessage?: (value: string) => void;
 }
 
 export default function ItemCard({ active, openModal, items, calculateReturnDate, calculateHistoryDate, itemLoading, userId, listRef, hasMore, innerRef, openMessageModal, setMessage }: BorrowCardProps) {
@@ -161,8 +161,10 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
     };
 
     const openMessage = (message: string) => {
-        openMessageModal(true);
-        setMessage(message);
+        if (openMessageModal && setMessage) {
+            openMessageModal(true);
+            setMessage(message);
+        }
     };
 
     return (
