@@ -28,9 +28,10 @@ interface ModalCardProps {
     mode: 'add' | 'edit' | 'delete';
     userId: String | null;
     token: String | null;
+    uniqueEmails: string[];
 }
 
-export default function Modal({ open, onClose, onItemsUpdated, selectedItems, roles, mode, userId, token }: ModalCardProps) {
+export default function Modal({ open, onClose, onItemsUpdated, selectedItems, roles, mode, userId, token, uniqueEmails }: ModalCardProps) {
     const theme = createTheme({
         palette: {
             primary: {
@@ -198,6 +199,9 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
             isValid = false;
         } else if (!emailPattern.test(email)) {
             setEmailError('Invalid email format.');
+            isValid = false;
+        } else if (uniqueEmails.includes(email)) {
+            setEmailError('Email is already in use.');
             isValid = false;
         }
         if (!selectedRoleId) {

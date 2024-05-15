@@ -118,7 +118,7 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                                         <span>Repaired</span>
                                                     </div>
                                                 )}
-                                                {item.item.itemStatusId === 6 && (
+                                                {!item.returnDate && item.item.itemStatusId === 6 && (
                                                     <div className="flex truncate text-custom-red gap-1 text-sm sm:text-base">
                                                         <DoNotTouchOutlinedIcon fontSize="small"/>
                                                         <span>Broken</span>
@@ -136,7 +136,7 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                             <span>{formatDateYear(item.item.yearBought)}</span>
                                         </div>
                                         <div className="truncate">
-                                            <span className="font-semibold">Number:&nbsp;</span>
+                                            <span className="font-semibold">No:&nbsp;</span>
                                             <span>{item.item.number}</span>
                                         </div>
                                     </div>
@@ -151,6 +151,13 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                         <div className="truncate">
                                             <span className="font-semibold">Location:&nbsp;</span>
                                             <span>{item.item.location.name}</span>
+                                        </div>
+                                        <div className="truncate">
+                                            <span className="font-semibold">Supervisor:&nbsp;</span>
+                                            <span>
+                                                {item.item.ItemRequests?.[item.item.ItemRequests?.length - 1]?.approver?.firstName}{' '}
+                                                {item.item.ItemRequests?.[item.item.ItemRequests?.length - 1]?.approver?.lastName}
+                                            </span>
                                         </div>
                                     </div>
                                     <div className="flex flex-col w-1/5 justify-end items-end">
@@ -227,13 +234,19 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                                 <span className="text-gray-400">Name</span>
                                                 <span className="truncate">{item.item.name}</span>
                                             </div>
-                                            <div className="flex flex-col items-start w-full text-sm sm:text-base truncate">
-                                                <span className="text-gray-400">Model</span>
-                                                <span className="truncate">{item.item.model}</span>
-                                            </div>
+                                            <div className="flex flex-col items-Brand w-full text-sm sm:text-base truncate">
+                                                <span className="text-gray-400">Brand</span>
+                                                <span className="truncate">{item.item.brand}</span>
                                             <div className="flex flex-col items-start w-full text-sm sm:text-base truncate">
                                                 <span className="text-gray-400">Number</span>
                                                 <span className="truncate">{item.item.number}</span>
+                                            </div>
+                                            <div className="flex flex-col items-start w-full text-sm sm:text-base truncate">
+                                                <span className="text-gray-400">Supervisor</span>
+                                                <span className="truncate">
+                                                    {item.item.ItemRequests?.[item.item.ItemRequests?.length - 1]?.approver?.firstName}{' '}
+                                                    {item.item.ItemRequests?.[item.item.ItemRequests?.length - 1]?.approver?.lastName}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>

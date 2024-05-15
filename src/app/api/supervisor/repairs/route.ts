@@ -84,6 +84,7 @@ export async function GET(request: NextRequest) {
             name: { contains: nameFilter, mode: 'insensitive' },
             itemStatusId: 5,
         },
+        returnDate: null,
     };
     
     if (borrowDate) {
@@ -110,7 +111,8 @@ export async function GET(request: NextRequest) {
                     location: true,
                     ItemRequests: {
                         include: {
-                            borrower: true
+                            borrower: true,
+                            approver: true
                         }
                     }
                 }

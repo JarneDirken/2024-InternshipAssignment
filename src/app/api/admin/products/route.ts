@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
     const modelFilter = searchParams.get('model') || '';
     const brandFilter = searchParams.get('brand') || '';
     const locationFilter = searchParams.get('location') || '';
+    const numberFilter = searchParams.get('number') || '';
     const yearBoughtFilter = searchParams.get('year') || '';
     const availabilityFilter = searchParams.get('availability') || '';
     const sortBy = searchParams.get('sortBy') || 'id';
@@ -105,6 +106,7 @@ export async function GET(request: NextRequest) {
         location: { 
             name: {contains: locationFilter, mode: 'insensitive'}
         },
+        number: { contains: numberFilter, mode: 'insensitive'},
         ...(yearBoughtFilter && {
             yearBought: {
                 gte: new Date(`${yearBoughtFilter}-01-01T00:00:00.000Z`),
@@ -274,6 +276,15 @@ export async function PUT(req: NextRequest) {
 
         // Check if the item already has an active request with itemStatusId: 3
         const result = await prisma.$transaction(async (prisma) => {
+            const currentItemStatus = await prisma.item.findUnique({
+                where: {
+                    id: data.id,
+                },
+                select: {
+                    itemStatusId: true,
+                },
+            });
+
             const updateProduct = await prisma.item.update({
                 where: {
                     id: data.id,
@@ -331,6 +342,35 @@ export async function PUT(req: NextRequest) {
                     },
                 });
             };
+
+            const brokenStatus = await prisma.itemStatus.findUnique({
+                where: {
+                    name: 'Broken',
+                },
+                select: {
+                    id: true,
+                },
+            });
+
+            if (currentItemStatus?.itemStatusId === brokenStatus?.id) {
+                const reparation = await prisma.reparation.findFirst({
+                    where: {
+                        itemId: data.id,
+                        returnDate: null,
+                    },
+                });
+    
+                if (reparation) {
+                    await prisma.reparation.update({
+                        where: {
+                            id: reparation.id,
+                        },
+                        data: {
+                            returnDate: new Date(),
+                        },
+                    });
+                }
+            }
     
             const Admin = await prisma.user.findMany({
                 where: {

@@ -154,7 +154,7 @@ export default function Modal({ open, onClose, item, repaired, broken, setRepair
                                                 <span>Repaired</span>
                                             </div>
                                         )}
-                                        {item.item.itemStatusId === 6 && (
+                                        {!item.returnDate && item.item.itemStatusId === 6 && (
                                             <div className="flex truncate text-custom-red gap-1 text-sm sm:text-base">
                                                 <DoNotTouchOutlinedIcon fontSize="small"/>
                                                 <span>Broken</span>

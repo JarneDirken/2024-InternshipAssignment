@@ -64,6 +64,7 @@ export default function Product() {
     const [model, setModel] = useState<string>('');
     const [brand, setBrand] = useState<string>('');
     const [location, setLocation] = useState<string>('');
+    const [number, setNumber] = useState<string>('');
     const [year, setYear] = useState<string>('');
     const [availability, setAvailability] = useState<string>('');
     const [selectedItems, setSelectedItems] = useState<Item[]>([]);
@@ -73,6 +74,7 @@ export default function Product() {
         { label: 'Model', state: [model, setModel], inputType: 'text', optionsKey: 'model'},
         { label: 'Brand', state: [brand, setBrand], inputType: 'text', optionsKey: 'brand'},
         { label: 'Location', state: [location, setLocation], inputType: 'text', optionsKey: 'location.name'},
+        { label: 'Number', state: [number, setNumber], inputType: 'text', optionsKey: 'number'},
         { label: 'Year', state: [year, setYear], inputType: 'text', optionsKey: 'yearBought'},
         { label: 'Availability', state: [availability, setAvailability], inputType: 'multipleSelect', options: ['Active', 'Inactive']},
     ];
@@ -100,7 +102,7 @@ export default function Product() {
         if(userId && token) {
             getAllItems(true);
         }
-    }, [userId, name, model, brand, location, year, availability, token]);
+    }, [userId, name, model, brand, location, year, availability, token, number]);
 
     // infinite loading scroll
     useEffect(() => {
@@ -130,6 +132,9 @@ export default function Product() {
             case 'location':
                 setLocation(value as string);
                 break;
+            case 'number':
+                setNumber(value as string);
+                break;
             case 'year':
                 setYear(value as string);
                 break;
@@ -142,20 +147,21 @@ export default function Product() {
     };
 
     async function getAllItems(initialLoad = false, sortBy = 'id', sortDirection = 'desc') {
-        if (!hasMore && !initialLoad) return; // infinate loading
-        const currentOffset = initialLoad ? 0 : offset; // infinate loading
+        if (!hasMore && !initialLoad) return; // infinite loading
+        const currentOffset = initialLoad ? 0 : offset; // infinite loading
         setItemLoading(true);
         const params: Record<string, string> = {
             name: name,
             model: model,
             brand: brand,
             location: location,
+            number: number,
             year: year,
             availability: availability,
             sortBy: sortBy || 'id',
             sortDirection: sortDirection || 'desc',
-            offset: currentOffset.toString(), // infinate loading 
-            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinate loading 
+            offset: currentOffset.toString(), // infinite loading 
+            limit: NUMBER_OF_ITEMS_TO_FETCH.toString() // infinite loading 
         };
     
         // Only add userId to the query if it is not null
@@ -183,7 +189,7 @@ export default function Product() {
             setItemStatuses(data.itemStatuses || []);
             setItemsAll(fetchedItemsAll);
 
-            // infinate loading
+            // infinite loading
             if (initialLoad) {
                 setItems(fetchedItems);
             } else {
@@ -246,24 +252,24 @@ export default function Product() {
     };
 
     const uniqueNames = useMemo(() => {
-        const nameSet = new Set(items.map(item => item.name));
+        const nameSet = new Set(itemsAll.map(item => item.name));
         return Array.from(nameSet);
-    }, [items]);
+    }, [itemsAll]);
     
     const uniqueModels = useMemo(() => {
-        const modelSet = new Set(items.map(item => item.model));
+        const modelSet = new Set(itemsAll.map(item => item.model));
         return Array.from(modelSet);
-    }, [items]);
+    }, [itemsAll]);
     
     const uniqueBrands = useMemo(() => {
-        const brandSet = new Set(items.map(item => item.brand));
+        const brandSet = new Set(itemsAll.map(item => item.brand));
         return Array.from(brandSet);
-    }, [items]);
+    }, [itemsAll]);
 
     const uniqueNumbers = useMemo(() => {
-        const numberSet = new Set(items.map(item => item.number));
+        const numberSet = new Set(itemsAll.map(item => item.number));
         return Array.from(numberSet);
-    }, [items]);
+    }, [itemsAll]);
 
     const formatDate = (dateString: Date): string => {
         const date = new Date(dateString);
@@ -424,7 +430,7 @@ export default function Product() {
                         onFilterChange={handleFilterChange}
                         onSortChange={handleSortChange}
                         filters={filters}
-                        items={items}
+                        items={itemsAll}
                         sortOptions={sortOptions}
                         isSort={true}
                     />

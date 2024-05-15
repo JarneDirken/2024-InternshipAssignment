@@ -105,9 +105,9 @@ export default function Locations() {
     };
 
     const uniqueNames = useMemo(() => {
-        const namesSet = new Set(locations.map(location => location.name));
+        const namesSet = new Set(locationsAll.map(location => location.name));
         return Array.from(namesSet);
-    }, [locations]);
+    }, [locationsAll]);
 
     async function getAllLocations(initialLoad = false, sortBy = 'id', sortDirection = 'desc') {
         if (!hasMore && !initialLoad) return; // infinite loading
@@ -265,7 +265,7 @@ export default function Locations() {
                         onFilterChange={handleFilterChange}
                         onSortChange={handleSortChange}
                         filters={filters}
-                        items={locations}
+                        items={locationsAll}
                         sortOptions={sortOptions}
                         isSort={true}
                     />

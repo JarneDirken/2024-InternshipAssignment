@@ -284,7 +284,7 @@ export default function DashboardHeader() {
                             flex flex-col justify-between ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                                 
                 <Image src={'/assets/images/logo.png'} 
-                        className="overflow-hidden fixed transition-all right-9 top-6"
+                        className="fixed transition-all right-9 top-6"
                         style={{ width: '90px', height: 'auto' }}
                         alt="Logo"
                         width={90}
