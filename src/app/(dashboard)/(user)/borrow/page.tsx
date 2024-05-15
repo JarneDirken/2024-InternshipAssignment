@@ -170,6 +170,7 @@ export default function Borrow() {
                     onFilterChange={handleFilterChange}
                     items={items}
                     userId={userId}
+                    token={token}
                 />
             </div>
             <div className="rounded-xl">

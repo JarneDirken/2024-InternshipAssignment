@@ -15,9 +15,7 @@ export async function POST(req: NextRequest) {
             role: true,
         }
     });
-    console.log(data);
-    console.log(data.token);
-
+    
     const decodedToken = await admin.auth().verifyIdToken(data.token);
 
     if (!decodedToken) {
