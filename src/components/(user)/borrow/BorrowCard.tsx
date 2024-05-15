@@ -114,7 +114,7 @@ export default function BorrowCard({ active, openModal, nameFilter, modelFilter,
         } else {
             return <span>Borrowed</span>;
         }
-    }
+    };
 
     if (loading) { return (<Loading />); };
 
