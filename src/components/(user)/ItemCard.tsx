@@ -2,12 +2,14 @@ import Button from "@/components/states/Button";
 import { ItemRequest } from "@/models/ItemRequest";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Loading from "@/components/states/Loading";
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import Image from 'next/image';
 import { RefObject, useState } from "react";
 import { useSnackbar } from "notistack";
 import { useRecoilState } from "recoil";
 import { updateRequest } from "@/services/store";
+import DoNotTouchOutlinedIcon from '@mui/icons-material/DoNotTouchOutlined';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 
 interface BorrowCardProps {
     active: boolean;
@@ -81,6 +83,81 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
         return dateObj.toLocaleDateString('en-US', options);
     };
 
+    const checkAvailability = (request: ItemRequest) => {
+        switch(request.item.itemStatusId) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                switch(request.requestStatusId) {
+                    case 1:
+                        return (
+                            <div className="flex truncate items-center text-custom-primary gap-1">
+                                <AccessTimeIcon fontSize="small"/>
+                                <span>Pending</span>
+                            </div>
+                        );
+                    case 2:
+                        return (
+                            <div className="flex truncate items-center text-custom-green gap-1">
+                                <CheckCircleOutlineOutlinedIcon fontSize="small"/>
+                                <span>Accepted</span>
+                            </div>
+                        );
+                    case 3:
+                        return (
+                            <div className="flex truncate items-center text-custom-red gap-1">
+                                <CancelOutlinedIcon fontSize="small"/>
+                                <span>Rejected</span>
+                            </div>
+                        );
+                    case 4:
+                        return (
+                            <div className="flex truncate items-center text-custom-green gap-1">
+                                <CheckCircleOutlineOutlinedIcon fontSize="small"/>
+                                <span>Received</span>
+                            </div>
+                        );
+                    case 5:
+                        return (
+                            <div className="flex truncate items-center text-custom-primary gap-1">
+                                <AccessTimeIcon fontSize="small"/>
+                                <span>Pending return</span>
+                            </div>
+                        );
+                    case 6:
+                    case 7:
+                        return (
+                            <div className="flex truncate items-center text-custom-green gap-1">
+                                <CheckCircleOutlineOutlinedIcon fontSize="small"/>
+                                <span>Finished</span>
+                            </div>
+                        );
+                    case 8:
+                        return (
+                            <div className="flex truncate items-center text-custom-red gap-1">
+                                <CancelOutlinedIcon fontSize="small"/>
+                                <span>Cancelled</span>
+                            </div>
+                        );
+                }   
+            case 5:
+                return (
+                    <div className="flex truncate items-center text-custom-primary gap-1 text-sm sm:text-base">
+                        <AccessTimeIcon fontSize="small"/>
+                        <span>In repair</span>
+                    </div>
+                );
+            case 6:
+                return (
+                    <div className="flex truncate items-center text-custom-red gap-1 text-sm sm:text-base">
+                        <DoNotTouchOutlinedIcon fontSize="small"/>
+                        <span>Broken</span>
+                    </div>
+                );
+        }
+    };
+
     return (
         <>
             <div ref={listRef} className={active ? listViewClass : gridViewClass} style={{maxHeight: "60vh"}}>
@@ -126,25 +203,29 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                     <div className="flex flex-col w-1/3">
                                         <div className="flex gap-8 items-center">
                                             <div className="truncate">
+                                                <span className="font-semibold">Brand:&nbsp;</span>
+                                                <span>{item.item.brand}</span>
+                                            </div>
+                                            
+                                        </div>
+                                        <div className="truncate">
+                                            <span className="font-semibold">Location:&nbsp;</span>
+                                            <span>{item.item.location.name}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col w-1/3 ml-4">
+                                        <div className="flex gap-8 items-center">
+                                            <div className="truncate">
                                                 {calculateReturnDate ? (
                                                     <div>
                                                         <span className="font-semibold">Borrow date:&nbsp;</span>
                                                         <span>{formatDate(item.borrowDate)}</span>
                                                     </div>
                                                 ): (
-                                                    <>
-                                                    {item.requestStatusId === 8 ? (
-                                                        <div className="flex truncate items-center text-custom-red gap-1">
-                                                            <CancelOutlinedIcon fontSize="small"/>
-                                                            <span>Cancelled</span>
-                                                        </div>
-                                                    ) : (
-                                                        <div>
-                                                            <span className="font-semibold">Borrowed:&nbsp;</span>
-                                                            <span>{formatDate(item.borrowDate)}</span>
-                                                        </div>
-                                                    )}
-                                                    </>
+                                                    <div>
+                                                        <span className="font-semibold">Borrowed:&nbsp;</span>
+                                                        <span>{formatDate(item.borrowDate)}</span>
+                                                    </div>
                                                 )}
                                             </div>
                                             
@@ -156,30 +237,11 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                                     <span>{formatDate(item.endBorrowDate)}</span>
                                                 </div>
                                             ) : (
-                                                <>
-                                                    {item.requestStatusId === 8 ? (
-                                                        <div></div>
-                                                    ) : (
-                                                        <div>
-                                                            <span className="font-semibold">Borrowed:&nbsp;</span>
-                                                            <span>{formatDate(item.borrowDate)}</span>
-                                                        </div>
-                                                    )}
-                                                    </>
+                                                <div>
+                                                    <span className="font-semibold">Borrowed:&nbsp;</span>
+                                                    <span>{formatDate(item.borrowDate)}</span>
+                                                </div>
                                             )}
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col w-1/3">
-                                        <div className="flex gap-8 items-center">
-                                            <div className="truncate">
-                                                <span className="font-semibold">Brand:&nbsp;</span>
-                                                <span>{item.item.brand}</span>
-                                            </div>
-                                            
-                                        </div>
-                                        <div className="truncate">
-                                            <span className="font-semibold">Location:&nbsp;</span>
-                                            <span>{item.item.location.name}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -208,6 +270,11 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                             onClick={() => openModal!(item)}
                                         />
                                     )
+                                )}
+                                {calculateReturnDate ? (
+                                    <div></div>
+                                ) : (
+                                    checkAvailability(item)
                                 )}
                                 </div>
                             </div>
@@ -291,6 +358,11 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                             onClick={() => openModal!(item)}
                                         />
                                     )
+                                )}
+                                {calculateReturnDate ? (
+                                    <div></div>
+                                ) : (
+                                    checkAvailability(item)
                                 )}
                                 </div>
                             </div>

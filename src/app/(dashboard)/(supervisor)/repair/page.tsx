@@ -29,6 +29,7 @@ export default function Reparation() {
     const [repairs, setRepairs] = useState<Repair[]>([]);
     const [history, setHistory] = useState<Repair[]>([]);
     const [allHistory, setAllHistory] = useState<Repair[]>([]);
+    const [allRepairs, setAllRepairs] = useState<Repair[]>([]);
     const [repairCount, setRepairCount] = useState(0);
     const [currentItems, setCurrentItems] = useState(repairs);
     const repairRecoilValue = useRecoilValue(repariState);
@@ -72,15 +73,15 @@ export default function Reparation() {
     useEffect(() => {
         switch (selectedTab) {
             case "repair":
-                setCurrentItems(repairs);
+                setCurrentItems(allRepairs);
                 break;
             case "history":
-                setCurrentItems(history);
+                setCurrentItems(allHistory);
                 break;
             default:
                 setCurrentItems([]);
         }
-    }, [selectedTab, repairs, history]);
+    }, [selectedTab, repairs, history, allHistory, allRepairs]);
 
     // infinate loading scroll
     useEffect(() => {
@@ -247,8 +248,10 @@ export default function Reparation() {
             const data = await response.json();
             const fetchedItems = data.repairs || [];
             const itemCount = data.totalCount || 0;
+            const Allrepairsfetched = data.Allrepairs || [];
 
             setRepairCount(itemCount);
+            setAllRepairs(Allrepairsfetched);
 
             // infinate loading
             if (initialLoad) {

@@ -27,6 +27,9 @@ export default function Requests() {
     const [normalBorrows, setNormalBorrows] = useState<ItemRequest[]>([]);
     const [urgentBorrows, setUrgentBorrows] = useState<ItemRequest[]>([]);
     const [allRequests, setAllRequests] = useState<ItemRequest[]>([]);
+    const [ALLnormalBorrows, ALLsetNormalBorrows] = useState<ItemRequest[]>([]);
+    const [ALLurgentBorrows, ALLsetUrgentBorrows] = useState<ItemRequest[]>([]);
+    const [ALLallRequests, ALLsetAllRequests] = useState<ItemRequest[]>([]);
     const [totalNormalBorrowsCount, setTotalNormalBorrowsCount] = useState(0);
     const [totalUrgentBorrowsCount, setUrgentBorrowsCount] = useState(0);
     // filters
@@ -118,18 +121,18 @@ export default function Requests() {
     useEffect(() => {
         switch (selectedTab) {
             case "normalBorrows":
-                setCurrentItems(normalBorrows);
+                setCurrentItems(ALLnormalBorrows);
                 break;
             case "urgentBorrows":
-                setCurrentItems(urgentBorrows);
+                setCurrentItems(ALLurgentBorrows);
                 break;
             case "requestedBorrows":
-                setCurrentItems(allRequests);
+                setCurrentItems(ALLallRequests);
                 break;
             default:
                 setCurrentItems([]);
         }
-    }, [selectedTab, normalBorrows, urgentBorrows, allRequests]);
+    }, [selectedTab, normalBorrows, urgentBorrows, allRequests, ALLallRequests, ALLnormalBorrows, ALLurgentBorrows]);
 
     const handleFilterChange = (filterType: string, value: string) => {
         switch (filterType) {
@@ -211,9 +214,11 @@ export default function Requests() {
             const fetchedItems = data.itemRequests || [];
             const itemCount = data.totalCount || 0;
             const itemCountUrgent = data.totalCountUrgent || 0;
+            const allFetchedItems = data.AllItems || [];
 
             setTotalNormalBorrowsCount(itemCount);
             setUrgentBorrowsCount(itemCountUrgent);
+            ALLsetNormalBorrows(allFetchedItems);
 
             // infinate loading
             if (initialLoad) {
@@ -270,6 +275,9 @@ export default function Requests() {
     
             const data = await response.json();
             const fetchedItems = data.itemRequests || [];
+            const allFetchedItems = data.AllItems || [];
+
+            ALLsetUrgentBorrows(allFetchedItems);
 
             // infinate loading
             if (initialLoad) {
@@ -325,15 +333,19 @@ export default function Requests() {
             }
     
             const data = await response.json();
+            const itemRequests = data.itemRequests;
+            const ALLrequests = data.allRequests;
+
+            ALLsetAllRequests(ALLrequests);
 
             // infinate loading
             if (initialLoad) {
-                setAllRequests(data);
+                setAllRequests(itemRequests);
             } else {
-                setAllRequests(prevItems => [...prevItems, ...data]);
+                setAllRequests(prevItems => [...prevItems, ...itemRequests]);
             }
-            setOffset(currentOffset + data.length);
-            setHasMore(data.length === NUMBER_OF_ITEMS_TO_FETCH);
+            setOffset(currentOffset + itemRequests.length);
+            setHasMore(itemRequests.length === NUMBER_OF_ITEMS_TO_FETCH);
 
         } catch (error) {
             console.error("Failed to fetch items:", error);

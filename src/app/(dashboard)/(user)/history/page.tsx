@@ -19,6 +19,7 @@ export default function History() {
     const { userId, token } = useUser();
     const [itemLoading, setItemLoading] = useState(true);
     const [items, setItems] = useState<ItemRequest[]>([]);
+    const [allItems, setAllItems] = useState<ItemRequest[]>([]);
     const [totalItemCount, setTotalItemCount] = useState(0);
     const [nameFilter, setNameFilter] = useState(''); // name filter
     const [borrowDateFilter, setBorrowDateFilter] = useState(''); // model filter
@@ -40,7 +41,7 @@ export default function History() {
 
     useEffect(() => {
         if(userId && token) {
-            getItems();
+            getItems(true);
         }
     }, [userId, nameFilter, borrowDateFilter, token]);
 
@@ -121,8 +122,10 @@ export default function History() {
             const data = await response.json();
             const fetchedItems = data.itemRequests || [];
             const itemCount = data.totalCount || 0;
+            const allItemsFetched = data.allItems || [];
 
             setTotalItemCount(itemCount);
+            setAllItems(allItemsFetched);
 
             // infinate loading
             if (initialLoad) {
@@ -193,7 +196,7 @@ export default function History() {
                     setActive={setActive}
                     onFilterChange={handleFilterChange}
                     onSortChange={handleSortChange}
-                    items={items}
+                    items={allItems}
                     filters={filters}
                     sortOptions={sortOptions}
                     isCardView={true}

@@ -121,7 +121,18 @@ export async function GET(request: NextRequest) {
         where: whereClause,
     });
 
-    return new Response(JSON.stringify({ itemRequests, totalCount }), {
+    const allItems = await prisma.itemRequest.findMany({
+        where: whereClause,
+        include: {
+            item: {
+                include: {
+                    location: true
+                }
+            }
+        }
+    });
+
+    return new Response(JSON.stringify({ itemRequests, totalCount, allItems }), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',

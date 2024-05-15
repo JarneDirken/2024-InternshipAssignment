@@ -321,28 +321,56 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                 </div>
                                 <hr />
                                 <div className="flex justify-center items-center p-2">
-                                    {selectedTab === "borrows" && (
-                                        <Button 
-                                            text="Hand over"
-                                            textColor="custom-green"
-                                            borderColor="custom-green"
-                                            onClick={() => handover(item)}
-                                        />
-                                    )}
-                                    {selectedTab === "returns" && (
-                                        <Button 
-                                            text="Received"
-                                            textColor="custom-green"
-                                            borderColor="custom-green"
-                                            onClick={() => receive(item)}
-                                        />
-                                    )}
-                                    {selectedTab === "checkitem" && (
-                                        <Button 
-                                            text="Checked"
-                                            textColor="custom-green"
-                                            borderColor="custom-green"
-                                        />
+                                {selectedTab !== "history" ? (
+                                        selectedTab === "borrows" ? (
+                                            <Button 
+                                                text="Hand over"
+                                                textColor="custom-green"
+                                                borderColor="custom-green"
+                                                buttonClassName="hover:border-custom-green-hover"
+                                                textClassName="group-hover:text-custom-green-hover"
+                                                paddingX="px-0"
+                                                paddingY="py-0"
+                                                onClick={() => handover(item)}
+                                            />
+                                        ) : selectedTab === "returns" ? (
+                                            <Button 
+                                                text="Received"
+                                                textColor="custom-green"
+                                                borderColor="custom-green"
+                                                buttonClassName="hover:border-custom-green-hover"
+                                                textClassName="group-hover:text-custom-green-hover"
+                                                paddingX="px-0"
+                                                paddingY="py-0"
+                                                onClick={() => receive(item)}
+                                            />
+                                        ) : selectedTab === "checkitem" ? (
+                                            <Button 
+                                                text="Checked"
+                                                textColor="custom-green"
+                                                borderColor="custom-green"
+                                                buttonClassName="hover:border-custom-green-hover"
+                                                textClassName="group-hover:text-custom-green-hover"
+                                                paddingX="px-0"
+                                                paddingY="py-0"
+                                                onClick={() => checked(item)}
+                                            />
+                                        ) : null
+                                    ) : (
+                                        <>
+                                            {(item.item.itemStatusId === 6) && (
+                                                <div className="text-custom-red flex items-center gap-1 font-semibold">
+                                                    <DoNotTouchOutlinedIcon fontSize="small"/>
+                                                    <span>Broken</span>
+                                                </div>
+                                            )}
+                                            {(item.item.itemStatusId === 5) && (
+                                                <div className="text-custom-primary flex items-center gap-1 font-semibold">
+                                                    <WarningAmberOutlinedIcon fontSize="small"/>
+                                                    <span>In repair</span>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             </div>
