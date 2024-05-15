@@ -2,7 +2,7 @@ import Button from "@/components/states/Button";
 import { ItemRequest } from "@/models/ItemRequest";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Loading from "@/components/states/Loading";
-import useAuth from "@/hooks/useAuth";
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import Image from 'next/image';
 import { RefObject, useState } from "react";
 import { useSnackbar } from "notistack";
@@ -132,10 +132,19 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                                         <span>{formatDate(item.borrowDate)}</span>
                                                     </div>
                                                 ): (
-                                                    <div>
-                                                        <span className="font-semibold">Borrowed:&nbsp;</span>
-                                                        <span>{formatDate(item.borrowDate)}</span>
-                                                    </div>
+                                                    <>
+                                                    {item.requestStatusId === 8 ? (
+                                                        <div className="flex truncate items-center text-custom-red gap-1">
+                                                            <CancelOutlinedIcon fontSize="small"/>
+                                                            <span>Cancelled</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            <span className="font-semibold">Borrowed:&nbsp;</span>
+                                                            <span>{formatDate(item.borrowDate)}</span>
+                                                        </div>
+                                                    )}
+                                                    </>
                                                 )}
                                             </div>
                                             
@@ -147,10 +156,16 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                                     <span>{formatDate(item.endBorrowDate)}</span>
                                                 </div>
                                             ) : (
-                                                <div>
-                                                    <span className="font-semibold">Returned:&nbsp;</span>
-                                                    <span>{formatDate(item.returnDate)}</span>
-                                                </div>
+                                                <>
+                                                    {item.requestStatusId === 8 ? (
+                                                        <div></div>
+                                                    ) : (
+                                                        <div>
+                                                            <span className="font-semibold">Borrowed:&nbsp;</span>
+                                                            <span>{formatDate(item.borrowDate)}</span>
+                                                        </div>
+                                                    )}
+                                                    </>
                                             )}
                                         </div>
                                     </div>

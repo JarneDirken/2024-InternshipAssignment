@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
         item: {
             name: { contains: nameFilter, mode: 'insensitive' },
         },
-        requestStatusId: { in: [6, 7] },
+        requestStatusId: { in: [6, 7, 8] },
     };
     
     if (borrowDate) {

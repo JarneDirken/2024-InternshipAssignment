@@ -193,6 +193,7 @@ export default function Return() {
                     items={items}
                     filters={filters}
                     sortOptions={sortOptions}
+                    isSort={true}
                     isCardView={true}
                 />
             </div>

@@ -512,6 +512,7 @@ export default function Lending() {
                     filters={filters}
                     sortOptions={sortOptions}
                     isCardView={true}
+                    isSort={true}
                 />
             </div>
             <div className="rounded-xl">

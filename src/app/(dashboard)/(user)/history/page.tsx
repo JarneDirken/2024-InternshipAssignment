@@ -128,8 +128,14 @@ export default function History() {
             if (initialLoad) {
                 setItems(fetchedItems);
             } else {
-                setItems(prevItems => [...prevItems, ...fetchedItems]);
+                setItems((prevItems: ItemRequest[]) => {
+                    const itemsMap = new Map<string, ItemRequest>();
+                    prevItems.forEach((item: ItemRequest) => itemsMap.set(item.id.toString(), item));
+                    fetchedItems.forEach((item: ItemRequest) => itemsMap.set(item.id.toString(), item));
+                    return Array.from(itemsMap.values());
+                });
             }
+
             setOffset(currentOffset + fetchedItems.length);
             setHasMore(fetchedItems.length === NUMBER_OF_ITEMS_TO_FETCH);
         } catch (error) {
@@ -191,6 +197,7 @@ export default function History() {
                     filters={filters}
                     sortOptions={sortOptions}
                     isCardView={true}
+                    isSort={true}
                 />
             </div>
             <div className="rounded-xl">
