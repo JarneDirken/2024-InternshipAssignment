@@ -149,7 +149,7 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                             </>
                                         )}
                                         <div className="truncate">
-                                            <span className="font-semibold">Number:&nbsp;</span>
+                                            <span className="font-semibold">No:&nbsp;</span>
                                             <span>{item.item.number}</span>
                                         </div>
                                         {(selectedTab === "checkitem" || selectedTab === "history") && (
