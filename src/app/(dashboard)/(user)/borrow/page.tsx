@@ -84,7 +84,10 @@ export default function Borrow() {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 const data = await response.json();
-                setItems(Array.isArray(data) ? data : []);
+                const dataItems = data.items;
+                const countItems = data.totalCount;
+                setItems(Array.isArray(dataItems) ? dataItems : []);
+                setTotalItemCount(countItems);
             }
         } catch (error) {
             console.error("Failed to fetch items:", error);
@@ -131,7 +134,7 @@ export default function Borrow() {
     }, [userId, token]);
 
     useEffect(() => {
-        setTotalItemCount(items.length);
+        getAllItems();
     },[items]);
 
     useEffect(() => {

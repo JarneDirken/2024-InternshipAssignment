@@ -200,13 +200,7 @@ export async function GET(request: NextRequest) {
                 model: { contains: modelFilter, mode: 'insensitive' },
                 brand: { contains: brandFilter, mode: 'insensitive' },
                 location: { name: { contains: locationFilter, mode: 'insensitive' } },
-                itemStatusId: {
-                    in: [1,2,3]
-                }
             },
-            requestStatusId: {
-                in: [1, 2, 3]
-            }
         },
         include: { 
             item: {
@@ -225,14 +219,6 @@ export async function GET(request: NextRequest) {
     const totalCount = await prisma.itemRequest.count({
         where: {
             borrowerId: uid,
-            item: {
-                itemStatusId: {
-                    in: [1,2,3]
-                }
-            },
-            requestStatusId: {
-                in: [1, 2, 3]
-            }
         }
     });
 
