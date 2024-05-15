@@ -120,8 +120,8 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                             <span>{item.item.name}</span>
                                         </div>
                                         <div className="truncate">
-                                            <span className="font-semibold">Model:&nbsp;</span>
-                                            <span>{item.item.model}</span>
+                                            <span className="font-semibold">Brand:&nbsp;</span>
+                                            <span>{item.item.brand}</span>
                                         </div>
                                         {(selectedTab !== "checkitem" && selectedTab !== "history") && (
                                             <div className="flex truncate items-center text-gray-400 gap-1 text-xs sm:text-sm">
@@ -149,8 +149,8 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                             </>
                                         )}
                                         <div className="truncate">
-                                            <span className="font-semibold">Brand:&nbsp;</span>
-                                            <span>{item.item.brand}</span>
+                                            <span className="font-semibold">Number:&nbsp;</span>
+                                            <span>{item.item.number}</span>
                                         </div>
                                         {(selectedTab === "checkitem" || selectedTab === "history") && (
                                             <div className="truncate">
@@ -301,8 +301,8 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                                 <span className="truncate">{item.item.model}</span>
                                             </div>
                                             <div className="flex flex-col items-start w-full text-sm sm:text-base truncate">
-                                                <span className="text-gray-400">Brand</span>
-                                                <span className="truncate">{item.item.brand}</span>
+                                                <span className="text-gray-400">Number</span>
+                                                <span className="truncate">{item.item.number}</span>
                                             </div>
                                         </div>
                                     </div>

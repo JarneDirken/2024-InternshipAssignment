@@ -238,6 +238,9 @@ export default function Modal({ open, onClose, item, userId, handover, receive, 
                                     </div>
                                 )}
                                 </div>
+                                <div className="font-semibold">
+                                    <span>{item.item.number}</span>
+                                </div>
                                 <div>
                                     <span>Information requestor:</span>
                                     <div className="flex items-center">

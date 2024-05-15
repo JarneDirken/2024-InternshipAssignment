@@ -213,6 +213,9 @@ export default function Modal({ open, onClose, item, userId, rejected, setReject
                                     </div>
                                 )}
                                 </div>
+                                <div className="font-semibold">
+                                    <span>{item.item.number}</span>
+                                </div>
                             </div>
                         </div>
                         <div className="flex flex-col gap-3 lg:mt-4">
