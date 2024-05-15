@@ -9,44 +9,44 @@ function useAuth(allowedRoles: string[] = []) {
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   useEffect(() => {
-      const auth = getAuth();
-      const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        if (pathname === '/register') {
-            setLoading(false);
-            return; // Skip the rest of the hook logic if on the register page
-        }
-          if (!user) {
-            setTimeout(() => router.push('/login'), 0);
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (pathname === '/register') {
+        setLoading(false);
+        return; // Skip the rest of the hook logic if on the register page
+    }
+      if (!user) {
+        setTimeout(() => router.push('/login'), 0);
+      } else {
+        try {
+          const response = await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uid: user.uid }),
+          });
+
+          if (response.ok) {
+            const { role } = await response.json();
+            setUserRole(role);
+            setIsAuthorized(allowedRoles.includes(role));
           } else {
-              try {
-                  const response = await fetch('/api/auth', {
-                      method: 'POST',
-                      headers: {'Content-Type': 'application/json'},
-                      body: JSON.stringify({ uid: user.uid }),
-                  });
-
-                  if (response.ok) {
-                      const { role } = await response.json();
-                      setUserRole(role);
-                      setIsAuthorized(allowedRoles.includes(role));
-                  } else {
-                    setTimeout(() => router.push('/login'), 0);
-                  }
-              } catch (error) {
-                  console.error('Authorization check failed:', error);
-                  setTimeout(() => router.push('/login'), 0);
-              }
+            setTimeout(() => router.push('/login'), 0);
           }
-          setLoading(false);
-      });
+        } catch (error) {
+          console.error('Authorization check failed:', error);
+          setTimeout(() => router.push('/login'), 0);
+        }
+      }
+      setLoading(false);
+    });
 
-      return () => {
-          unsubscribe();
-          setLoading(false);
-      };
+    return () => {
+      unsubscribe();
+      setLoading(false);
+    };
   }, [router, allowedRoles]);
 
   return { userRole, isAuthorized, loading };

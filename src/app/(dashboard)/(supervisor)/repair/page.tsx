@@ -29,6 +29,7 @@ export default function Reparation() {
     const [repairs, setRepairs] = useState<Repair[]>([]);
     const [history, setHistory] = useState<Repair[]>([]);
     const [allHistory, setAllHistory] = useState<Repair[]>([]);
+    const [allRepairs, setAllRepairs] = useState<Repair[]>([]);
     const [repairCount, setRepairCount] = useState(0);
     const [currentItems, setCurrentItems] = useState(repairs);
     const repairRecoilValue = useRecoilValue(repariState);
@@ -55,13 +56,13 @@ export default function Reparation() {
     const { ref, inView } = useInView();
 
     useEffect(() => {
-        if(userId) {
+        if(userId && token) {
             getRepairs(true);
             if(selectedTab === "history"){
                 getHistory(true);
             }
         }
-    }, [userId, nameFilter, borrowDateFilter, repairRecoilValue]);
+    }, [userId, nameFilter, borrowDateFilter, repairRecoilValue, token]);
 
     useEffect(() => {
         if(selectedTab === "history"){
@@ -72,15 +73,15 @@ export default function Reparation() {
     useEffect(() => {
         switch (selectedTab) {
             case "repair":
-                setCurrentItems(repairs);
+                setCurrentItems(allRepairs);
                 break;
             case "history":
-                setCurrentItems(history);
+                setCurrentItems(allHistory);
                 break;
             default:
                 setCurrentItems([]);
         }
-    }, [selectedTab, repairs, history]);
+    }, [selectedTab, repairs, history, allHistory, allRepairs]);
 
     // infinate loading scroll
     useEffect(() => {
@@ -247,8 +248,10 @@ export default function Reparation() {
             const data = await response.json();
             const fetchedItems = data.repairs || [];
             const itemCount = data.totalCount || 0;
+            const Allrepairsfetched = data.Allrepairs || [];
 
             setRepairCount(itemCount);
+            setAllRepairs(Allrepairsfetched);
 
             // infinate loading
             if (initialLoad) {
@@ -335,6 +338,8 @@ export default function Reparation() {
                 broken={broken}
                 setRepaired={setRepaired}
                 setBroken={setBroken}
+                token={token}
+                userId={userId}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
@@ -348,6 +353,7 @@ export default function Reparation() {
                     filters={filters}
                     sortOptions={sortOptions}
                     isCardView={true}
+                    isSort={true}
                 />
             </div>
             <div className="rounded-xl">

@@ -41,9 +41,11 @@ export default function Parameter() {
     const { userId, token } = useUser();
 
     useEffect(() => {
-        getParameters();
-        fetchCurrentTemplateUrl();
-    }, []);
+        if (userId && token) {
+            getParameters();
+            fetchCurrentTemplateUrl();
+        }
+    }, [userId, token]);
 
     const handleTimeChange = (dayjsSetter: DayjsSetterType, stringSetter: StringSetterType) => (newValue: Dayjs | null) => {
         if (newValue) {

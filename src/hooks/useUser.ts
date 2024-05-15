@@ -13,7 +13,7 @@ const useUser = () => {
                 setUserId(user.uid);
                 
                 // Get the ID token
-                user.getIdToken().then(idToken => {
+                user.getIdToken(true).then(idToken => {
                     setToken(idToken);
                 }).catch(error => {
                     console.error("Failed to get ID token:", error);

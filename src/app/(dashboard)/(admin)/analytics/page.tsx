@@ -25,10 +25,10 @@ export default function Analytics() {
     ];
 
     useEffect(() => {
-        if (userId) {
+        if (userId && token) {
             getAllBorrows();
         }
-    }, [userId, year]);
+    }, [userId, year, token]);
 
     const handleFilterChange = (filterType: string, value: string) => {
         switch (filterType) {
@@ -96,7 +96,7 @@ export default function Analytics() {
         }
     };
 
-    if (loading || isAuthorized === null || monthlyCounts.every(count => count === 0)) { return <Loading/>; }
+    if (loading || isAuthorized === null) { return <Loading/>; }
 
     if (!isAuthorized) { return <Unauthorized />; }
 

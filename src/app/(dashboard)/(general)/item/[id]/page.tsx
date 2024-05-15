@@ -29,13 +29,13 @@ export default function GeneralItem({ params } : {params: {id: string}}){
     const [repairState, setRepairState] = useState(false);
 
     useEffect(() => {
-        if(userId) {
+        if(userId && token) {
             if (!isModalOpen) {
                 getItem();
             }
             
         }
-    }, [userId, id, isModalOpen]);
+    }, [userId, id, isModalOpen, token]);
 
     const formatDate = (dateString?: Date): string => {
         if (!dateString) {return ''}
@@ -161,6 +161,7 @@ export default function GeneralItem({ params } : {params: {id: string}}){
                 onClose={() => setModalOpen(false)}
                 item={item}
                 userId={userId}
+                token={token}
             />
             <ModalLendings
                 open={isModalCheckOpen}
@@ -170,6 +171,7 @@ export default function GeneralItem({ params } : {params: {id: string}}){
                 checked={checked}
                 repairState={repairState}
                 setRepairState={setRepairState}
+                token={token}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <div className="p-4 flex flex-wrap font-semibold text-2xl items-center gap-1">

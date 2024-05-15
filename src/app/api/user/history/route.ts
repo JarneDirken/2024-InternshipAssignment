@@ -84,7 +84,6 @@ export async function GET(request: NextRequest) {
         item: {
             name: { contains: nameFilter, mode: 'insensitive' },
         },
-        requestStatusId: { in: [6, 7] },
     };
     
     if (borrowDate) {
@@ -121,7 +120,18 @@ export async function GET(request: NextRequest) {
         where: whereClause,
     });
 
-    return new Response(JSON.stringify({ itemRequests, totalCount }), {
+    const allItems = await prisma.itemRequest.findMany({
+        where: whereClause,
+        include: {
+            item: {
+                include: {
+                    location: true
+                }
+            }
+        }
+    });
+
+    return new Response(JSON.stringify({ itemRequests, totalCount, allItems }), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',

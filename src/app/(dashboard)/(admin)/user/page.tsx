@@ -87,10 +87,10 @@ export default function Users() {
     const { ref, inView } = useInView();
 
     useEffect(() => {
-        if(userId) {
+        if(userId && token) {
             getAllUsers(true);
         }
-    }, [userId, firstName, lastName, email, role]);
+    }, [userId, firstName, lastName, email, role, token]);
 
     // infinite loading scroll
     useEffect(() => {

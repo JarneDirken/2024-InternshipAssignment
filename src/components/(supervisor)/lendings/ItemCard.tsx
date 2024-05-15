@@ -120,8 +120,8 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                             <span>{item.item.name}</span>
                                         </div>
                                         <div className="truncate">
-                                            <span className="font-semibold">Model:&nbsp;</span>
-                                            <span>{item.item.model}</span>
+                                            <span className="font-semibold">Brand:&nbsp;</span>
+                                            <span>{item.item.brand}</span>
                                         </div>
                                         {(selectedTab !== "checkitem" && selectedTab !== "history") && (
                                             <div className="flex truncate items-center text-gray-400 gap-1 text-xs sm:text-sm">
@@ -149,8 +149,8 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                             </>
                                         )}
                                         <div className="truncate">
-                                            <span className="font-semibold">Brand:&nbsp;</span>
-                                            <span>{item.item.brand}</span>
+                                            <span className="font-semibold">No:&nbsp;</span>
+                                            <span>{item.item.number}</span>
                                         </div>
                                         {(selectedTab === "checkitem" || selectedTab === "history") && (
                                             <div className="truncate">
@@ -301,8 +301,8 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                                 <span className="truncate">{item.item.model}</span>
                                             </div>
                                             <div className="flex flex-col items-start w-full text-sm sm:text-base truncate">
-                                                <span className="text-gray-400">Brand</span>
-                                                <span className="truncate">{item.item.brand}</span>
+                                                <span className="text-gray-400">Number</span>
+                                                <span className="truncate">{item.item.number}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -321,28 +321,56 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                 </div>
                                 <hr />
                                 <div className="flex justify-center items-center p-2">
-                                    {selectedTab === "borrows" && (
-                                        <Button 
-                                            text="Hand over"
-                                            textColor="custom-green"
-                                            borderColor="custom-green"
-                                            onClick={() => handover(item)}
-                                        />
-                                    )}
-                                    {selectedTab === "returns" && (
-                                        <Button 
-                                            text="Received"
-                                            textColor="custom-green"
-                                            borderColor="custom-green"
-                                            onClick={() => receive(item)}
-                                        />
-                                    )}
-                                    {selectedTab === "checkitem" && (
-                                        <Button 
-                                            text="Checked"
-                                            textColor="custom-green"
-                                            borderColor="custom-green"
-                                        />
+                                {selectedTab !== "history" ? (
+                                        selectedTab === "borrows" ? (
+                                            <Button 
+                                                text="Hand over"
+                                                textColor="custom-green"
+                                                borderColor="custom-green"
+                                                buttonClassName="hover:border-custom-green-hover"
+                                                textClassName="group-hover:text-custom-green-hover"
+                                                paddingX="px-0"
+                                                paddingY="py-0"
+                                                onClick={() => handover(item)}
+                                            />
+                                        ) : selectedTab === "returns" ? (
+                                            <Button 
+                                                text="Received"
+                                                textColor="custom-green"
+                                                borderColor="custom-green"
+                                                buttonClassName="hover:border-custom-green-hover"
+                                                textClassName="group-hover:text-custom-green-hover"
+                                                paddingX="px-0"
+                                                paddingY="py-0"
+                                                onClick={() => receive(item)}
+                                            />
+                                        ) : selectedTab === "checkitem" ? (
+                                            <Button 
+                                                text="Checked"
+                                                textColor="custom-green"
+                                                borderColor="custom-green"
+                                                buttonClassName="hover:border-custom-green-hover"
+                                                textClassName="group-hover:text-custom-green-hover"
+                                                paddingX="px-0"
+                                                paddingY="py-0"
+                                                onClick={() => checked(item)}
+                                            />
+                                        ) : null
+                                    ) : (
+                                        <>
+                                            {(item.item.itemStatusId === 6) && (
+                                                <div className="text-custom-red flex items-center gap-1 font-semibold">
+                                                    <DoNotTouchOutlinedIcon fontSize="small"/>
+                                                    <span>Broken</span>
+                                                </div>
+                                            )}
+                                            {(item.item.itemStatusId === 5) && (
+                                                <div className="text-custom-primary flex items-center gap-1 font-semibold">
+                                                    <WarningAmberOutlinedIcon fontSize="small"/>
+                                                    <span>In repair</span>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             </div>

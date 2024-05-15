@@ -99,10 +99,10 @@ export default function Product() {
     const { ref, inView } = useInView();
 
     useEffect(() => {
-        if(userId) {
+        if(userId && token) {
             getAllItems(true);
         }
-    }, [userId, name, model, brand, location, year, availability, number]);
+    }, [userId, name, model, brand, location, year, availability, token, number]);
 
     // infinite loading scroll
     useEffect(() => {
@@ -367,10 +367,9 @@ export default function Product() {
 
         doc.setFontSize(8); // Smaller font size
 
-
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
-            const url = `http://localhost:3000/item/${item.id}`;
+            const url = `https://2024-internship-assignment.vercel.app/item/${item.id}`;
     
             try {
                 const src = await QrCode.toDataURL(url);

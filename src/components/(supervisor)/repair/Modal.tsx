@@ -25,9 +25,11 @@ interface ModalCardProps {
     broken: boolean;
     setRepaired: (value: boolean) => void;
     setBroken: (value: boolean) => void;
+    token: String | null;
+    userId: String | null;
 }
 
-export default function Modal({ open, onClose, item, repaired, broken, setRepaired, setBroken, selectedTab }: ModalCardProps) {
+export default function Modal({ open, onClose, item, repaired, broken, setRepaired, setBroken, selectedTab, token, userId }: ModalCardProps) {
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
     const [repair, setRepair] = useRecoilState(repariState);
     const router = useRouter();
@@ -37,7 +39,9 @@ export default function Modal({ open, onClose, item, repaired, broken, setRepair
         const data = {
             repairId: item.id,
             itemId: item.itemId,
-            broken
+            broken,
+            userId,
+            token
         };
 
         const response = await fetch(`/api/supervisor/repairs/`, {
@@ -170,6 +174,9 @@ export default function Modal({ open, onClose, item, repaired, broken, setRepair
                                     ) : (
                                         <span>{formatDate(item.repairDate)} - /</span>
                                     )}
+                                </div>
+                                <div className="font-semibold">
+                                    <span>{item.item.number}</span>
                                 </div>
                             </div>
                         </div>

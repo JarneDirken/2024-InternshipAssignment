@@ -237,6 +237,9 @@ export default function ItemCard({ active, openModal, items, itemLoading, select
                                             <div className="flex flex-col items-Brand w-full text-sm sm:text-base truncate">
                                                 <span className="text-gray-400">Brand</span>
                                                 <span className="truncate">{item.item.brand}</span>
+                                            <div className="flex flex-col items-start w-full text-sm sm:text-base truncate">
+                                                <span className="text-gray-400">Number</span>
+                                                <span className="truncate">{item.item.number}</span>
                                             </div>
                                             <div className="flex flex-col items-start w-full text-sm sm:text-base truncate">
                                                 <span className="text-gray-400">Supervisor</span>

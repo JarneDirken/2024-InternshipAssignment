@@ -142,11 +142,26 @@ export async function GET(request: NextRequest) {
     const totalCounts = await Promise.all(dynamicWhereClauses.map(clause =>
         prisma.itemRequest.count({ where: clause })
     ));
+
+    const allitemRequests = await prisma.itemRequest.findMany({
+        where: dynamicWhereClauses[0],
+        include: { 
+            item: {
+                include: {
+                    location: true
+                }
+            },
+            borrower: true,
+            approver: true,
+        },
+    });
+
     return new Response(JSON.stringify({
         itemRequests,
         totalCount: totalCounts[0],
         totalCountReturns: totalCounts[1],
         totalCountCheckItem: totalCounts[2],
+        allitemRequests
     }), {
         status: 200,
         headers: {

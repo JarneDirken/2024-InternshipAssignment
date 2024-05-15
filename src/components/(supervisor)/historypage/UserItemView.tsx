@@ -151,6 +151,13 @@ export default function UserItemView({ active, item}: BorrowCardProps) {
                             <span>Checked</span>
                         </div>
                     );
+                case 8:
+                    return (
+                        <div className="flex truncate items-center text-custom-red gap-1 text-sm sm:text-base">
+                            <CancelOutlinedIcon fontSize="small"/>
+                            <span>Cancelled</span>
+                        </div>
+                    );
                 default:
                     return <div>Unknown status</div>;
             }

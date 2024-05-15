@@ -21,6 +21,7 @@ interface ModalCardProps {
     onClose: () => void;
     item: ItemRequest | undefined;
     userId: String | null;
+    token: String | null;
     handover?: boolean;
     receive?: boolean;
     checked?: boolean;
@@ -28,7 +29,7 @@ interface ModalCardProps {
     setRepairState?: (value: boolean) => void;
 }
 
-export default function Modal({ open, onClose, item, userId, handover, receive, checked, repairState, setRepairState }: ModalCardProps) {
+export default function Modal({ open, onClose, item, userId, handover, receive, checked, repairState, setRepairState, token }: ModalCardProps) {
     const [message, setMessage] = useState<string | null>("");  // State can be string or null
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
     const [requests, setRequest] = useRecoilState(updateRequest);
@@ -93,7 +94,8 @@ export default function Modal({ open, onClose, item, userId, handover, receive, 
             itemId: item.item.id,
             repairState,
             message,
-            userId
+            userId,
+            token
         };
 
         const response = await fetch(`/api/supervisor/checkitem/`, {
@@ -235,6 +237,9 @@ export default function Modal({ open, onClose, item, userId, handover, receive, 
                                         </a>
                                     </div>
                                 )}
+                                </div>
+                                <div className="font-semibold">
+                                    <span>{item.item.number}</span>
                                 </div>
                                 <div>
                                     <span>Information requestor:</span>

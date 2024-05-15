@@ -75,10 +75,10 @@ export default function Locations() {
     const { ref, inView } = useInView();
 
     useEffect(() => {
-        if(userId) {
+        if(userId && token) {
             getAllLocations(true);
         }
-    }, [userId, name]);
+    }, [userId, name, token]);
 
     // infinite loading scroll
     useEffect(() => {

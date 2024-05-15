@@ -129,7 +129,20 @@ export async function GET(request: NextRequest) {
         take: limit // infinate scroll
     });
 
-    return new Response(JSON.stringify(itemRequests), {
+    const allitemRequests = await prisma.itemRequest.findMany({
+        where: whereClause,
+        include: { 
+            item: {
+                include: {
+                    location: true
+                }
+            },
+            borrower: true,
+            approver: true,
+        },
+    });
+
+    return new Response(JSON.stringify({itemRequests, allitemRequests}), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',

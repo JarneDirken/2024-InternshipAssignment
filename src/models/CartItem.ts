@@ -8,5 +8,6 @@ export interface CartItem {
         isUrgent: boolean;
         file: string | null;
         amountRequest: string | null,
+        token: string | null,
     };
 }

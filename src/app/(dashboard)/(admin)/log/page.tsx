@@ -23,12 +23,12 @@ export default function Log() {
     const { userId, token } = useUser();
 
     useEffect(() => {
-        if (!loading && isAuthorized && userId && userRole) {
+        if (!loading && isAuthorized && userId && userRole && token) {
             const checkArray = [userRole, userId];
             const unsubscribe = userRole === "Admin" ? listenForNotificationsAdmin() : listenForNotifications(checkArray);
             if (unsubscribe) return () => unsubscribe();
         }
-    }, [loading, isAuthorized, userId, userRole]);
+    }, [loading, isAuthorized, userId, userRole, token]);
 
     const listenForNotificationsAdmin = () => {
         

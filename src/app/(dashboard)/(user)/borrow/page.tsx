@@ -84,7 +84,10 @@ export default function Borrow() {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 const data = await response.json();
-                setItems(Array.isArray(data) ? data : []);
+                const dataItems = data.items;
+                const countItems = data.totalCount;
+                setItems(Array.isArray(dataItems) ? dataItems : []);
+                setTotalItemCount(countItems);
             }
         } catch (error) {
             console.error("Failed to fetch items:", error);
@@ -125,18 +128,20 @@ export default function Borrow() {
     };
 
     useEffect(() => {
-        getAllItems();
-    }, [userId]);
+        if (token) {
+            getAllItems();
+        }
+    }, [userId, token]);
 
     useEffect(() => {
-        setTotalItemCount(items.length);
+        getAllItems();
     },[items]);
 
     useEffect(() => {
-        if (userId) {
+        if (userId && token) {
             getPendingBorrowCount();
         }
-    }, [userId, created, canceled]);
+    }, [userId, created, canceled, token]);
 
     useEffect(() => {
         getPendingBorrowCount();
@@ -159,6 +164,7 @@ export default function Borrow() {
                 onClose={() => setModalOpen(false)}
                 item={item}
                 userId={userId}
+                token={token}
             />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
@@ -167,6 +173,7 @@ export default function Borrow() {
                     onFilterChange={handleFilterChange}
                     items={items}
                     userId={userId}
+                    token={token}
                 />
             </div>
             <div className="rounded-xl">
@@ -217,6 +224,7 @@ export default function Borrow() {
                         setMessage={setMessage}
                         setCanceled={setCanceled}
                         canceled={canceled}
+                        token={token}
                     />
                 )}
             </div>
