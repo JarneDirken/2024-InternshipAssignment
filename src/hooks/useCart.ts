@@ -15,6 +15,8 @@ export default function useCart() {
             const expirationTime = Date.now() + EXPIRATION_DURATION;
             localStorage.setItem("cartExpiration", expirationTime.toString());
         } else {
+            localStorage.removeItem("cart");
+            localStorage.removeItem("cartExpiration");
         }
         window.dispatchEvent(new CustomEvent(CART_EVENT, { detail: newCart }));
     };
@@ -29,7 +31,8 @@ export default function useCart() {
         } else {
             localStorage.removeItem("cart");
             localStorage.removeItem("cartExpiration");
-            setCart([]);        }
+            setCart([]);
+        }
         setIsInitialized(true);
     }, []);
 
@@ -71,7 +74,11 @@ export default function useCart() {
         if (isItemInCart) {
             return { success: false, message: 'Error: Item already in cart' };
         } else {
-            setCart(prevCart => [...prevCart, cartItem]);
+            setCart(prevCart => {
+                const newCart = [...prevCart, cartItem];
+                updateLocalStorage(newCart);
+                return newCart;
+            });
             return { success: true, message: 'Item successfully added to cart' };
         }
     };
@@ -79,6 +86,7 @@ export default function useCart() {
     const removeFromCart = (itemId: number) => {
         setCart(prevCart => {
             const updatedCart = prevCart.filter(cartItem => cartItem.item.id !== itemId);
+            updateLocalStorage(updatedCart);
             return updatedCart;
         });
     };

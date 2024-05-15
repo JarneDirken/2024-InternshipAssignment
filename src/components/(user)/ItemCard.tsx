@@ -22,9 +22,11 @@ interface BorrowCardProps {
     listRef: RefObject<HTMLDivElement>;
     hasMore: boolean;
     innerRef: React.Ref<HTMLDivElement>;
+    openMessageModal: (value: boolean) => void;
+    setMessage: (value: string) => void;
 }
 
-export default function ItemCard({ active, openModal, items, calculateReturnDate, calculateHistoryDate, itemLoading, userId, listRef, hasMore, innerRef }: BorrowCardProps) {
+export default function ItemCard({ active, openModal, items, calculateReturnDate, calculateHistoryDate, itemLoading, userId, listRef, hasMore, innerRef, openMessageModal, setMessage }: BorrowCardProps) {
     const gridViewClass = "grid md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 overflow-y-scroll w-full";
     const listViewClass = "flex flex-col bg-white rounded-bl-xl rounded-br-xl overflow-y-scroll";
     const { enqueueSnackbar } = useSnackbar(); // snackbar popup
@@ -158,6 +160,11 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
         }
     };
 
+    const openMessage = (message: string) => {
+        openMessageModal(true);
+        setMessage(message);
+    };
+
     return (
         <>
             <div ref={listRef} className={active ? listViewClass : gridViewClass} style={{maxHeight: "60vh"}}>
@@ -259,18 +266,17 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                             onClick={() => returnItem(item)}
                                         />
                                     ) : (
-                                        <Button 
-                                            text="View" 
-                                            textColor="white" 
-                                            borderColor="custom-primary" 
-                                            fillColor="custom-primary"
-                                            buttonClassName="hover:bg-custom-primary-hover"
-                                            paddingY="py-0"
-                                            font="semibold"
-                                            onClick={() => openModal!(item)}
-                                        />
+                                        null
                                     )
                                 )}
+                                {((item.approveMessage) || (item.requestStatusId === 2 && item.approveMessage)) && (
+                                        <Button 
+                                            text="Message"
+                                            paddingY="py-0"
+                                            paddingX="px-2"
+                                            onClick={() => openMessage(item.approveMessage)}
+                                        />
+                                    )}
                                 {calculateReturnDate ? (
                                     <div></div>
                                 ) : (
@@ -348,17 +354,17 @@ export default function ItemCard({ active, openModal, items, calculateReturnDate
                                             onClick={() => returnItem(item)}
                                         />
                                     ) : (
-                                        <Button 
-                                            text="View" 
-                                            textColor="white" 
-                                            borderColor="custom-primary" 
-                                            fillColor="custom-primary"
-                                            paddingY="py-0"
-                                            font="semibold"
-                                            onClick={() => openModal!(item)}
-                                        />
+                                        null
                                     )
                                 )}
+                                {((item.approveMessage) || (item.requestStatusId === 2 && item.approveMessage)) && (
+                                        <Button 
+                                            text="Message"
+                                            paddingY="py-0"
+                                            paddingX="px-2"
+                                            onClick={() => openMessage(item.approveMessage)}
+                                        />
+                                    )}
                                 {calculateReturnDate ? (
                                     <div></div>
                                 ) : (

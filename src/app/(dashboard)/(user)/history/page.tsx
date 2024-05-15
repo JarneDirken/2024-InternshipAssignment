@@ -12,6 +12,7 @@ import { Filter } from "@/models/Filter";
 import { SortOptions } from "@/models/SortOptions";
 import { useInView } from "react-intersection-observer";
 import useUser from "@/hooks/useUser";
+import MessageModal from "@/components/(user)/borrow/MessageModal";
 
 export default function History() {
     const { isAuthorized, loading } = useAuth(['Student', 'Teacher', 'Supervisor', 'Admin']);
@@ -23,6 +24,8 @@ export default function History() {
     const [totalItemCount, setTotalItemCount] = useState(0);
     const [nameFilter, setNameFilter] = useState(''); // name filter
     const [borrowDateFilter, setBorrowDateFilter] = useState(''); // model filter
+    const [isMessageModalOpen, setMessageModalOpen] = useState(false); // Message modal
+    const [message, setMessage] = useState("");
     const filters: Filter[] = [
         { label: 'Name', state: [nameFilter, setNameFilter], inputType: 'text', optionsKey: 'item.name'},
         { label: 'Borrow Date', state: [borrowDateFilter, setBorrowDateFilter], inputType: 'dateRange'}
@@ -84,7 +87,7 @@ export default function History() {
         return { borrowDate, returnDate };
     };
 
-    async function getItems(initialLoad = false, sortBy = 'returnDate', sortDirection = 'desc') {
+    async function getItems(initialLoad = false, sortBy = 'requestDate', sortDirection = 'desc') {
         if (!hasMore && !initialLoad) return; // infinate loading
         setItemLoading(true);
         const { borrowDate, returnDate } = parseDateFilter(borrowDateFilter);
@@ -188,6 +191,11 @@ export default function History() {
 
     return (
         <div>
+            <MessageModal 
+                open={isMessageModalOpen}
+                onClose={() => setMessageModalOpen(false)}
+                message={message}
+            />
             <div className="bg-white mb-4 rounded-xl">
                 <Filters
                     title="History"
@@ -225,6 +233,8 @@ export default function History() {
                     listRef={listRef}
                     hasMore={hasMore}
                     innerRef={ref}
+                    openMessageModal={setMessageModalOpen}
+                    setMessage={setMessage}
                 />
             </div>
         </div>
