@@ -3,7 +3,6 @@ import Unauthorized from "@/app/(dashboard)/(error)/unauthorized/page";
 import useAuth from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { GroupedItem, Item } from "@/models/Item";
-import {app} from "@/services/firebase-config";
 import { useRecoilValue } from "recoil";
 import { createRequest, requestsState } from "@/services/store";
 import Filters from "@/components/(user)/borrow/Filter"
@@ -128,15 +127,11 @@ export default function Borrow() {
     };
 
     useEffect(() => {
-        if (token) {
+        if (token && userId) {
             getAllItems();
         }
     }, [userId, token]);
-
-    useEffect(() => {
-        getAllItems();
-    },[items]);
-
+    
     useEffect(() => {
         if (userId && token) {
             getPendingBorrowCount();
