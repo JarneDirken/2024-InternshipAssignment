@@ -30,17 +30,15 @@ yarn-error.log*
 .env*.local
 .env
 
+# Functions
+/functions/node_modules/
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-/functions/
-
-# firebaseAdmin
-# firebaseAdmin.json
 
 # Ignore service account credentials
 /src/config/serviceAccountKey.json
