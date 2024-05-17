@@ -3,7 +3,6 @@ import Loading from "@/components/states/Loading";
 import Checkbox from '@mui/material/Checkbox';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import { useRouter } from 'next/navigation';
 import Tooltip from '@mui/material/Tooltip';
 import { IconButton } from "@mui/material";
 
@@ -18,8 +17,6 @@ interface LocationCardProps {
 };
 
 export default function LocationCard({ openModal, onSelectItem, selectedItems, items, itemLoading, hasMore, innerRef }: LocationCardProps) {
-    const router = useRouter();
-
     if (itemLoading) { return (<Loading />); };
 
     if (items.length === 0) {

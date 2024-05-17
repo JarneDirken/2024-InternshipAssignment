@@ -576,13 +576,13 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, mo
 
             // Prepare data
             const itemData = {
-                number: number,
-                name: name,
-                model: model,
-                brand: brand,
+                number: number.toString(),
+                name: name.toString(),
+                model: model.toString(),
+                brand: brand.toString(),
                 locationId: locations.find(loc => loc.name === location)?.id,
                 roleId: roles.find(r => r.name === role)?.id,
-                yearBought: new Date(year, 0, 1), // Assuming year is just a number
+                yearBought: new Date(year, 0, 2), // Assuming year is just a number
                 itemStatusId: itemStatuses.find(s => s.name === status)?.id,
                 active: active,
                 notes: note || undefined,
