@@ -88,14 +88,14 @@ export default function Modal({ open, onClose, item, userId, token }: ModalCardP
             const day = date.day();
             return day !== 0 && day !== 6;
         };
-
+    
         const setTimeOnDate = (time: dayjs.Dayjs, date: dayjs.Dayjs): dayjs.Dayjs => {
             return dayjs(date)
                 .hour(time.hour())
                 .minute(time.minute())
                 .second(0);
         };
-        
+    
         const adjustedStartMorningTime = setTimeOnDate(startMorningTime, start).subtract(1, 'second');
         const adjustedEndMorningTime = setTimeOnDate(endMorningTime, start).add(1, 'second');
         const adjustedStartEveningTimeBorrow = setTimeOnDate(startEveningTime, start).subtract(1, 'second');
@@ -104,26 +104,26 @@ export default function Modal({ open, onClose, item, userId, token }: ModalCardP
         const adjustedEndMorningTimeReturn = setTimeOnDate(endMorningTime, end).add(1, 'second');
         const adjustedStartEveningTime = setTimeOnDate(startEveningTime, end).subtract(1, 'second');
         const adjustedEndEveningTime = setTimeOnDate(endEveningTime, end).add(1, 'second');
-
+    
         const startMorningPlusBuffer = adjustedStartMorningTime.subtract(bufferTimeMorning, "minutes");
         const startEveningPlusBuffer = adjustedStartEveningTime.subtract(bufferTimeEvening, "minutes");
-
+    
         if (!isWeekday(start)) {
             setErrorMessage("Borrow date should be a week day");
             return;
         }
-
+    
         if (!isWeekday(end)) {
             setErrorMessage("Return date should be a week day");
             return;
         }
-
+    
         if (start.isBefore(now) || end.isBefore(now)) {
             setErrorMessage("Dates cannot be in the past");
             return;
         }
     
-        if (start.isBefore(adjustedStartMorningTime) || start.isAfter(adjustedEndEveningTime)) {
+        if (start.isBefore(adjustedStartMorningTime) || start.isAfter(adjustedEndEveningTimeBorrow)) {
             setErrorMessage("Borrow date should be between the hours");
             return;
         }
@@ -133,7 +133,7 @@ export default function Modal({ open, onClose, item, userId, token }: ModalCardP
             setErrorMessage("Return date should be within morning or evening hours");
             return;
         }
-
+    
         if ((now.isAfter(startMorningPlusBuffer) && now.isBefore(adjustedEndMorningTime)) &&
             (start.isAfter(startMorningPlusBuffer) && start.isBefore(adjustedEndMorningTime)) ||
             (now.isAfter(startEveningPlusBuffer) && now.isBefore(adjustedEndEveningTime)) &&
@@ -141,16 +141,16 @@ export default function Modal({ open, onClose, item, userId, token }: ModalCardP
             setErrorMessage("You cannot make a request for the upcoming timeslot. Please choose another time.");
             return;
         }
-
+    
         if ((start.isBefore(adjustedStartMorningTime) || start.isAfter(adjustedEndMorningTime)) &&
             (start.isBefore(adjustedStartEveningTimeBorrow) || start.isAfter(adjustedEndEveningTimeBorrow))) {
             setIsUrgent(true);
             return;
         }
-
+    
         setErrorMessage(null);
         setIsUrgent(false);
-    };
+    };    
 
     const handleDateSelection = (type: 'borrow' | 'return', date: Date) => {
         if (type === 'borrow') {
