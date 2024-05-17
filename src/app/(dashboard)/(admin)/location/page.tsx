@@ -70,7 +70,7 @@ export default function Locations() {
     // infinite scroll load
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);     
-    const NUMBER_OF_ITEMS_TO_FETCH = 10;
+    const NUMBER_OF_ITEMS_TO_FETCH = 20;
     const listRef = useRef<HTMLDivElement>(null);
     const { ref, inView } = useInView();
 
@@ -325,7 +325,7 @@ export default function Locations() {
                         />
                         <p className="text-custom-primary font-semibold px-16 py-2 border-b-2 border-b-custom-primary w-fit">LOCATIONS</p>
                     </div>
-                    <div className="bg-white w-full rounded-b-xl overflow-y-auto md:hidden" style={{ height: '50vh' }}>
+                    <div ref={listRef} className="bg-white w-full rounded-b-xl overflow-y-auto md:hidden" style={{ height: '50vh' }}>
                         <LocationCard 
                             items={locations} 
                             openModal={openModal} 
@@ -347,7 +347,7 @@ export default function Locations() {
                             <span className="text-gray-500 border-r-4 border-white font-semibold col-span-9 py-2 pl-2 truncate">NAME</span>
                             <span className="text-gray-500 font-semibold col-span-2 py-2 pl-2 truncate">ACTION</span>
                         </div>
-                        <div className="bg-white w-full rounded-b-xl overflow-y-auto" style={{ height: '50vh' }}>
+                        <div ref={listRef} className="bg-white w-full rounded-b-xl overflow-y-auto" style={{ height: '50vh' }}>
                             <LocationCard 
                                 items={locations} 
                                 openModal={openModal} 
