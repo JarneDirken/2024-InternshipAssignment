@@ -361,7 +361,7 @@ export default function Users() {
                             checked={selectedItems.length === usersAll.length && usersAll.length > 0}
                             onChange={toggleSelectAll}
                         />
-                        <p className="text-custom-primary font-semibold px-16 py-2 border-b-2 border-b-custom-primary w-fit">PRODUCTS</p>
+                        <p className="text-custom-primary font-semibold px-16 py-2 border-b-2 border-b-custom-primary w-fit">USERS</p>
                     </div>
                     <div ref={listRef} className="bg-white w-full rounded-b-xl overflow-y-auto lg:hidden" style={{ height: '50vh' }}>
                         <UserCard 
