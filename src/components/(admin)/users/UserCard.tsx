@@ -100,7 +100,7 @@ export default function UserCard({ openModal, onSelectItem, selectedItems, items
                                         </div>
                                     </Tooltip>
                                     <Tooltip title="Delete" placement="top-start" arrow>
-                                        <div className="cursor-pointer" onClick={() => openModal('delete', item)}>\
+                                        <div className="cursor-pointer" onClick={() => openModal('delete', item)}>
                                             <IconButton size="small">
                                                 <DeleteOutlinedIcon className="text-custom-red" />
                                             </IconButton>
