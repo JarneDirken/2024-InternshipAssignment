@@ -60,9 +60,6 @@ export async function GET(request: NextRequest) {
     const itemRequests = await prisma.itemRequest.findMany({
         where: {
             ...whereClause,
-            requestStatusId: {
-                in: [6, 7],
-            }
         },
         include: { 
             item: true,
