@@ -255,6 +255,12 @@ export async function PUT(req: NextRequest) {
                 },
             });
 
+            await admin.auth().updateUser(updateUser.firebaseUid, {
+                email: data.email,
+                displayName: `${data.firstName} ${data.lastName}`,
+                disabled: !data.active,
+            })
+
             const user = await prisma.user.findUnique({
                 where: {
                     firebaseUid: data.userId,

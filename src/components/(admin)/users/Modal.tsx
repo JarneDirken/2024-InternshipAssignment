@@ -200,7 +200,10 @@ export default function Modal({ open, onClose, onItemsUpdated, selectedItems, ro
         } else if (!emailPattern.test(email)) {
             setEmailError('Invalid email format.');
             isValid = false;
-        } else if (uniqueEmails.includes(email)) {
+        } else if (mode === 'add' && uniqueEmails.includes(email)) {
+            setEmailError('Email is already in use.');
+            isValid = false;
+        } else if (mode === 'edit' && email !== items[0].email && uniqueEmails.includes(email)) {
             setEmailError('Email is already in use.');
             isValid = false;
         }
