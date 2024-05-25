@@ -101,7 +101,7 @@ export async function PUT(req: NextRequest) {
                 isRead: false,
                 fromRole: [user?.role.name],
                 toRole: borrower.role.name,
-                message: `Your request for ${updateItemRequest.item.name} has been ${data.requestStatusId === 3 ? 'rejected' : 'approved'} - pick it up at ${updateItemRequest.item.location.name}`,
+                message: `Your request for ${updateItemRequest.item.name} has been ${data.requestStatusId === 3 ? 'rejected' : 'approved'} - ${data.requestStatusId === 3 ? '' : `pick it up at ${updateItemRequest.item.location.name}`}`,
                 timeStamp: new Date(),
                 requestId: updateItemRequest.id,
                 userId: borrower.firebaseUid,
