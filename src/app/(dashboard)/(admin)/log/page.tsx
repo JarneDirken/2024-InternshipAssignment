@@ -31,37 +31,31 @@ export default function Log() {
         if (!loading && isAuthorized && userId && userRole && token) {
             const checkArray = [userRole, userId];
             if (userRole === "Admin") {
-                fetchTotalPagesAdmin();
-                listenForNotificationsAdmin(page);
+                fetchTotalCount(null);
+                listenForNotificationsAdmin();
             } else {
-                fetchTotalPages(checkArray);
-                listenForNotifications(checkArray, page);
+                fetchTotalCount(checkArray);
+                listenForNotifications(checkArray);
             }
         }
     }, [loading, isAuthorized, userId, userRole, token, page]);
 
-    const fetchTotalPagesAdmin = async () => {
-        const notificationsQuery = query(collection(db, "notifications"));
+    const fetchTotalCount = async (checkArray: string[] | null) => {
+        const notificationsQuery = checkArray
+            ? query(collection(db, "notifications"), where("targets", "array-contains-any", checkArray))
+            : query(collection(db, "notifications"));
+
         const snapshot = await getDocs(notificationsQuery);
-        setTotalPages(Math.ceil(snapshot.size / PAGE_SIZE));
+        const totalCount = snapshot.size;
+        setTotalPages(Math.ceil(totalCount / PAGE_SIZE));
     };
 
-    const fetchTotalPages = async (checkArray: string[]) => {
-        const notificationsQuery = query(
-            collection(db, "notifications"),
-            where("targets", "array-contains-any", checkArray)
-        );
-        const snapshot = await getDocs(notificationsQuery);
-        setTotalPages(Math.ceil(snapshot.size / PAGE_SIZE));
-    };
-
-    const listenForNotificationsAdmin = (page: number) => {
-        const offset = (page - 1) * PAGE_SIZE;
+    const listenForNotificationsAdmin = () => {
         const notificationsQuery = query(
             collection(db, "notifications"),
             orderBy("timeStamp", "desc"),
             limit(PAGE_SIZE),
-            ...(offset > 0 ? [startAfter(lastVisible)] : [])
+            ...(lastVisible ? [startAfter(lastVisible)] : [])
         );
 
         const unsubscribe = onSnapshot(notificationsQuery, snapshot => {
@@ -84,14 +78,13 @@ export default function Log() {
         return unsubscribe;
     };
 
-    const listenForNotifications = (checkArray: string[], page: number) => {
-        const offset = (page - 1) * PAGE_SIZE;
+    const listenForNotifications = (checkArray: string[]) => {
         const notificationsQuery = query(
             collection(db, "notifications"),
             orderBy("timeStamp", "desc"),
             where("targets", "array-contains-any", checkArray),
             limit(PAGE_SIZE),
-            ...(offset > 0 ? [startAfter(lastVisible)] : [])
+            ...(lastVisible ? [startAfter(lastVisible)] : [])
         );
 
         const unsubscribe = onSnapshot(notificationsQuery, snapshot => {
