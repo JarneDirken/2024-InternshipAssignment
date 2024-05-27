@@ -26,6 +26,7 @@ export default function Log() {
     const [lastVisible, setLastVisible] = useState<DocumentSnapshot | null>(null);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [clearAll, setClearAll] = useState(true);
 
     const { userId, token } = useUser();
 
@@ -41,6 +42,10 @@ export default function Log() {
             }
         }
     }, [loading, isAuthorized, userId, userRole, token, page]);
+
+    useEffect(() => {
+        listenForNotificationsAll();
+    }, [clearAll]);
 
     const listenForNotificationsAll = () => {
         const notificationsQuery = query(
@@ -214,6 +219,7 @@ export default function Log() {
     };    
 
     const exportAndClearList = async () => {
+        setClearAll(!clearAll);
         // Step 1: Export the current list to Excel and get the workbook object
         const workbook = exportLogsHistoryToExcel("Logs-History", "LogsData");
     
@@ -245,6 +251,7 @@ export default function Log() {
             // Clear the local state
             setNotificationsAdmin([]);
             setNotifications([]);
+            setNotificationsAll([]);
             setLastVisible(null);
         }
     };
