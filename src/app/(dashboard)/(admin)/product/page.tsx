@@ -7,8 +7,6 @@ import { Role } from "@/models/Role";
 import { Location } from "@/models/Location";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { getAuth } from 'firebase/auth';
-import {app} from "@/services/firebase-config";
 import Button from "@/components/states/Button";
 import Checkbox from '@mui/material/Checkbox';
 import ProductCard from "@/components/(admin)/products/ProductCard";
@@ -29,6 +27,7 @@ import Unauthorized from "../../(error)/unauthorized/page";
 import QrCode from "qrcode";
 import jsPDF from "jspdf";
 import useUser from "@/hooks/useUser";
+import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
 
 export default function Product() {
     const { isAuthorized, loading } = useAuth(['Admin']);
@@ -305,8 +304,6 @@ export default function Product() {
 
     const exportProductsToExcel = (filename: string, worksheetName: string) => {
         if (!selectedItems || !selectedItems.length) return;
-    
-        console.log(selectedItems);
 
         const dataToExport: ExportDataItem[] = selectedItems.map(item => ({
             itemId: item.id,
@@ -369,7 +366,7 @@ export default function Product() {
 
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
-            const url = `https://2024-internship-assignment.vercel.app/item/${item.id}`;
+            const url = `https://inventory.raikmitl.com/item/${item.id}`;
     
             try {
                 const src = await QrCode.toDataURL(url);
@@ -507,6 +504,30 @@ export default function Product() {
                                 textClassName="font-semibold" 
                                 text="Import EXCEL" 
                             />
+                        </div>
+                    </div>
+                    <div className="flex flex-wrap justify-center md:justify-start bg-white gap-4 p-4">
+                        <div className="flex items-center">
+                            <div className="w-4 h-4 bg-gray-400 mr-2"></div>
+                            <span className="text-gray-600">Inactive</span>
+                        </div>
+                        <div className="flex items-center">
+                            <div className="w-4 h-4 bg-blue-100 mr-2"></div>
+                            <span className="text-gray-600">Borrowed</span>
+                        </div>
+                        <div className="flex items-center">
+                            <div className="w-4 h-4 bg-red-100 mr-2"></div>
+                            <span className="text-gray-600">Broken</span>
+                        </div>
+                        <div className="flex flex-wrap justify-center md:justify-start md:w-auto w-full gap-4 mt-2 md:mt-0">
+                            <div className="flex items-center">
+                                <div className="w-4 h-4 bg-orange-100 mr-2"></div>
+                                <span className="text-gray-600">Repairing</span>
+                            </div>
+                            <div className="flex items-center">
+                                <AdminPanelSettingsRoundedIcon className="text-purple-600 mr-2" />
+                                <span className="text-gray-600">Teacher</span>
+                            </div>
                         </div>
                     </div>
                     <div className="w-full border-b border-b-gray-300 bg-white flex items-center relative lg:hidden">

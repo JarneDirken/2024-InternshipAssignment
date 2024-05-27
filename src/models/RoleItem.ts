@@ -5,6 +5,6 @@ export interface RoleItem {
     id: number,
     itemId: number,
     roleId: number,
-    Role: Role,
+    role: Role,
     Item: Item
 }

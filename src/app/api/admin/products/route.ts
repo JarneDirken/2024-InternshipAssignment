@@ -119,7 +119,11 @@ export async function GET(request: NextRequest) {
     const items = await prisma.item.findMany({
         where: whereClause,
         include: { 
-            RoleItem: true,
+            RoleItem: {
+                include: {
+                    role: true,
+                }
+            },
             location: true,
             itemStatus: true,
         },
@@ -131,7 +135,11 @@ export async function GET(request: NextRequest) {
     const itemsAll = await prisma.item.findMany({
         where: whereClause,
         include: { 
-            RoleItem: true,
+            RoleItem: {
+                include: {
+                    role: true,
+                }
+            },
             location: true,
             itemStatus: true,
         },
