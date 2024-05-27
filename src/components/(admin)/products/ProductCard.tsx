@@ -8,6 +8,7 @@ import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import { useRouter } from 'next/navigation';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
+import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
 
 interface ProductCardProps {
     openModal: (mode: 'add' | 'edit' | 'delete', item: Item) => void;
@@ -41,7 +42,19 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
         <>
             {items.map((item) => (
                 <div key={item.id}>
-                    <div className={`border-b-2 p-3 relative lg:hidden ${!item.active ? 'bg-red-100' : ''}`}>
+                    <div className={`border-b-2 p-3 relative lg:hidden
+                        ${
+                            !item.active ? 'bg-gray-300' :
+                            item.itemStatus?.name === 'Borrowed' ? 'bg-blue-100' :
+                            item.itemStatus?.name === 'Broken' ? 'bg-red-100' :
+                            item.itemStatus?.name === 'Repairing' ? 'bg-orange-100' : ''
+                        }
+                    `}>
+                        {item.RoleItem?.[0]?.role?.name === 'Teacher' && (
+                            <div className="absolute top-2 left-2 text-purple-600">
+                                <AdminPanelSettingsRoundedIcon fontSize="medium" />
+                            </div>
+                        )}
                         <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                             <Checkbox
                                 checked={selectedItems.some(selectedItem => selectedItem.id === item.id)}
@@ -124,7 +137,7 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                                 <Tooltip title="Edit" placement="top-start" arrow>
                                     <div className="cursor-pointer hover:bg-gray-100 rounded-full" onClick={() => openModal('edit', item)}>
                                         <IconButton size="small">
-                                            <EditOutlinedIcon className="text-gray-400" />
+                                            <EditOutlinedIcon className="text-gray-500" />
                                         </IconButton>
                                     </div>
                                 </Tooltip>
@@ -147,7 +160,19 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                     </div>
 
                     {/* Desktop View */}
-                    <div className={`border-b-2 py-2 hidden lg:grid grid-cols-12 ${!item.active ? 'bg-red-100' : ''}`}>
+                    <div className={`border-b-2 py-2 hidden lg:grid grid-cols-12 relative 
+                        ${
+                            !item.active ? 'bg-gray-300' :
+                            item.itemStatus?.name === 'Borrowed' ? 'bg-blue-100' :
+                            item.itemStatus?.name === 'Broken' ? 'bg-red-100' :
+                            item.itemStatus?.name === 'Repairing' ? 'bg-orange-100' : ''
+                        }
+                    `}>
+                        {item.RoleItem?.[0]?.role?.name === 'Teacher' && (
+                            <div className="absolute top-1 left-1 text-purple-600">
+                                <AdminPanelSettingsRoundedIcon />
+                            </div>
+                        )}
                         <div className="mx-auto">
                             <Checkbox
                                 className="col-span-1"
@@ -212,7 +237,7 @@ export default function ProductCard({ openModal, onSelectItem, selectedItems, it
                             <Tooltip title="Edit" placement="top" arrow>
                                 <div className="cursor-pointer" onClick={() => openModal('edit', item)}>
                                     <IconButton size="small">
-                                        <EditOutlinedIcon className="text-gray-400" />
+                                        <EditOutlinedIcon className="text-gray-500" />
                                     </IconButton>
                                 </div>
                             </Tooltip>
