@@ -96,7 +96,12 @@ export default function Product() {
     const [hasMore, setHasMore] = useState(true);     
     const NUMBER_OF_ITEMS_TO_FETCH = 20;
     const listRef = useRef<HTMLDivElement>(null);
-    const { ref, inView } = useInView();
+    const { ref: mobileRef, inView: mobileInView } = useInView({
+        threshold: 0.5, // Adjust threshold as needed
+    });
+    const { ref: desktopRef, inView: desktopInView } = useInView({
+        threshold: 0.5, // Adjust threshold as needed
+    });
 
     useEffect(() => {
         if(userId && token) {
@@ -106,6 +111,7 @@ export default function Product() {
 
     // infinite loading scroll
     useEffect(() => {
+        const inView = mobileInView || desktopInView;
         if (inView && hasMore && !loading) {
             const currentScrollPosition = listRef.current ? listRef.current.scrollTop : 0;
             getAllItems().then(() => {
@@ -116,7 +122,7 @@ export default function Product() {
                 });
             });
         }
-    }, [inView, loading, hasMore]);
+    }, [mobileInView, desktopInView, loading, hasMore]);
 
     const handleFilterChange = (filterType: string, value: string | string[]) => {
         switch (filterType) {
@@ -525,7 +531,7 @@ export default function Product() {
                             selectedItems={selectedItems} 
                             onSelectItem={handleSelectItem}
                             hasMore={hasMore}
-                            innerRef={ref} 
+                            innerRef={mobileRef} 
                         />
                     </div>
                     <div className="hidden lg:block">
@@ -553,7 +559,7 @@ export default function Product() {
                                 selectedItems={selectedItems} 
                                 onSelectItem={handleSelectItem} 
                                 hasMore={hasMore}
-                                innerRef={ref}
+                                innerRef={desktopRef}
                             />
                         </div>
                     </div>
