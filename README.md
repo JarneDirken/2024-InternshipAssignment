@@ -20,6 +20,7 @@ If you are not interested with all the technical details of our application you 
 - `Tailwind`
 - `Prisma`
 - `Firebase`
+- `MUI`
 
 ## 🦄 Features
 
